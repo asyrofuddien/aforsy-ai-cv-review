@@ -1,0 +1,1422 @@
+{
+	"info": {
+		"_postman_id": "ef6a485b-4922-4291-b16b-84f1e1c04934",
+		"name": "CV Evaluation API - dev",
+		"description": "Complete API testing collection for CV and Project evaluation service\n\n⚠️ Endpoints marked with [DEV ONLY] should not be used in production",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18760211"
+	},
+	"item": [
+		{
+			"name": "📋 API Information",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3000/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Overview",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Documentation (Full)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"API is working\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('endpoints');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test"
+							]
+						},
+						"description": "Get complete API documentation with all endpoints, supported file types, and limits"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "💼 Job Descriptions",
+			"item": [
+				{
+					"name": "Create Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Job description created\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"    ",
+									"    // Save job description ID",
+									"    pm.collectionVariables.set(\"jobDescriptionId\", jsonData.data._id);",
+									"    console.log(\"Job Description ID: \" + jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"slug\": \"senior-backend-engineer\",\n    \"title\": \"Senior Backend Engineer\",\n    \"company\": \"Tech Company\",\n    \"description\": \"We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies. The ideal candidate will have experience building scalable APIs and working with AI/ML integrations.\",\n    \"requirements\": {\n        \"technical\": [\n            \"5+ years of backend development experience\",\n            \"Strong proficiency in Node.js and TypeScript\",\n            \"Experience with MongoDB and PostgreSQL\",\n            \"Knowledge of cloud platforms (AWS, GCP)\",\n            \"Experience with microservices architecture\",\n            \"Understanding of AI/ML concepts is a plus\"\n        ],\n        \"soft_skills\": [\n            \"Strong communication skills\",\n            \"Team leadership experience\",\n            \"Problem-solving mindset\",\n            \"Continuous learning attitude\"\n        ]\n    },\n    \"scoringWeights\": {\n        \"technicalSkillsMatch\": 0.3,\n        \"experienceLevel\": 0.25,\n        \"relevantAchievements\": 0.2,\n        \"culturalFit\": 0.15,\n        \"aiExperience\": 0.1\n    },\n    \"isDefault\": false\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions"
+							]
+						},
+						"description": "Create a new job description with manual input"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Job Description from File",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Job description uploaded\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('_id');",
+									"    ",
+									"    pm.collectionVariables.set(\"jobDescriptionId\", jsonData.data._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"description": "Job description file (TXT, PDF, or DOCX)",
+									"type": "file",
+									"src": "test-files/job-description.txt"
+								},
+								{
+									"key": "slug",
+									"value": "fullstack-engineer",
+									"type": "text"
+								},
+								{
+									"key": "title",
+									"value": "Full Stack Engineer",
+									"type": "text"
+								},
+								{
+									"key": "company",
+									"value": "Startup XYZ",
+									"type": "text"
+								},
+								{
+									"key": "isDefault",
+									"value": "false",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"upload"
+							]
+						},
+						"description": "Upload job description from a file"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Job Descriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Returns job descriptions list\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData).to.have.property('data');",
+									"    pm.expect(jsonData).to.have.property('pagination');",
+									"    ",
+									"    if (jsonData.data.length > 0) {",
+									"        console.log(\"Found \" + jsonData.data.length + \" job descriptions\");",
+									"        jsonData.data.forEach(job => {",
+									"            console.log(`- ${job.slug}: ${job.title} at ${job.company}`);",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions?page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "search",
+									"value": "backend",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all job descriptions with pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job Description by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Returns job description details\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data).to.have.property('title');",
+									"    pm.expect(jsonData.data).to.have.property('description');",
+									"    pm.expect(jsonData.data).to.have.property('requirements');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{jobDescriptionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{jobDescriptionId}}"
+							]
+						},
+						"description": "Get single job description by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Job Description by Slug",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/slug/senior-backend-engineer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"slug",
+								"senior-backend-engineer"
+							]
+						},
+						"description": "Get job description by slug identifier"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Job description updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('updated');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Senior Backend Engineer - Updated\",\n    \"description\": \"Updated description with new requirements\",\n    \"requirements\": {\n        \"technical\": [\n            \"7+ years of backend development experience\",\n            \"Expert level Node.js and TypeScript\",\n            \"Strong experience with MongoDB and PostgreSQL\",\n            \"Deep knowledge of cloud platforms (AWS, GCP)\",\n            \"Proven experience with microservices architecture\",\n            \"Hands-on experience with AI/ML integrations\"\n        ],\n        \"soft_skills\": [\n            \"Excellent communication skills\",\n            \"Team leadership experience required\",\n            \"Strategic problem-solving ability\",\n            \"Mentoring and coaching skills\"\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{jobDescriptionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{jobDescriptionId}}"
+							]
+						},
+						"description": "Update existing job description"
+					},
+					"response": []
+				},
+				{
+					"name": "Set Default Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Default job description set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.data.isDefault).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{jobDescriptionId}}/set-default",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{jobDescriptionId}}",
+								"set-default"
+							]
+						},
+						"description": "Set this job description as the default for evaluations"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Job description deleted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"    pm.expect(jsonData.message).to.include('deleted');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{jobDescriptionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{jobDescriptionId}}"
+							]
+						},
+						"description": "Delete a job description (cannot delete default)"
+					},
+					"response": []
+				}
+			],
+			"description": "CRUD operations for job descriptions"
+		},
+		{
+			"name": "📤 Upload",
+			"item": [
+				{
+					"name": "Upload CV and Project - Text Files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has document IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('cvDocumentId');",
+									"    pm.expect(jsonData.data).to.have.property('projectDocumentId');",
+									"    ",
+									"    // Save IDs for next requests",
+									"    pm.collectionVariables.set(\"cvDocumentId\", jsonData.data.cvDocumentId);",
+									"    pm.collectionVariables.set(\"projectDocumentId\", jsonData.data.projectDocumentId);",
+									"    ",
+									"    console.log(\"CV Document ID: \" + jsonData.data.cvDocumentId);",
+									"    console.log(\"Project Document ID: \" + jsonData.data.projectDocumentId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cv",
+									"description": "CV file (TXT format)",
+									"type": "file",
+									"src": "test-files/sample-cv.txt"
+								},
+								{
+									"key": "project",
+									"description": "Project report (TXT format)",
+									"type": "file",
+									"src": "test-files/sample-project.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload"
+							]
+						},
+						"description": "Upload CV and Project files. Supports PDF, DOCX, and TXT formats.\n\n**Max file size:** 10MB per file"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload CV and Project - PDF Files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has document IDs\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.data).to.have.property('cvDocumentId');",
+									"    pm.expect(jsonData.data).to.have.property('projectDocumentId');",
+									"    ",
+									"    pm.collectionVariables.set(\"cvDocumentId\", jsonData.data.cvDocumentId);",
+									"    pm.collectionVariables.set(\"projectDocumentId\", jsonData.data.projectDocumentId);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cv",
+									"type": "file",
+									"src": "test-files/sample-cv.pdf"
+								},
+								{
+									"key": "project",
+									"type": "file",
+									"src": "test-files/sample-project.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload - Error: Missing Files",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message for missing files\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.false;",
+									"    pm.expect(jsonData.message).to.include(\"required\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cv",
+									"type": "file",
+									"src": "test-files/sample-cv.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload"
+							]
+						},
+						"description": "Test error handling for missing files"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔄 Evaluate",
+			"item": [
+				{
+					"name": "Start Evaluation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"pm.test(\"Response has evaluation ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData.status).to.equal('queued');",
+									"    ",
+									"    // Save evaluation ID for next requests",
+									"    pm.collectionVariables.set(\"evaluationId\", jsonData.id);",
+									"    console.log(\"Evaluation ID: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cvDocumentId\": \"{{cvDocumentId}}\",\n    \"projectDocumentId\": \"{{projectDocumentId}}\",\n    \"candidateName\": \"John Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/evaluate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"evaluate"
+							]
+						},
+						"description": "Start evaluation process for uploaded CV and project.\n\n**Note:** Uses default job description if `jobDescriptionId` not provided"
+					},
+					"response": []
+				},
+				{
+					"name": "Start Evaluation - With Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"pm.test(\"Evaluation started with custom job description\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData.status).to.equal('queued');",
+									"    ",
+									"    pm.collectionVariables.set(\"evaluationId\", jsonData.id);",
+									"    console.log(\"Evaluation ID with custom job: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cvDocumentId\": \"{{cvDocumentId}}\",\n    \"projectDocumentId\": \"{{projectDocumentId}}\",\n    \"candidateName\": \"Jane Smith\",\n    \"jobDescriptionId\": \"{{jobDescriptionId}}\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/evaluate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"evaluate"
+							]
+						},
+						"description": "Start evaluation with specific job description ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Queue Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/evaluate/queue-status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"evaluate",
+								"queue-status"
+							]
+						},
+						"description": "Get current queue statistics (waiting, active, completed, failed)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "📊 Results",
+			"item": [
+				{
+					"name": "Get Result - Immediate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has status\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(['queued', 'processing', 'completed', 'failed']).to.include(jsonData.status);",
+									"    console.log(\"Evaluation Status: \" + jsonData.status);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/result/{{evaluationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"result",
+								"{{evaluationId}}"
+							]
+						},
+						"description": "Get evaluation result immediately after submission (usually 'queued' or 'processing')"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Result - After Processing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Completed evaluation has results\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.status === 'completed') {",
+									"        pm.expect(jsonData).to.have.property('result');",
+									"        pm.expect(jsonData.result).to.have.property('cv_match_rate');",
+									"        pm.expect(jsonData.result).to.have.property('cv_feedback');",
+									"        pm.expect(jsonData.result).to.have.property('project_score');",
+									"        pm.expect(jsonData.result).to.have.property('project_feedback');",
+									"        pm.expect(jsonData.result).to.have.property('overall_summary');",
+									"        ",
+									"        // Validate score ranges",
+									"        pm.expect(jsonData.result.cv_match_rate).to.be.within(0, 1);",
+									"        pm.expect(jsonData.result.project_score).to.be.within(0, 10);",
+									"    } else {",
+									"        console.log(\"Evaluation still in progress: \" + jsonData.status);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/result/{{evaluationId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"result",
+								"{{evaluationId}}"
+							]
+						},
+						"description": "Get evaluation result after processing (wait 6-10 seconds after submission)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🛠️ Testing & Development",
+			"item": [
+				{
+					"name": "Recent Uploads",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test/recent-uploads?limit=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test",
+								"recent-uploads"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5",
+									"description": "Number of results to return"
+								}
+							]
+						},
+						"description": "Get recent document uploads for testing purposes"
+					},
+					"response": []
+				},
+				{
+					"name": "Recent Evaluations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test/recent-evaluations?limit=5",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test",
+								"recent-evaluations"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "5"
+								}
+							]
+						},
+						"description": "Get recent evaluations for testing purposes"
+					},
+					"response": []
+				},
+				{
+					"name": "Available Job Descriptions",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get job descriptions\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    ",
+									"    if (jsonData.jobDescriptions && jsonData.jobDescriptions.length > 0) {",
+									"        console.log(\"Available Job Descriptions:\");",
+									"        jsonData.jobDescriptions.forEach(function(job) {",
+									"            console.log(`- ${job.slug} (${job.title}) - ID: ${job._id}`);",
+									"            if (job.isDefault) {",
+									"                console.log(\"  ^ DEFAULT JOB DESCRIPTION\");",
+									"            }",
+									"        });",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test/job-descriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test",
+								"job-descriptions"
+							]
+						},
+						"description": "Get all available job descriptions with their IDs"
+					},
+					"response": []
+				},
+				{
+					"name": "System Statistics",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test/stats",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test",
+								"stats"
+							]
+						},
+						"description": "Get system statistics including document count, evaluation count by status, and queue stats"
+					},
+					"response": []
+				},
+				{
+					"name": "🚨 [DEV ONLY] Clear Test Data",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Warning prompt",
+									"console.warn(\"⚠️  WARNING: This will delete all test data!\");",
+									"console.warn(\"Only works in development environment\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 403) {",
+									"    pm.test(\"Correctly blocked in non-dev environment\", function () {",
+									"        pm.response.to.have.status(403);",
+									"    });",
+									"} else {",
+									"    pm.test(\"Test data cleared\", function () {",
+									"        pm.response.to.have.status(200);",
+									"        var jsonData = pm.response.json();",
+									"        console.log(`Deleted ${jsonData.deleted.evaluations} evaluations`);",
+									"        console.log(`Deleted ${jsonData.deleted.documents} documents`);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/test/clear-test-data",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"test",
+								"clear-test-data"
+							]
+						},
+						"description": "⚠️ **DEVELOPMENT ONLY**\n\nClears all test data including:\n- All evaluations\n- All uploaded documents\n\n**Note:** This endpoint is disabled in production environments"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "❌ Error Cases",
+			"item": [
+				{
+					"name": "Invalid Evaluation ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/result/invalid-id-123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"result",
+								"invalid-id-123"
+							]
+						},
+						"description": "Test error handling for invalid evaluation ID format"
+					},
+					"response": []
+				},
+				{
+					"name": "Non-existent Evaluation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/result/507f1f77bcf86cd799439011",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"result",
+								"507f1f77bcf86cd799439011"
+							]
+						},
+						"description": "Test 404 error for valid but non-existent ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Upload Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"invalid\": \"request\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload"
+							]
+						},
+						"description": "Test error handling for wrong content type"
+					},
+					"response": []
+				},
+				{
+					"name": "Missing Required Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"candidateName\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/evaluate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"evaluate"
+							]
+						},
+						"description": "Test validation error for missing required fields"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Default Job Description",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{defaultJobDescriptionId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{defaultJobDescriptionId}}"
+							]
+						},
+						"description": "Test error when trying to delete default job description"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🚀 Complete Flow Tests",
+			"item": [
+				{
+					"name": "1. Create Job Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Job description created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"flow_jobId\", jsonData.data._id);",
+									"    console.log(\"✅ Step 1 Complete: Job description created\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"slug\": \"test-flow-job\",\n    \"title\": \"Test Backend Engineer\",\n    \"company\": \"Test Company\",\n    \"description\": \"Test job description for complete flow testing\",\n    \"requirements\": {\n        \"technical\": [\n            \"Node.js experience\",\n            \"TypeScript knowledge\",\n            \"API development\"\n        ],\n        \"soft_skills\": [\n            \"Communication skills\",\n            \"Team player\"\n        ]\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions"
+							]
+						},
+						"description": "Step 1: Create a job description for evaluation"
+					},
+					"response": []
+				},
+				{
+					"name": "2. Upload Documents",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Upload successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"flow_cvId\", jsonData.data.cvDocumentId);",
+									"    pm.collectionVariables.set(\"flow_projectId\", jsonData.data.projectDocumentId);",
+									"    console.log(\"✅ Step 2 Complete: Documents uploaded\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "cv",
+									"type": "file",
+									"src": "test-files/sample-cv.txt"
+								},
+								{
+									"key": "project",
+									"type": "file",
+									"src": "test-files/sample-project.txt"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload"
+							]
+						},
+						"description": "Step 2: Upload CV and project documents"
+					},
+					"response": []
+				},
+				{
+					"name": "3. Start Evaluation with Job Description",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.variables.set(\"cvId\", pm.collectionVariables.get(\"flow_cvId\"));",
+									"pm.variables.set(\"projectId\", pm.collectionVariables.get(\"flow_projectId\"));",
+									"pm.variables.set(\"jobId\", pm.collectionVariables.get(\"flow_jobId\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Evaluation started\", function () {",
+									"    pm.response.to.have.status(202);",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"flow_evalId\", jsonData.id);",
+									"    console.log(\"✅ Step 3 Complete: Evaluation started - ID: \" + jsonData.id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cvDocumentId\": \"{{cvId}}\",\n    \"projectDocumentId\": \"{{projectId}}\",\n    \"jobDescriptionId\": \"{{jobId}}\",\n    \"candidateName\": \"Flow Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/evaluate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"evaluate"
+							]
+						},
+						"description": "Step 3: Start evaluation with custom job description"
+					},
+					"response": []
+				},
+				{
+					"name": "4. Check Status (Wait 10s)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"console.log(\"⏳ Waiting 10 seconds for processing...\");",
+									"setTimeout(() => {}, 10000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Get evaluation status\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    console.log(\"📊 Step 4: Current status - \" + jsonData.status);",
+									"    ",
+									"    if (jsonData.status === 'completed') {",
+									"        console.log(\"✅ Evaluation completed!\");",
+									"        console.log(\"CV Match Rate: \" + jsonData.result.cv_match_rate);",
+									"        console.log(\"Project Score: \" + jsonData.result.project_score);",
+									"        console.log(\"Overall Summary: \" + jsonData.result.overall_summary);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/result/{{flow_evalId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"result",
+								"{{flow_evalId}}"
+							]
+						},
+						"description": "Step 4: Check evaluation result"
+					},
+					"response": []
+				},
+				{
+					"name": "5. Cleanup - Delete Test Job",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Cleanup completed\", function () {",
+									"    if (pm.response.code === 200) {",
+									"        console.log(\"✅ Step 5 Complete: Test job description deleted\");",
+									"    } else if (pm.response.code === 400) {",
+									"        console.log(\"⚠️  Cannot delete - job is set as default\");",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/job-descriptions/{{flow_jobId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"job-descriptions",
+								"{{flow_jobId}}"
+							]
+						},
+						"description": "Step 5: Cleanup - delete test job description"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log(`🔄 ${pm.info.requestName}`);"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"pm.test(\"Response time is less than 2000ms\", function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+					"});"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api",
+			"type": "default"
+		},
+		{
+			"key": "cvDocumentId",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "projectDocumentId",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "evaluationId",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "jobDescriptionId",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "defaultJobDescriptionId",
+			"value": "",
+			"type": "default"
+		}
+	]
+}

@@ -1,0 +1,597 @@
+openapi: 3.0.0
+info:
+  title: CV Evaluation API - dev
+  description: |-
+    Complete API testing collection for CV and Project evaluation service
+
+    ⚠️ Endpoints marked with [DEV ONLY] should not be used in production
+  version: 1.0.0
+servers:
+  - url: /api
+    description: Current Environment
+paths:
+  /health:
+    get:
+      summary: Health Check
+      description: Health Check
+      tags:
+        - API Information
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /:
+    get:
+      summary: API Overview
+      description: API Overview
+      tags:
+        - API Information
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /test:
+    get:
+      summary: API Documentation (Full)
+      description: Get complete API documentation with all endpoints, supported file types, and limits
+      tags:
+        - API Information
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /job-descriptions:
+    post:
+      summary: 1. Create Job Description
+      description: 'Step 1: Create a job description for evaluation'
+      tags:
+        - Complete Flow Tests
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/JobDescription'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                slug: test-flow-job
+                title: Test Backend Engineer
+                company: Test Company
+                description: Test job description for complete flow testing
+                requirements:
+                  technical:
+                    - Node.js experience
+                    - TypeScript knowledge
+                    - API development
+                  soft_skills:
+                    - Communication skills
+                    - Team player
+    get:
+      summary: Get All Job Descriptions
+      description: Get all job descriptions with pagination
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: string
+          description: page
+          required: false
+        - name: limit
+          in: query
+          schema:
+            type: string
+          description: limit
+          required: false
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: search
+          required: false
+  /job-descriptions/upload:
+    post:
+      summary: Upload Job Description from File
+      description: Upload job description from a file
+      tags:
+        - Job Descriptions
+      responses:
+        '201':
+          description: Created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/JobDescription'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Job description file (TXT, PDF, or DOCX)
+                slug:
+                  type: string
+                  description: slug
+                title:
+                  type: string
+                  description: title
+                company:
+                  type: string
+                  description: company
+                isDefault:
+                  type: string
+                  description: isDefault
+  /job-descriptions/{jobDescriptionId}:
+    get:
+      summary: Get Job Description by ID
+      description: Get single job description by ID
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: jobDescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: jobDescriptionId identifier
+    put:
+      summary: Update Job Description
+      description: Update existing job description
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: jobDescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: jobDescriptionId identifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: Senior Backend Engineer - Updated
+                description: Updated description with new requirements
+                requirements:
+                  technical:
+                    - 7+ years of backend development experience
+                    - Expert level Node.js and TypeScript
+                    - Strong experience with MongoDB and PostgreSQL
+                    - Deep knowledge of cloud platforms (AWS, GCP)
+                    - Proven experience with microservices architecture
+                    - Hands-on experience with AI/ML integrations
+                  soft_skills:
+                    - Excellent communication skills
+                    - Team leadership experience required
+                    - Strategic problem-solving ability
+                    - Mentoring and coaching skills
+    delete:
+      summary: Delete Job Description
+      description: Delete a job description (cannot delete default)
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: jobDescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: jobDescriptionId identifier
+  /job-descriptions/slug/senior-backend-engineer:
+    get:
+      summary: Get Job Description by Slug
+      description: Get job description by slug identifier
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /job-descriptions/{jobDescriptionId}/set-default:
+    patch:
+      summary: Set Default Job Description
+      description: Set this job description as the default for evaluations
+      tags:
+        - Job Descriptions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: jobDescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: jobDescriptionId identifier
+  /upload:
+    post:
+      summary: 2. Upload Documents
+      description: 'Step 2: Upload CV and project documents'
+      tags:
+        - Complete Flow Tests
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                cv:
+                  type: string
+                  format: binary
+                  description: cv file
+                project:
+                  type: string
+                  format: binary
+                  description: project file
+              required:
+                - cv
+                - project
+  /evaluate:
+    post:
+      summary: 3. Start Evaluation with Job Description
+      description: 'Step 3: Start evaluation with custom job description'
+      tags:
+        - Complete Flow Tests
+      responses:
+        '202':
+          description: Evaluation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: string
+                    enum:
+                      - queued
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                cvDocumentId: '{{cvId}}'
+                projectDocumentId: '{{projectId}}'
+                jobDescriptionId: '{{jobId}}'
+                candidateName: Flow Test User
+  /evaluate/queue-status:
+    get:
+      summary: Queue Status
+      description: Get current queue statistics (waiting, active, completed, failed)
+      tags:
+        - Evaluate
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /result/{evaluationId}:
+    get:
+      summary: Get Result - After Processing
+      description: Get evaluation result after processing (wait 6-10 seconds after submission)
+      tags:
+        - Results
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: evaluationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: evaluationId identifier
+  /test/recent-uploads:
+    get:
+      summary: Recent Uploads
+      description: Get recent document uploads for testing purposes
+      tags:
+        - Testing & Development
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: string
+          description: Number of results to return
+          required: false
+  /test/recent-evaluations:
+    get:
+      summary: Recent Evaluations
+      description: Get recent evaluations for testing purposes
+      tags:
+        - Testing & Development
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: string
+          description: limit
+          required: false
+  /test/job-descriptions:
+    get:
+      summary: Available Job Descriptions
+      description: Get all available job descriptions with their IDs
+      tags:
+        - Testing & Development
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /test/stats:
+    get:
+      summary: System Statistics
+      description: Get system statistics including document count, evaluation count by status, and queue stats
+      tags:
+        - Testing & Development
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /test/clear-test-data:
+    delete:
+      summary: 🚨 [DEV ONLY] Clear Test Data
+      description: |-
+        ⚠️ **DEVELOPMENT ONLY**
+
+        Clears all test data including:
+        - All evaluations
+        - All uploaded documents
+
+        **Note:** This endpoint is disabled in production environments
+      tags:
+        - Testing & Development
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /result/invalid-id-123:
+    get:
+      summary: Invalid Evaluation ID
+      description: Test error handling for invalid evaluation ID format
+      tags:
+        - Error Cases
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /result/507f1f77bcf86cd799439011:
+    get:
+      summary: Non-existent Evaluation
+      description: Test 404 error for valid but non-existent ID
+      tags:
+        - Error Cases
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+  /job-descriptions/{defaultJobDescriptionId}:
+    delete:
+      summary: Delete Default Job Description
+      description: Test error when trying to delete default job description
+      tags:
+        - Error Cases
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: defaultJobDescriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: defaultJobDescriptionId identifier
+  /result/{flow_evalId}:
+    get:
+      summary: 4. Check Status (Wait 10s)
+      description: 'Step 4: Check evaluation result'
+      tags:
+        - Complete Flow Tests
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: flow_evalId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: flow_evalId identifier
+  /job-descriptions/{flow_jobId}:
+    delete:
+      summary: 5. Cleanup - Delete Test Job
+      description: 'Step 5: Cleanup - delete test job description'
+      tags:
+        - Complete Flow Tests
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+        - name: flow_jobId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: flow_jobId identifier
+components:
+  schemas:
+    JobDescription:
+      type: object
+      properties:
+        _id:
+          type: string
+        slug:
+          type: string
+        title:
+          type: string
+        company:
+          type: string
+        description:
+          type: string
+        requirements:
+          type: object
+          properties:
+            technical:
+              type: array
+              items:
+                type: string
+            soft_skills:
+              type: array
+              items:
+                type: string
+        isDefault:
+          type: boolean
+    EvaluationResult:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - queued
+            - processing
+            - completed
+            - failed
+        result:
+          type: object
+          properties:
+            cv_match_rate:
+              type: number
+              minimum: 0
+              maximum: 1
+            cv_feedback:
+              type: string
+            project_score:
+              type: number
+              minimum: 0
+              maximum: 10
+            project_feedback:
+              type: string
+            overall_summary:
+              type: string
