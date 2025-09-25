@@ -67,10 +67,7 @@ class VectorDBService {
 
   async search(query: string, topK: number = 3, filter?: any): Promise<any[]> {
     try {
-      logger.info(
-        '🔍 VectorDB: Searching for:',
-        query.substring(0, 50) + '...'
-      );
+      logger.info(`🔍 VectorDB: Searching for: ${query.substring(0, 50)}...`);
 
       const queryEmbedding = await openaiService.generateEmbedding(query);
       const pinecone = getPineconeClient();
