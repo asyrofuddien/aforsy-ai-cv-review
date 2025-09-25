@@ -2,10 +2,8 @@
   "name": "cv-evaluation-service",
   "version": "1.0.0",
   "scripts": {
-    "dev": "npm run build:docs && nodemon",
-    "build": "npm run build:docs && tsc",
-    "build:docs": "ts-node scripts/build-docs.ts",
-    "setup:docs": "ts-node scripts/setup-docs.ts",
+    "dev": "nodemon",
+    "build": "tsc",
     "start": "node dist/server.js",
     "seed": "ts-node scripts/seed-job-descriptions.ts",
     "seed:vector": "ts-node scripts/seed-vector-db.ts",
@@ -13,8 +11,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "check:queue": "ts-node scripts/check-queue.ts",
-    "test:api": "./test-api.sh",
-    "docs:dev": "npm run build:docs && npx http-server public/docs -p 8080 -o -c-1"
+    "test:api": "./test-api.sh"
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^6.1.2",
@@ -26,7 +23,6 @@
     "express-rate-limit": "^6.7.0",
     "helmet": "^7.0.0",
     "joi": "^17.9.0",
-    "js-yaml": "^4.1.0",
     "mammoth": "^1.6.0",
     "mongoose": "^7.0.0",
     "multer": "^1.4.5-lts.1",
@@ -41,15 +37,12 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.0",
-    "@types/js-yaml": "^4.0.9",
     "@types/multer": "^1.4.7",
     "@types/node": "^18.0.0",
     "@types/pdf-parse": "^1.1.5",
     "@types/uuid": "^10.0.0",
     "jest": "^29.5.0",
     "nodemon": "^2.0.22",
-    "postman-to-openapi": "^1.7.3",
-    "swagger-ui-dist": "^5.29.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   }
