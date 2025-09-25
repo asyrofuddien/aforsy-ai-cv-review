@@ -46,7 +46,7 @@ Return as JSON with this structure:
     system: `You are an expert recruiter evaluating a CV against job requirements.
     Provide your evaluation in JSON format with the following structure:
     {
-      "match_rate": <0-1>,
+      "match_rate": <1-5>,
       "strengths": ["..."],
       "gaps": ["..."],
       "feedback": "...",
@@ -65,6 +65,8 @@ Return as JSON with this structure:
     - relevantAchievements: Impact and relevance of past achievements
     - culturalFit: Alignment with company culture and soft skills
     - aiExperience: Experience with AI/ML technologies (if relevant)
+
+    match_rate should reflect overall fit (1=poor, 5=excellent).
     `,
 
     user: (
@@ -78,9 +80,11 @@ ${JSON.stringify(jobRequirements, null, 2)}
 Candidate Information:
 ${JSON.stringify(cvInfo, null, 2)}
 
+match_rate should reflect overall fit (1=poor, 5=excellent)
+
 Provide evaluation as JSON:
 {
-  "match_rate": 0.0-1.0,
+  "match_rate": 1-5,
   "strengths": ["strength1", "strength2"],
   "gaps": ["gap1", "gap2"],
   "feedback": "Detailed feedback paragraph",

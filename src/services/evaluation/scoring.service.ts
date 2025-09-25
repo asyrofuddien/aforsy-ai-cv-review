@@ -6,7 +6,8 @@ import logger from '../../utils/logger';
 export class ScoringService {
   calculateOverallCVScore(
     scores: Partial<DetailedScores>,
-    scoringWeights: IJobDescription['scoringWeights']
+    scoringWeights: IJobDescription['scoringWeights'],
+    rawMatchRate?: number
   ): number {
     // Gunakan weights dari JobDescription (tanpa aiExperience)
     const weights = {
@@ -15,6 +16,12 @@ export class ScoringService {
       relevantAchievements: scoringWeights.relevantAchievements,
       culturalFit: scoringWeights.culturalFit,
     };
+
+    if (rawMatchRate !== undefined) {
+      const percentage = rawMatchRate * 20;
+      logger.info(`CV Score: Using LLM match rate = ${rawMatchRate}, Percentage = ${percentage.toFixed(1)}%`);
+      return percentage;
+    }
 
     let weightedSum = 0;
     let totalWeight = 0;

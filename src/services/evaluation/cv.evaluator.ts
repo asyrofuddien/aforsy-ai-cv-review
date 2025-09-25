@@ -83,7 +83,8 @@ export class CVEvaluator {
       // Calculate weighted score using real weights from job description
       const weightedScore = scoringService.calculateOverallCVScore(
         evaluation.scores,
-        jobDesc.scoringWeights
+        jobDesc.scoringWeights,
+        evaluation?.match_rate
       );
 
       // Generate detailed feedback
