@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api', routes);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
