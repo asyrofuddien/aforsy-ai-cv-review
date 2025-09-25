@@ -1,40 +1,28 @@
-import app from "./app";
-import { connectDB } from "./config/database";
-import { config } from "./config/config";
-import { logger } from "./utils/logger";
+import app from './app';
+import { connectDB } from './config/database';
+import { initializeVectorDB } from './config/vectordb';
+import { startWorker } from './workers/evaluation.worker';
+import config from './config/config';
+import logger from './utils/logger';
 
-const startServer = async () => {
+const start = async () => {
   try {
-    // Connect to database
+    // Connect to databases
     await connectDB();
+    await initializeVectorDB();
+
+    // Start background worker
+    startWorker();
 
     // Start server
-    const server = app.listen(config.port, () => {
-      logger.info(
-        `Server is running on port ${config.port} in ${config.nodeEnv} mode`
-      );
-    });
-
-    // Handle unhandled promise rejections
-    process.on("unhandledRejection", (err: Error) => {
-      logger.error("UNHANDLED REJECTION! 💥 Shutting down...");
-      logger.error(err.name, err.message);
-      server.close(() => {
-        process.exit(1);
-      });
-    });
-
-    // Handle SIGTERM
-    process.on("SIGTERM", () => {
-      logger.info("SIGTERM RECEIVED. Shutting down gracefully");
-      server.close(() => {
-        logger.info("Process terminated!");
-      });
+    const port = config.port;
+    app.listen(port, () => {
+      logger.info(`Server running on port ${port} in ${config.nodeEnv} mode`);
     });
   } catch (error) {
-    logger.error("Failed to start server:", error);
+    logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-startServer();
+start();

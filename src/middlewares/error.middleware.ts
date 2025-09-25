@@ -1,65 +1,67 @@
-import { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger";
+import { Request, Response, NextFunction } from 'express';
+import logger from '../utils/logger';
 
-export const errorHandler = (
-  err: any,
-  _req: Request,
+export class AppError extends Error {
+  statusCode: number;
+  isOperational: boolean;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+export const errorMiddleware = (
+  err: Error | AppError,
+  req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
-  logger.error(err.stack);
+  let error = { ...err };
+  error.message = err.message;
+
+  // Log error
+  logger.error(`Error: ${err.message}`, {
+    error: err,
+    request: req.url,
+    method: req.method,
+    ip: req.ip,
+  });
+
+  // Mongoose bad ObjectId
+  if (err.name === 'CastError') {
+    const message = 'Resource not found';
+    error = new AppError(message, 404);
+  }
+
+  // Mongoose duplicate key
+  if ((err as any).code === 11000) {
+    const message = 'Duplicate field value entered';
+    error = new AppError(message, 400);
+  }
 
   // Mongoose validation error
-  if (err.name === "ValidationError") {
-    const errors = Object.values(err.errors).map((e: any) => ({
-      field: e.path,
-      message: e.message,
-    }));
-    return res.status(400).json({
-      success: false,
-      message: "Validation failed",
-      errors,
-    });
+  if (err.name === 'ValidationError') {
+    const message = Object.values((err as any).errors)
+      .map((val: any) => val.message)
+      .join(', ');
+    error = new AppError(message, 400);
   }
 
-  // Mongoose duplicate key error
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyPattern)[0];
-    return res.status(400).json({
-      success: false,
-      message: `${field} already exists`,
-    });
-  }
-
-  // JWT errors
-  if (err.name === "JsonWebTokenError") {
-    return res.status(401).json({
-      success: false,
-      message: "Invalid token",
-    });
-  }
-
-  if (err.name === "TokenExpiredError") {
-    return res.status(401).json({
-      success: false,
-      message: "Token expired",
-    });
-  }
-
-  // Custom errors
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal server error";
-
-  return res.status(statusCode).json({
+  res.status((error as AppError).statusCode || 500).json({
     success: false,
-    message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    error: {
+      message: error.message || 'Server Error',
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    },
   });
 };
 
-export const notFound = (_req: Request, res: Response) => {
-  res.status(404).json({
-    success: false,
-    message: "Resource not found",
-  });
-};
+// Async error handler wrapper
+export const asyncHandler =
+  (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
