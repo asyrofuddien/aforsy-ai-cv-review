@@ -10,7 +10,8 @@ export class UploadController {
     async (req: Request, res: Response, next: NextFunction) => {
       const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-      if (!files.cv || !files.project) {
+      if (!files?.cv || !files?.project) {
+        console.log('masuk');
         return res.status(400).json({
           success: false,
           message: 'Both CV and project files are required',
