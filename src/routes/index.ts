@@ -80,7 +80,7 @@ router.get('/', (req, res) => {
 });
 
 // Get recent uploads
-router.get('/recent-uploads', async (req: Request, res: Response) => {
+router.get('/test/recent-uploads', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
     const documents = await Document.find()
@@ -102,7 +102,7 @@ router.get('/recent-uploads', async (req: Request, res: Response) => {
 });
 
 // Get recent evaluations
-router.get('/recent-evaluations', async (req: Request, res: Response) => {
+router.get('/test/recent-evaluations', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
     const evaluations = await Evaluation.find()
@@ -124,7 +124,7 @@ router.get('/recent-evaluations', async (req: Request, res: Response) => {
 });
 
 // Get available job descriptions
-router.get('/job-descriptions', async (req: Request, res: Response) => {
+router.get('/test/job-descriptions', async (req: Request, res: Response) => {
   try {
     const jobs = await JobDescription.find().select(
       'slug title company isDefault'
@@ -144,7 +144,7 @@ router.get('/job-descriptions', async (req: Request, res: Response) => {
 });
 
 // Clear test data (development only)
-router.delete('/clear-test-data', async (req: Request, res: Response) => {
+router.delete('/test/clear-test-data', async (req: Request, res: Response) => {
   try {
     if (process.env.NODE_ENV !== 'development') {
       return res.status(403).json({
@@ -178,7 +178,7 @@ router.delete('/clear-test-data', async (req: Request, res: Response) => {
 });
 
 // System stats
-router.get('/stats', async (req: Request, res: Response) => {
+router.get('/test/stats', async (req: Request, res: Response) => {
   try {
     const [documentCount, evaluationCount, queueStats] = await Promise.all([
       Document.countDocuments(),
