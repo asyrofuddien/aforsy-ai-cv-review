@@ -41,7 +41,7 @@ app.use('/api', routes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok',version:'v1.0', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok',version:'v 1.0.1', timestamp: new Date().toISOString() });
 });
 
 // Error handling
