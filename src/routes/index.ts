@@ -30,7 +30,6 @@ router.get('/test', (req, res) => {
     'POST /api/upload                       - Upload CV and Project files',
     'POST /api/evaluate                     - Start evaluation process',
     'GET  /api/result/:id                   - Get evaluation result',
-    'GET  /api/evaluate/queue-status        - Get queue statistics',
     '',
     '===== TESTING & MONITORING =====',
     'GET  /api/test/recent-uploads          - Get recent document uploads',

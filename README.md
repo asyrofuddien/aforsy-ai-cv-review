@@ -225,7 +225,6 @@ Response (Completed):
 
 - `GET /health` - Health check
 - `GET /api/test` - API documentation
-- `GET /api/evaluate/queue-status` - Queue statistics
 - `GET /api/test/stats` - System statistics
 
 ## 🧪 Testing
@@ -378,10 +377,6 @@ src/
 
    - Check file size (max 10MB)
    - Ensure file type is supported
-
-4. **Evaluation Stuck**
-   - Check queue status at `/api/evaluate/queue-status`
-   - Check worker logs
 
 ## 📄 License
 
