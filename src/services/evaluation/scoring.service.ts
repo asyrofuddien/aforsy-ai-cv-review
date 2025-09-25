@@ -1,13 +1,20 @@
+// services/scoring/scoring.service.ts
 import { DetailedScores } from '../../types/evaluation.types';
+import { IJobDescription } from '../../models/jobDescription.model';
 import logger from '../../utils/logger';
 
 export class ScoringService {
-  calculateOverallCVScore(scores: Partial<DetailedScores>): number {
+  calculateOverallCVScore(
+    scores: Partial<DetailedScores>,
+    scoringWeights: IJobDescription['scoringWeights']
+  ): number {
+    // Gunakan weights dari JobDescription
     const weights = {
-      technicalSkillsMatch: 0.35,
-      experienceLevel: 0.25,
-      relevantAchievements: 0.25,
-      culturalFit: 0.15,
+      technicalSkillsMatch: scoringWeights.technicalSkillsMatch,
+      experienceLevel: scoringWeights.experienceLevel,
+      relevantAchievements: scoringWeights.relevantAchievements,
+      culturalFit: scoringWeights.culturalFit,
+      aiExperience: scoringWeights.aiExperience,
     };
 
     let totalScore = 0;
@@ -55,30 +62,30 @@ export class ScoringService {
     const improvements: string[] = [];
 
     // CV-related feedback
-    if (scores.technicalSkillsMatch >= 4) {
+    if (scores.technicalSkillsMatch && scores.technicalSkillsMatch >= 4) {
       strengths.push('Strong technical skills alignment with job requirements');
-    } else if (scores.technicalSkillsMatch <= 2) {
+    } else if (scores.technicalSkillsMatch && scores.technicalSkillsMatch <= 2) {
       improvements.push(
         'Technical skills need strengthening in required areas'
       );
     }
 
-    if (scores.experienceLevel >= 4) {
+    if (scores.experienceLevel && scores.experienceLevel >= 4) {
       strengths.push('Excellent experience level for the position');
-    } else if (scores.experienceLevel <= 2) {
+    } else if (scores.experienceLevel && scores.experienceLevel <= 2) {
       improvements.push('Would benefit from more relevant experience');
     }
 
     // Project-related feedback
-    if (scores.codeQuality >= 4) {
+    if (scores.codeQuality && scores.codeQuality >= 4) {
       strengths.push('High code quality and good architectural decisions');
-    } else if (scores.codeQuality <= 2) {
+    } else if (scores.codeQuality && scores.codeQuality <= 2) {
       improvements.push('Code quality needs improvement');
     }
 
-    if (scores.resilience >= 4) {
+    if (scores.resilience && scores.resilience >= 4) {
       strengths.push('Excellent error handling and system resilience');
-    } else if (scores.resilience <= 2) {
+    } else if (scores.resilience && scores.resilience <= 2) {
       improvements.push('Error handling and retry mechanisms need work');
     }
 

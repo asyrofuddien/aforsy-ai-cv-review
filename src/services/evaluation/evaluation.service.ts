@@ -1,5 +1,7 @@
+// services/evaluation/evaluation.service.ts
 import { Job } from 'bullmq';
 import Evaluation from '../../models/evaluation.model';
+import JobDescription from '../../models/jobDescription.model';
 import cvEvaluator from './cv.evaluator';
 import projectEvaluator from './project.evaluator';
 import chainService from '../llm/chains';
@@ -18,8 +20,12 @@ class EvaluationService {
         status: 'processing',
       });
 
+      // Get job description for weights info
+      const jobDesc = await JobDescription.findById(jobDescriptionId);
+      if (!jobDesc) throw new Error('Job description not found');
+
       // Step 1: Evaluate CV
-      logger.info('📄 Step 1: Evaluating CV');
+      logger.info('📄 Step 1: Evaluating CV with weights:', jobDesc.scoringWeights);
       const cvResult = await cvEvaluator.evaluate(
         cvDocumentId,
         jobDescriptionId
@@ -36,7 +42,7 @@ class EvaluationService {
         projectResult.evaluation
       );
 
-      // Compile final result
+      // Compile final result dengan info weights yang digunakan
       const finalResult = {
         cvMatchRate: cvResult.matchRate,
         cvFeedback: cvResult.evaluation.feedback,
@@ -47,6 +53,7 @@ class EvaluationService {
           ...cvResult.evaluation.scores,
           ...projectResult.evaluation.scores,
         },
+        scoringWeightsUsed: jobDesc.scoringWeights,
       };
 
       // Update evaluation with result

@@ -1,7 +1,9 @@
+// services/evaluation/cv.evaluator.ts
 import Document from '../../models/document.model';
 import JobDescription from '../../models/jobDescription.model';
 import chainService from '../llm/chains';
 import vectordbService from '../vectordb/vectordb.service';
+import scoringService from './scoring.service';
 import logger from '../../utils/logger';
 
 export class CVEvaluator {
@@ -13,7 +15,7 @@ export class CVEvaluator {
       const cvDoc = await Document.findById(cvDocumentId);
       if (!cvDoc) throw new Error('CV document not found');
 
-      // Get job description
+      // Get job description (dengan scoringWeights)
       const jobDesc = await JobDescription.findById(jobDescriptionId);
       if (!jobDesc) throw new Error('Job description not found');
 
@@ -34,10 +36,24 @@ export class CVEvaluator {
         context: relevantContext,
       });
 
+      // Calculate weighted score using real weights from job description
+      const weightedScore = scoringService.calculateOverallCVScore(
+        evaluation.scores,
+        jobDesc.scoringWeights
+      );
+
+      // Generate detailed feedback
+      const detailedFeedback = scoringService.generateDetailedFeedback(
+        evaluation.scores
+      );
+
       return {
         extractedInfo: cvInfo,
-        evaluation,
-        matchRate: evaluation.match_rate || 0.5,
+        evaluation: {
+          ...evaluation,
+          ...detailedFeedback,
+        },
+        matchRate: weightedScore, // Gunakan weighted score sebagai match rate
       };
     } catch (error) {
       logger.error('CV evaluation error:', error);

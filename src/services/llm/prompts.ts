@@ -43,8 +43,29 @@ Return as JSON with this structure:
   },
 
   CV_EVALUATION: {
-    system: `You are an expert technical recruiter evaluating candidates for software engineering positions.
-Provide honest, constructive feedback based on the job requirements.`,
+    system: `You are an expert recruiter evaluating a CV against job requirements.
+    Provide your evaluation in JSON format with the following structure:
+    {
+      "match_rate": <0-1>,
+      "strengths": ["..."],
+      "gaps": ["..."],
+      "feedback": "...",
+      "scores": {
+        "technicalSkillsMatch": <1-5>,
+        "experienceLevel": <1-5>,
+        "relevantAchievements": <1-5>,
+        "culturalFit": <1-5>,
+        "aiExperience": <1-5>
+      }
+    }
+    
+    Score each criterion from 1-5:
+    - technicalSkillsMatch: How well technical skills match requirements
+    - experienceLevel: Years and relevance of experience
+    - relevantAchievements: Impact and relevance of past achievements
+    - culturalFit: Alignment with company culture and soft skills
+    - aiExperience: Experience with AI/ML technologies (if relevant)
+    `,
 
     user: (
       cvInfo: any,
