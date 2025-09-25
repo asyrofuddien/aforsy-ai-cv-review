@@ -1,0 +1,28 @@
+PROJECT: AI-Powered CV Evaluation System
+
+OVERVIEW:
+Built a backend service that accepts CVs and project reports, 
+comparing them with job descriptions using AI.
+
+FEATURES IMPLEMENTED:
+1. File upload handling (PDF, DOCX, TXT)
+2. Async job processing with Bull queue
+3. LLM integration for evaluation
+4. RESTful API design
+
+TECHNICAL STACK:
+- Node.js with TypeScript
+- Express framework
+- MongoDB for data storage
+- Redis for queue management
+- OpenAI API for AI evaluation
+
+CHALLENGES & SOLUTIONS:
+- Implemented retry logic for LLM API failures
+- Added rate limiting to prevent abuse
+- Used queue system for long-running processes
+
+RESULTS:
+- Successfully processes evaluations asynchronously
+- Provides detailed feedback on CV and project matching
+- Handles multiple file formats

@@ -1,14 +1,24 @@
 import { Router } from 'express';
-import logger from '../utils/logger';
+import uploadRoutes from './upload.routes';
+import evaluationRoutes from './evaluation.routes';
+import resultRoutes from './result.routes';
 
 const router = Router();
 
-// Temporary route to test
+// Mount routes
+router.use('/upload', uploadRoutes);
+router.use('/evaluate', evaluationRoutes);
+router.use('/result', resultRoutes);
+
+// Test route
 router.get('/test', (req, res) => {
-  logger.info('Test route accessed');
   res.json({
     message: 'API is working',
-    timestamp: new Date().toISOString(),
+    endpoints: [
+      'POST /api/upload',
+      'POST /api/evaluate',
+      'GET /api/result/:id',
+    ],
   });
 });
 

@@ -1,0 +1,101 @@
+import { Request, Response, NextFunction } from 'express';
+import { asyncHandler } from '../middlewares/error.middleware';
+import queueService from '../services/queue.service';
+import JobDescription from '../models/jobDescription.model';
+import { SUCCESS_MESSAGES } from '../utils/constants';
+import logger from '../utils/logger';
+
+export class EvaluationController {
+  startEvaluation = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const {
+        cvDocumentId,
+        projectDocumentId,
+        jobDescriptionId,
+        candidateName,
+      } = req.body;
+
+      let actualJobDescriptionId = jobDescriptionId;
+
+      // If no jobDescriptionId provided, use default
+      if (!jobDescriptionId) {
+        const defaultJob = await JobDescription.findOne({ isDefault: true });
+        if (!defaultJob) {
+          // Create default if not exists
+          const defaultJobDesc = await this.createDefaultJobDescription();
+          actualJobDescriptionId = defaultJobDesc._id;
+        } else {
+          actualJobDescriptionId = defaultJob._id;
+        }
+      }
+
+      // Add to queue
+      const job = await queueService.addEvaluationJob({
+        cvDocumentId,
+        projectDocumentId,
+        jobDescriptionId: actualJobDescriptionId,
+        candidateName,
+      });
+
+      logger.info(`Evaluation job created: ${job.id}`);
+
+      res.status(202).json({
+        id: job.id,
+        status: 'queued',
+      });
+    }
+  );
+
+  private async createDefaultJobDescription() {
+    const defaultData = {
+      slug: 'default',
+      title: 'Senior Backend Engineer',
+      company: 'Tech Company',
+      description:
+        'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
+      requirements: {
+        technical: [
+          '5+ years of backend development experience',
+          'Strong proficiency in Node.js and TypeScript',
+          'Experience with databases (MongoDB, PostgreSQL)',
+          'Knowledge of cloud platforms (AWS, GCP)',
+          'Experience with microservices architecture',
+          'Understanding of AI/ML concepts is a plus',
+        ],
+        soft_skills: [
+          'Strong communication skills',
+          'Team leadership experience',
+          'Problem-solving mindset',
+          'Continuous learning attitude',
+        ],
+      },
+      isDefault: true,
+    };
+
+    const jobDesc = new JobDescription(defaultData);
+    await jobDesc.save();
+    logger.info('Default job description created');
+    return jobDesc;
+  }
+
+  // Optional: Add method to get queue status
+  getQueueStatus = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const counts = await queueService.getJobCounts();
+
+      res.status(200).json({
+        success: true,
+        data: {
+          waiting: counts.waiting || 0,
+          active: counts.active || 0,
+          completed: counts.completed || 0,
+          failed: counts.failed || 0,
+          delayed: counts.delayed || 0,
+          paused: counts.paused || 0,
+        },
+      });
+    }
+  );
+}
+
+export default new EvaluationController();

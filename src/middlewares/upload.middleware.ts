@@ -1,21 +1,18 @@
-// middlewares/upload.middleware.ts
 import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import fs from 'fs';
+import { Request } from 'express';
+import config from '../config/config';
+import { AppError } from './error.middleware';
 
-// Create upload directory if not exists
-const uploadDir = 'uploads/images';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Multer storage configuration
+// Configure storage
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
+  destination: (req: Request, file: Express.Multer.File, cb) => {
+    const type = req.body.type || 'temp';
+    const uploadPath = path.join(config.upload.uploadDir, type);
+    cb(null, uploadPath);
   },
-  filename: (_req, file, cb) => {
+  filename: (req: Request, file: Express.Multer.File, cb) => {
     const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
     cb(null, uniqueName);
   },
@@ -23,29 +20,28 @@ const storage = multer.diskStorage({
 
 // File filter
 const fileFilter = (
-  _req: Express.Request,
+  req: Request,
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) => {
-  // Allowed file types
-  const allowedTypes = /jpeg|jpg|png|gif|webp/;
-  const extname = allowedTypes.test(
-    path.extname(file.originalname).toLowerCase()
-  );
-  const mimetype = allowedTypes.test(file.mimetype);
-
-  if (mimetype && extname) {
+  if (config.upload.allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed'));
+    cb(new AppError(`File type ${file.mimetype} not allowed`, 400));
   }
 };
 
-// Multer configuration
 export const uploadMiddleware = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB
+    fileSize: config.upload.maxFileSize,
   },
 });
+
+// Specific upload configurations
+export const uploadSingle = uploadMiddleware.single('file');
+export const uploadMultiple = uploadMiddleware.fields([
+  { name: 'cv', maxCount: 1 },
+  { name: 'project', maxCount: 1 },
+]);

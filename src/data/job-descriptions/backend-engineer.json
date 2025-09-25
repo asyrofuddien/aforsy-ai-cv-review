@@ -1,0 +1,29 @@
+{
+  "id": "default",
+  "title": "Senior Backend Engineer",
+  "company": "Tech Company",
+  "description": "We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.",
+  "requirements": {
+    "technical": [
+      "5+ years of backend development experience",
+      "Strong proficiency in Node.js and TypeScript",
+      "Experience with databases (MongoDB, PostgreSQL)",
+      "Knowledge of cloud platforms (AWS, GCP)",
+      "Experience with microservices architecture",
+      "Understanding of AI/ML concepts is a plus"
+    ],
+    "soft_skills": [
+      "Strong communication skills",
+      "Team leadership experience",
+      "Problem-solving mindset",
+      "Continuous learning attitude"
+    ]
+  },
+  "scoring_weights": {
+    "technicalSkillsMatch": 0.3,
+    "experienceLevel": 0.25,
+    "relevantAchievements": 0.2,
+    "culturalFit": 0.15,
+    "aiExperience": 0.1
+  }
+}

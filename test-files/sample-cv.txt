@@ -1,0 +1,23 @@
+John Doe
+Software Engineer
+john.doe@email.com
+
+SKILLS:
+- Node.js, Express, TypeScript
+- MongoDB, PostgreSQL
+- Docker, Kubernetes
+- AWS, GCP
+
+EXPERIENCE:
+Senior Backend Engineer - Tech Corp (2020-2023)
+- Developed RESTful APIs serving 1M+ requests/day
+- Implemented microservices architecture
+- Led team of 5 developers
+
+Backend Developer - StartupXYZ (2018-2020)
+- Built scalable APIs using Node.js
+- Integrated third-party services
+- Improved system performance by 40%
+
+EDUCATION:
+BSc Computer Science - University (2014-2018)
