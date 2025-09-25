@@ -42,8 +42,8 @@ This service provides automated evaluation of job candidates by:
 ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
 │   Client    │────▶│  REST API   │────▶│   Queue     │
 └─────────────┘     └─────────────┘     └─────────────┘
-                           │                     │
-                           ▼                     ▼
+                           │                   │
+                           ▼                   ▼
                     ┌─────────────┐     ┌─────────────┐
                     │   MongoDB   │     │   Worker    │
                     └─────────────┘     └─────────────┘
@@ -116,7 +116,12 @@ docker-compose up -d
 npm run seed:all
 ```
 
-6. **Start the development server**
+6. **Create Temp Folder**
+
+```bash
+mkdir uploads/temp
+```
+7. **Start the development server**
 
 ```bash
 npm run dev
