@@ -16,7 +16,7 @@ const router = Router();
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/result', resultRoutes);
-router.use('/job-description', jobDescriptionRoutes);
+router.use('/job-descriptions', jobDescriptionRoutes);
 
 // Test route
 router.get('/test', (req, res) => {
