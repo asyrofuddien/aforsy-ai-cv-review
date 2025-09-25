@@ -14,7 +14,6 @@ export interface IJobDescription extends Document {
     experienceLevel: number;
     relevantAchievements: number;
     culturalFit: number;
-    aiExperience: number;
   };
   isDefault: boolean;
   createdAt: Date;

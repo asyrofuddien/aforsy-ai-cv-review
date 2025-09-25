@@ -76,13 +76,29 @@ export class LLMChainService {
           temperature: 0.3,
         }
       );
+
       const parsed = this.parseJSON(response, {
-        score: 5.0,
+        score: 3.0,
         feedback: 'Unable to evaluate',
         strengths: [],
         improvements: [],
-        scores: {},
+        scores: {
+          correctness: 3,
+          codeQuality: 3,
+          resilience: 3,
+          documentation: 3,
+          creativity: 3
+        },
       });
+
+      // Validate scores are in 1-5 range
+      if (parsed.scores) {
+        for (const [key, value] of Object.entries(parsed.scores)) {
+          if (typeof value === 'number') {
+            parsed.scores[key] = Math.max(1, Math.min(5, value));
+          }
+        }
+      }
 
       logger.info('✅ Chain: Project evaluation completed');
       return parsed;
