@@ -8,6 +8,7 @@ import Document from '../models/document.model';
 import Evaluation from '../models/evaluation.model';
 import JobDescription from '../models/jobDescription.model';
 import queueService from '../services/queue.service';
+import jobDescriptionRoutes from './jobDescription.routes';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const router = Router();
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/result', resultRoutes);
+router.use('/job-description', jobDescriptionRoutes);
 
 // Test route
 router.get('/test', (req, res) => {
