@@ -62,7 +62,7 @@ app.get('/api/health', (req, res) => {
 
 app.get('/api/pdf/:filename', (req, res) => {
   const { filename } = req.params;
-  const filePath = path.join(__dirname, '../public/temp', filename);
+  const filePath = path.join(__dirname, 'uploads/temp', filename);
   res.sendFile(filePath);
 });
 
