@@ -4,44 +4,15 @@ import { IJobDescription } from '../../models/jobDescription.model';
 import logger from '../../utils/logger';
 
 export class ScoringService {
-  calculateOverallCVScore(
-    scores: Partial<DetailedScores>,
-    scoringWeights: IJobDescription['scoringWeights'],
-    rawMatchRate?: number
-  ): number {
-    // Gunakan weights dari JobDescription (tanpa aiExperience)
-    const weights = {
-      technicalSkillsMatch: scoringWeights.technicalSkillsMatch,
-      experienceLevel: scoringWeights.experienceLevel,
-      relevantAchievements: scoringWeights.relevantAchievements,
-      culturalFit: scoringWeights.culturalFit,
-    };
+  calculateOverallCVScore(rawMatchRate?: number): number {
+    rawMatchRate = rawMatchRate ? rawMatchRate : 0;
 
-    if (rawMatchRate !== undefined) {
-      const percentage = rawMatchRate * 20;
-      logger.info(`CV Score: Using LLM match rate = ${rawMatchRate}, Percentage = ${percentage.toFixed(1)}%`);
-      return percentage;
-    }
-
-    let weightedSum = 0;
-    let totalWeight = 0;
-
-    for (const [key, weight] of Object.entries(weights)) {
-      if (scores[key as keyof typeof scores] !== undefined) {
-        const score = scores[key as keyof typeof scores] as number;
-        weightedSum += score * weight;
-        totalWeight += weight;
-      }
-    }
-
-    // Calculate weighted average (1-5 scale)
-    const weightedAverage = totalWeight > 0 ? weightedSum / totalWeight : 2.5;
-
-    // Convert to percentage (×20)
-    const percentage = weightedAverage * 20;
-
-    logger.info(`CV Score Calculation: Weighted Average = ${weightedAverage.toFixed(2)}, Percentage = ${percentage.toFixed(1)}%`);
-
+    const percentage = rawMatchRate * 20;
+    logger.info(
+      `CV Score: Using LLM match rate = ${rawMatchRate}, Percentage = ${percentage.toFixed(
+        1
+      )}%`
+    );
     return percentage;
   }
 
@@ -68,7 +39,9 @@ export class ScoringService {
     // Return weighted average (1-5 scale)
     const weightedAverage = totalWeight > 0 ? weightedSum / totalWeight : 3;
 
-    logger.info(`Project Score: Weighted Average = ${weightedAverage.toFixed(2)}`);
+    logger.info(
+      `Project Score: Weighted Average = ${weightedAverage.toFixed(2)}`
+    );
 
     return weightedAverage;
   }
@@ -85,13 +58,21 @@ export class ScoringService {
     // CV-related feedback
     if (scores.technicalSkillsMatch !== undefined) {
       if (scores.technicalSkillsMatch >= 4) {
-        strengths.push('Strong technical skills alignment with job requirements');
+        strengths.push(
+          'Strong technical skills alignment with job requirements'
+        );
       } else if (scores.technicalSkillsMatch === 3) {
         improvements.push('Technical skills partially match requirements');
-        recommendations.push('Consider gaining experience in missing technical areas');
+        recommendations.push(
+          'Consider gaining experience in missing technical areas'
+        );
       } else if (scores.technicalSkillsMatch <= 2) {
-        improvements.push('Technical skills need strengthening in required areas');
-        recommendations.push('Focus on learning core technologies mentioned in job requirements');
+        improvements.push(
+          'Technical skills need strengthening in required areas'
+        );
+        recommendations.push(
+          'Focus on learning core technologies mentioned in job requirements'
+        );
       }
     }
 
@@ -100,10 +81,14 @@ export class ScoringService {
         strengths.push('Excellent experience level for the position');
       } else if (scores.experienceLevel === 3) {
         improvements.push('Experience level is adequate but could be stronger');
-        recommendations.push('Highlight more complex projects to demonstrate depth of experience');
+        recommendations.push(
+          'Highlight more complex projects to demonstrate depth of experience'
+        );
       } else if (scores.experienceLevel <= 2) {
         improvements.push('Limited relevant experience for senior position');
-        recommendations.push('Gain more hands-on experience with enterprise-level projects');
+        recommendations.push(
+          'Gain more hands-on experience with enterprise-level projects'
+        );
       }
     }
 
@@ -112,10 +97,14 @@ export class ScoringService {
         strengths.push('Impressive track record with measurable impact');
       } else if (scores.relevantAchievements === 3) {
         improvements.push('Some achievements shown but impact unclear');
-        recommendations.push('Quantify achievements with specific metrics and outcomes');
+        recommendations.push(
+          'Quantify achievements with specific metrics and outcomes'
+        );
       } else if (scores.relevantAchievements <= 2) {
         improvements.push('Lack of clear, measurable achievements');
-        recommendations.push('Focus on highlighting quantifiable impact from past work');
+        recommendations.push(
+          'Focus on highlighting quantifiable impact from past work'
+        );
       }
     }
 
@@ -124,10 +113,14 @@ export class ScoringService {
         strengths.push('Excellent cultural fit with strong soft skills');
       } else if (scores.culturalFit === 3) {
         improvements.push('Soft skills adequately demonstrated');
-        recommendations.push('Provide more examples of leadership and collaboration');
+        recommendations.push(
+          'Provide more examples of leadership and collaboration'
+        );
       } else if (scores.culturalFit <= 2) {
         improvements.push('Soft skills and cultural fit unclear');
-        recommendations.push('Emphasize teamwork, communication, and learning experiences');
+        recommendations.push(
+          'Emphasize teamwork, communication, and learning experiences'
+        );
       }
     }
 
@@ -137,10 +130,14 @@ export class ScoringService {
         strengths.push('Project meets all functional requirements excellently');
       } else if (scores.correctness === 3) {
         improvements.push('Project partially meets requirements');
-        recommendations.push('Review and implement all required features completely');
+        recommendations.push(
+          'Review and implement all required features completely'
+        );
       } else if (scores.correctness <= 2) {
         improvements.push('Several functional requirements not met');
-        recommendations.push('Focus on implementing core requirements before additional features');
+        recommendations.push(
+          'Focus on implementing core requirements before additional features'
+        );
       }
     }
 
@@ -148,11 +145,17 @@ export class ScoringService {
       if (scores.codeQuality >= 4) {
         strengths.push('High code quality with clean architecture');
       } else if (scores.codeQuality === 3) {
-        improvements.push('Code quality is acceptable but has room for improvement');
-        recommendations.push('Apply design patterns and follow best practices more consistently');
+        improvements.push(
+          'Code quality is acceptable but has room for improvement'
+        );
+        recommendations.push(
+          'Apply design patterns and follow best practices more consistently'
+        );
       } else if (scores.codeQuality <= 2) {
         improvements.push('Code quality needs significant improvement');
-        recommendations.push('Refactor code for better modularity and maintainability');
+        recommendations.push(
+          'Refactor code for better modularity and maintainability'
+        );
       }
     }
 
@@ -161,10 +164,14 @@ export class ScoringService {
         strengths.push('Robust error handling and system resilience');
       } else if (scores.resilience === 3) {
         improvements.push('Basic error handling present');
-        recommendations.push('Implement comprehensive error handling and retry mechanisms');
+        recommendations.push(
+          'Implement comprehensive error handling and retry mechanisms'
+        );
       } else if (scores.resilience <= 2) {
         improvements.push('Insufficient error handling');
-        recommendations.push('Add proper error handling, logging, and recovery strategies');
+        recommendations.push(
+          'Add proper error handling, logging, and recovery strategies'
+        );
       }
     }
 
@@ -173,10 +180,14 @@ export class ScoringService {
         strengths.push('Comprehensive documentation and clear instructions');
       } else if (scores.documentation === 3) {
         improvements.push('Documentation is basic');
-        recommendations.push('Add more detailed setup instructions and code comments');
+        recommendations.push(
+          'Add more detailed setup instructions and code comments'
+        );
       } else if (scores.documentation <= 2) {
         improvements.push('Documentation is insufficient');
-        recommendations.push('Create comprehensive README with setup, usage, and architecture details');
+        recommendations.push(
+          'Create comprehensive README with setup, usage, and architecture details'
+        );
       }
     }
 
@@ -185,7 +196,9 @@ export class ScoringService {
         strengths.push('Demonstrates innovation beyond requirements');
       } else if (scores.creativity === 3) {
         improvements.push('Standard implementation with limited innovation');
-        recommendations.push('Consider adding unique features or creative solutions');
+        recommendations.push(
+          'Consider adding unique features or creative solutions'
+        );
       }
     }
 
@@ -219,7 +232,9 @@ export class ScoringService {
     // Opening assessment
     sentences.push(
       `The candidate shows ${category} alignment with the position requirements, ` +
-      `with a CV match rate of ${cvMatchRate.toFixed(0)}% and project score of ${projectScore.toFixed(1)}/5.`
+        `with a CV match rate of ${cvMatchRate.toFixed(
+          0
+        )}% and project score of ${projectScore.toFixed(1)}/5.`
     );
 
     // Key strengths
@@ -231,7 +246,9 @@ export class ScoringService {
     // Main gaps/improvements
     if (improvements.length > 0) {
       const mainGap = improvements[0];
-      sentences.push(`The main area for improvement is that ${mainGap.toLowerCase()}.`);
+      sentences.push(
+        `The main area for improvement is that ${mainGap.toLowerCase()}.`
+      );
     }
 
     // Top recommendation
@@ -241,11 +258,17 @@ export class ScoringService {
 
     // Hiring recommendation based on scores
     if (avgScore >= 3.5) {
-      sentences.push(`Overall, this candidate is recommended for further consideration.`);
+      sentences.push(
+        `Overall, this candidate is recommended for further consideration.`
+      );
     } else if (avgScore >= 2.5) {
-      sentences.push(`This candidate may be suitable with additional development in key areas.`);
+      sentences.push(
+        `This candidate may be suitable with additional development in key areas.`
+      );
     } else {
-      sentences.push(`This candidate would benefit from gaining more experience before reapplying.`);
+      sentences.push(
+        `This candidate would benefit from gaining more experience before reapplying.`
+      );
     }
 
     return sentences.join(' ');

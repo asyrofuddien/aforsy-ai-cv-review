@@ -1,3 +1,46 @@
+const scoringGuide = {
+  technicalSkillsMatch: {
+    description: 'Alignment with job requirements',
+    scoring: {
+      '1': 'Irrelevant skills',
+      '2': 'Few overlaps',
+      '3': 'Partial match',
+      '4': 'Strong match',
+      '5': 'Excellent match + AI/LLM exposure',
+    },
+  },
+  experienceLevel: {
+    description: 'Years of experience and project complexity',
+    scoring: {
+      '1': '<1 yr / trivial projects',
+      '2': '1-2 yrs',
+      '3': '3-4 yrs with mid-size projects',
+      '4': '5-6 yrs solid track record',
+      '5': '6+ yrs / high-impact projects',
+    },
+  },
+  relevantAchievements: {
+    description: 'Impact of past work (scaling, performance, adoption)',
+    scoring: {
+      '1': 'No clear achievements',
+      '2': 'Minimal improvements',
+      '3': 'Some measurable outcomes',
+      '4': 'Significant contributions',
+      '5': 'Major measurable impact',
+    },
+  },
+  culturalFit: {
+    description: 'Communication, learning mindset, teamwork/leadership',
+    scoring: {
+      '1': 'Not demonstrated',
+      '2': 'Minimal',
+      '3': 'Average',
+      '4': 'Good',
+      '5': 'Excellent and well-demonstrated',
+    },
+  },
+};
+
 export const PROMPTS = {
   CV_EXTRACTION: {
     system: `You are an expert HR analyst. Extract structured information from CVs/resumes.
@@ -44,55 +87,58 @@ Return as JSON with this structure:
 
   CV_EVALUATION: {
     system: `You are an expert recruiter evaluating a CV against job requirements.
-    Provide your evaluation in JSON format with the following structure:
-    {
-      "match_rate": <1-5>,
-      "strengths": ["..."],
-      "gaps": ["..."],
-      "feedback": "...",
-      "scores": {
-        "technicalSkillsMatch": <1-5>,
-        "experienceLevel": <1-5>,
-        "relevantAchievements": <1-5>,
-        "culturalFit": <1-5>,
-        "aiExperience": <1-5>
-      }
-    }
-    
-    Score each criterion from 1-5:
-    - technicalSkillsMatch: How well technical skills match requirements
-    - experienceLevel: Years and relevance of experience
-    - relevantAchievements: Impact and relevance of past achievements
-    - culturalFit: Alignment with company culture and soft skills
-    - aiExperience: Experience with AI/ML technologies (if relevant)
+Use the following scoring guide for each criterion:
 
-    match_rate should reflect overall fit (1=poor, 5=excellent).
-    `,
+${JSON.stringify(scoringGuide, null, 2)}
+
+Important:
+- Each score (0.0-5.0) must follow the scoring guide.
+- The "match_rate" must be computed as a weighted average using the provided weights in jobRequirements.
+- Formula: match_rate = sum(score * weight) / sum(weights), then round to nearest float 1 number behind (0.0–5.0).
+
+Provide your evaluation in JSON format with the following structure:
+{
+  "match_rate": <0.0-5.0>,
+  "strengths": ["..."],
+  "gaps": ["..."],
+  "feedback": "...",
+  "scores": {
+    "technicalSkillsMatch": <0.0-5.0>,
+    "experienceLevel": <0.0-5.0>,
+    "relevantAchievements": <0.0-5.0>,
+    "culturalFit": <0.0-5.0>,
+    "aiExperience": <0.0-5.0>
+  }
+}
+`,
 
     user: (
       cvInfo: any,
       jobRequirements: any
-    ) => `Evaluate this candidate against the job requirements:
+    ) => `Evaluate this candidate against the job requirements.
 
-Job Requirements:
+Job Requirements (including weights):
 ${JSON.stringify(jobRequirements, null, 2)}
 
 Candidate Information:
 ${JSON.stringify(cvInfo, null, 2)}
 
-match_rate should reflect overall fit (1=poor, 5=excellent)
+Remember:
+- Use weights from jobRequirements["scoringWeigths"] when computing match_rate.
+- Explain your reasoning for each score.
 
 Provide evaluation as JSON:
 {
-  "match_rate": 1-5,
+  "match_rate": 0.0-5.0,
   "strengths": ["strength1", "strength2"],
   "gaps": ["gap1", "gap2"],
   "feedback": "Detailed feedback paragraph",
   "scores": {
-    "technical_skills": 1-5,
-    "experience_level": 1-5,
-    "relevant_achievements": 1-5,
-    "cultural_fit": 1-5
+    "technicalSkillsMatch": 0.0-5.0,
+    "experienceLevel": 0.0-5.0,
+    "relevantAchievements": 0.0-5.0,
+    "culturalFit": 0.0-5.0,
+    "aiExperience": 0.0-5.0
   }
 }`,
   },
