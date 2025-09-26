@@ -37,11 +37,7 @@ app.use('/api/', rateLimiterMiddleware);
 app.use('/docs', (req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; " +
-      "script-src 'self'; " +
-      "style-src 'self' 'unsafe-inline'; " +
-      "img-src 'self' data:; " +
-      "font-src 'self';"
+    "default-src 'self'; " + "script-src 'self'; " + "style-src 'self' 'unsafe-inline'; " + "img-src 'self' data:; " + "font-src 'self';"
   );
   next();
 });
@@ -62,6 +58,12 @@ app.get('/api/health', (req, res) => {
     version: 'v 1.0.1',
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/api/pdf/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(__dirname, '../public/temp', filename);
+  res.sendFile(filePath);
 });
 
 // Error handling
