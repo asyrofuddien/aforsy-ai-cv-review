@@ -11,7 +11,22 @@ const app = express();
 
 // Security middlewares
 app.use(helmet());
-app.use(cors());
+
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',');
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.set('trust proxy', 1);
 
@@ -41,7 +56,11 @@ app.use('/api', routes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok',version:'v 1.0.1', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    version: 'v 1.0.1',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Error handling
