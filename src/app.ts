@@ -12,7 +12,8 @@ const app = express();
 // Security middlewares
 app.use(helmet());
 
-const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',');
+const allowedOrigins = config.cors.allowedOrigins;
+
 app.use(
   cors({
     origin: (origin, callback) => {

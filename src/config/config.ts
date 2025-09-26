@@ -40,4 +40,8 @@ export default {
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'),
     maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '10'),
   },
+
+  cors: {
+    allowedOrigins: (String(process.env.CORS_ORIGINS) || '').split(','),
+  },
 };
