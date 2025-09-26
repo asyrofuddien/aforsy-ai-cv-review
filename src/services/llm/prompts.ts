@@ -94,7 +94,7 @@ ${JSON.stringify(scoringGuide, null, 2)}
 Important:
 - Each score (0.0-5.0) must follow the scoring guide.
 - The "match_rate" must be computed as a weighted average using the provided weights in jobRequirements.
-- Formula: match_rate = sum(score * weight) / sum(weights), then round to nearest float 1 number behind (0.0–5.0).
+- Formula: match_rate = sum(score * weight) / sum(weights), then round to nearest float (0.0–5.0).
 
 Provide your evaluation in JSON format with the following structure:
 {
