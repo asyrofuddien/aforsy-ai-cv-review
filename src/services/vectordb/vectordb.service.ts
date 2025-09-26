@@ -24,16 +24,47 @@ class VectorDBService {
     }
   > = new Map();
 
+  // Simple dimension reduction using averaging
+  private reduceDimensions(
+    embedding: number[],
+    targetDim: number = 384
+  ): number[] {
+    const sourceLength = embedding.length;
+    const ratio = sourceLength / targetDim;
+    const reduced: number[] = [];
+
+    for (let i = 0; i < targetDim; i++) {
+      const startIdx = Math.floor(i * ratio);
+      const endIdx = Math.floor((i + 1) * ratio);
+
+      // Average the values in this segment
+      let sum = 0;
+      for (let j = startIdx; j < endIdx; j++) {
+        sum += embedding[j];
+      }
+      reduced.push(sum / (endIdx - startIdx));
+    }
+
+    // Normalize the reduced vector
+    const magnitude = Math.sqrt(
+      reduced.reduce((sum, val) => sum + val * val, 0)
+    );
+    return reduced.map((val) => val / magnitude);
+  }
+
   async upsertDocuments(documents: VectorDocument[]): Promise<void> {
     try {
       logger.info(`📊 VectorDB: Upserting ${documents.length} documents`);
 
       const vectors = await Promise.all(
         documents.map(async (doc) => {
-          const embedding = await openaiService.generateEmbedding(doc.text);
+          const fullEmbedding = await openaiService.generateEmbedding(doc.text);
+          // Reduce to 384 dimensions
+          const reducedEmbedding = this.reduceDimensions(fullEmbedding, 384);
+
           return {
             id: doc.id,
-            values: embedding,
+            values: reducedEmbedding,
             metadata: {
               ...doc.metadata,
               text: doc.text,
@@ -69,7 +100,10 @@ class VectorDBService {
     try {
       logger.info(`🔍 VectorDB: Searching for: ${query.substring(0, 50)}...`);
 
-      const queryEmbedding = await openaiService.generateEmbedding(query);
+      const fullQueryEmbedding = await openaiService.generateEmbedding(query);
+      // Reduce query embedding to 384 dimensions
+      const queryEmbedding = this.reduceDimensions(fullQueryEmbedding, 384);
+
       const pinecone = getPineconeClient();
 
       if (pinecone) {
