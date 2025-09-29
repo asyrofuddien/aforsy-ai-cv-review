@@ -87,7 +87,7 @@ export class LLMChainService {
           codeQuality: 3,
           resilience: 3,
           documentation: 3,
-          creativity: 3
+          creativity: 3,
         },
       });
 
@@ -108,7 +108,7 @@ export class LLMChainService {
     }
   }
 
-  async generateFinalSummary(cvEval: any, projectEval: any): Promise<string> {
+  async generateFinalSummary(cvEval: any, projectEval: any) {
     try {
       logger.info('🔗 Chain: Generating final summary');
 
@@ -121,8 +121,16 @@ export class LLMChainService {
         }
       );
 
+      const parsed = this.parseJSON(response, {
+        match_rate: 0.5,
+        strengths: [],
+        gaps: [],
+        feedback: 'Unable to evaluate',
+        scores: {},
+      });
+
       logger.info('✅ Chain: Final summary generated');
-      return response.trim();
+      return parsed;
     } catch (error) {
       logger.error('Chain: Final summary error:', error);
       throw error;

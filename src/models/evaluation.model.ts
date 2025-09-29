@@ -43,6 +43,7 @@ const EvaluationSchema = new Schema(
       projectScore: Number,
       projectFeedback: String,
       overallSummary: String,
+      recommendation: String,
       detailedScores: {
         technicalSkillsMatch: Number,
         experienceLevel: Number,

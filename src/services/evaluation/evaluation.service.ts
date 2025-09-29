@@ -25,7 +25,10 @@ class EvaluationService {
       if (!jobDesc) throw new Error('Job description not found');
 
       // Step 1: Evaluate CV
-      logger.info('📄 Step 1: Evaluating CV with weights:', jobDesc.scoringWeights);
+      logger.info(
+        '📄 Step 1: Evaluating CV with weights:',
+        jobDesc.scoringWeights
+      );
       const cvResult = await cvEvaluator.evaluate(
         cvDocumentId,
         jobDescriptionId
@@ -42,13 +45,17 @@ class EvaluationService {
         projectResult.evaluation
       );
 
+      const summary = overallSummary?.overall_summary;
+      const recommendation = overallSummary?.recommendation;
+
       // Compile final result dengan info weights yang digunakan
       const finalResult = {
         cvMatchRate: cvResult.matchRate,
         cvFeedback: cvResult.evaluation.feedback,
         projectScore: projectResult.score,
         projectFeedback: projectResult.evaluation.feedback,
-        overallSummary,
+        overallSummary: summary,
+        recommendation,
         detailedScores: {
           ...cvResult.evaluation.scores,
           ...projectResult.evaluation.scores,

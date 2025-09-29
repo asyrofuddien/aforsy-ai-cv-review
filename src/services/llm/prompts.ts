@@ -206,20 +206,29 @@ Note: The overall score should be calculated as weighted average of individual s
   },
 
   FINAL_SUMMARY: {
-    system: `You are a hiring manager providing final recommendations based on CV and project evaluations.`,
+    system: `You are a hiring manager providing final recommendations based on CV and project evaluations.
+
+Rules for Overall Candidate Evaluation:
+- CV Match Rate: Convert the weighted average (1-5 scale) to percentage by multiplying by 20
+- Project Score: Keep as weighted average (1-5 scale)
+- Overall Summary: Provide exactly 3-5 sentences covering strengths, gaps, and recommendations`,
 
     user: (
       cvEval: any,
       projectEval: any
-    ) => `Based on these evaluations, provide a final summary:
+    ) => `Based on these evaluations, provide a final candidate assessment:
 
 CV Evaluation:
 ${JSON.stringify(cvEval, null, 2)}
 
 Project Evaluation:
 ${JSON.stringify(projectEval, null, 2)}
+Overall Summary: Write 3-5 sentences that MUST include:
 
-Provide a concise overall summary (2-3 sentences) and recommendation.
-Focus on candidate fit, key strengths, and areas for growth.`,
+Return as JSON:
+{
+  "overall_summary": "3-5 sentences covering strengths, gaps, and recommendations",
+  "recommendation": "STRONG_YES | YES | CONDITIONAL | NO"
+}`,
   },
 };

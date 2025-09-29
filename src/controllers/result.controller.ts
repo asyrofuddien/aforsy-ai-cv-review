@@ -29,6 +29,7 @@ export class ResultController {
             project_score: evaluation.result.projectScore,
             project_feedback: evaluation.result.projectFeedback,
             overall_summary: evaluation.result.overallSummary,
+            result: evaluation.result.recommendation
           },
         });
       } else {

@@ -12,6 +12,7 @@ export interface EvaluationResult {
   projectFeedback: string;
   overallSummary: string;
   detailedScores?: DetailedScores;
+  recommendation: string;
 }
 
 export interface DetailedScores {
