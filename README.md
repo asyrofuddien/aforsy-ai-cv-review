@@ -369,9 +369,6 @@ src/
    - Check file size (max 10MB)
    - Ensure file type is supported
 
-## 📄 License
-
-MIT License - see LICENSE file for details
 
 ## 🤝 Contributing
 
