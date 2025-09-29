@@ -87,7 +87,7 @@ This service provides automated evaluation of job candidates by:
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/cv-evaluation-api.git
+git clone https://github.com/asyrofuddien/cv-evaluation-api.git
 cd cv-evaluation-api
 ```
 
