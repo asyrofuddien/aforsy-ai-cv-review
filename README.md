@@ -404,5 +404,3 @@ For issues and questions:
 - Review API documentation at `/api/test`
 
 ---
-
-Built with ❤️ for automated CV evaluation
