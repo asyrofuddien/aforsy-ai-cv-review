@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import uploadRoutes from './upload.routes';
 import evaluationRoutes from './evaluation.routes';
-import resultRoutes from './result.routes';
 
 import { Request, Response } from 'express';
 import Document from '../models/document.model';
@@ -15,7 +14,6 @@ const router = Router();
 // Mount routes
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
-router.use('/result', resultRoutes);
 router.use('/job-descriptions', jobDescriptionRoutes);
 
 // Test route
@@ -31,7 +29,7 @@ router.get('/test', (req, res) => {
     '===== MAIN ENDPOINTS =====',
     'POST /api/upload                       - Upload CV and Project files',
     'POST /api/evaluate                     - Start evaluation process',
-    'GET  /api/result/:id                   - Get evaluation result',
+    'GET  /api/evaluate/:id                   - Get evaluation result',
     '',
     '===== TESTING & MONITORING =====',
     'GET  /api/test/recent-uploads          - Get recent document uploads',
