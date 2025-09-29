@@ -292,20 +292,6 @@ git push origin main
 - Add environment variables
 - Deploy
 
-### Docker Deployment
-
-1. **Build image**
-
-```bash
-docker build -t cv-evaluation-api .
-```
-
-2. **Run container**
-
-```bash
-docker run -p 3000:3000 --env-file .env cv-evaluation-api
-```
-
 ## 🎯 Design Decisions
 
 ### 1. **Asynchronous Processing**
