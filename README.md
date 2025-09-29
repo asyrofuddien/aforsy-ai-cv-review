@@ -137,7 +137,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database
-MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/xxx
+MONGODB_URI=mongo-db-url
 REDIS_URL=redis://localhost:6379
 
 # OpenAI (optional - will use mock if not provided)
