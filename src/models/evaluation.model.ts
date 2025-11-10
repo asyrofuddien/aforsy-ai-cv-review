@@ -4,7 +4,6 @@ import { EvaluationResult, EvaluationStatus } from '../types/evaluation.types';
 export interface IEvaluation extends Document {
   candidateName?: string;
   cvDocumentId: mongoose.Types.ObjectId;
-  projectDocumentId: mongoose.Types.ObjectId;
   jobDescriptionId: mongoose.Types.ObjectId;
   status: EvaluationStatus;
   result?: EvaluationResult;
@@ -17,11 +16,6 @@ const EvaluationSchema = new Schema(
   {
     candidateName: { type: String },
     cvDocumentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Document',
-      required: true,
-    },
-    projectDocumentId: {
       type: Schema.Types.ObjectId,
       ref: 'Document',
       required: true,

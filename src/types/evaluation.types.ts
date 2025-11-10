@@ -1,6 +1,5 @@
 export interface EvaluationRequest {
   cvDocumentId: string;
-  projectDocumentId: string;
   jobDescriptionId: string;
   candidateName?: string;
 }

@@ -8,13 +8,10 @@ export class LLMChainService {
     try {
       logger.info('🔗 Chain: Extracting CV information');
 
-      const response = await openaiService.completion(
-        PROMPTS.CV_EXTRACTION.user(cvContent),
-        {
-          systemPrompt: PROMPTS.CV_EXTRACTION.system,
-          temperature: 0.1, // Low temperature for consistent extraction
-        }
-      );
+      const response = await openaiService.completion(PROMPTS.CV_EXTRACTION.user(cvContent), {
+        systemPrompt: PROMPTS.CV_EXTRACTION.system,
+        temperature: 0.1, // Low temperature for consistent extraction
+      });
 
       const parsed = this.parseJSON(response, {
         name: 'Unknown',
@@ -34,20 +31,14 @@ export class LLMChainService {
     }
   }
 
-  async evaluateCV(
-    cvInfo: CVExtractedInfo,
-    jobRequirements: any
-  ): Promise<any> {
+  async evaluateCV(cvInfo: CVExtractedInfo, jobRequirements: any): Promise<any> {
     try {
       logger.info('🔗 Chain: Evaluating CV against job requirements');
 
-      const response = await openaiService.completion(
-        PROMPTS.CV_EVALUATION.user(cvInfo, jobRequirements),
-        {
-          systemPrompt: PROMPTS.CV_EVALUATION.system,
-          temperature: 0.3,
-        }
-      );
+      const response = await openaiService.completion(PROMPTS.CV_EVALUATION.user(cvInfo, jobRequirements), {
+        systemPrompt: PROMPTS.CV_EVALUATION.system,
+        temperature: 0.3,
+      });
 
       const parsed = this.parseJSON(response, {
         match_rate: 0.5,
@@ -69,13 +60,10 @@ export class LLMChainService {
     try {
       logger.info('🔗 Chain: Evaluating project');
 
-      const response = await openaiService.completion(
-        PROMPTS.PROJECT_EVALUATION.user(projectContent, rubric),
-        {
-          systemPrompt: PROMPTS.PROJECT_EVALUATION.system,
-          temperature: 0.3,
-        }
-      );
+      const response = await openaiService.completion(PROMPTS.PROJECT_EVALUATION.user(projectContent, rubric), {
+        systemPrompt: PROMPTS.PROJECT_EVALUATION.system,
+        temperature: 0.3,
+      });
 
       const parsed = this.parseJSON(response, {
         score: 3.0,
@@ -108,18 +96,15 @@ export class LLMChainService {
     }
   }
 
-  async generateFinalSummary(cvEval: any, projectEval: any) {
+  async generateFinalSummary(cvEval: any) {
     try {
       logger.info('🔗 Chain: Generating final summary');
 
-      const response = await openaiService.completion(
-        PROMPTS.FINAL_SUMMARY.user(cvEval, projectEval),
-        {
-          systemPrompt: PROMPTS.FINAL_SUMMARY.system,
-          temperature: 0.4,
-          maxTokens: 500,
-        }
-      );
+      const response = await openaiService.completion(PROMPTS.FINAL_SUMMARY.user(cvEval), {
+        systemPrompt: PROMPTS.FINAL_SUMMARY.system,
+        temperature: 0.4,
+        maxTokens: 500,
+      });
 
       const parsed = this.parseJSON(response, {
         match_rate: 0.5,

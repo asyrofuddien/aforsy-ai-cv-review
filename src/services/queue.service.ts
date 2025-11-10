@@ -45,9 +45,7 @@ class QueueService {
       port: parseInt(parsed.port) || 6379,
       password: parsed.password || undefined,
       username: parsed.username || undefined,
-      db: parsed.pathname?.slice(1)
-        ? parseInt(parsed.pathname.slice(1))
-        : undefined,
+      db: parsed.pathname?.slice(1) ? parseInt(parsed.pathname.slice(1)) : undefined,
       tls: parsed.protocol === 'rediss:' ? {} : undefined,
     };
   }
@@ -73,7 +71,6 @@ class QueueService {
     try {
       const evaluation = new Evaluation({
         cvDocumentId: data.cvDocumentId,
-        projectDocumentId: data.projectDocumentId,
         jobDescriptionId: data.jobDescriptionId,
         candidateName: data.candidateName,
         status: 'queued',

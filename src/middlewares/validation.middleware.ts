@@ -4,16 +4,11 @@ import { AppError } from './error.middleware';
 
 const evaluationSchema = Joi.object({
   cvDocumentId: Joi.string().required(),
-  projectDocumentId: Joi.string().required(),
   jobDescriptionId: Joi.string().allow(null).optional(),
   candidateName: Joi.string().optional(),
 });
 
-export const validateEvaluation = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validateEvaluation = (req: Request, res: Response, next: NextFunction) => {
   const { error } = evaluationSchema.validate(req.body);
   if (error) {
     throw new AppError(error.details[0].message, 400);
@@ -44,16 +39,11 @@ const jobDescriptionSchema = Joi.object({
   isDefault: Joi.boolean().optional(),
 });
 
-const jobDescriptionUpdateSchema = jobDescriptionSchema.fork(
-  ['slug', 'title', 'company', 'description', 'requirements'],
-  (schema) => schema.optional()
+const jobDescriptionUpdateSchema = jobDescriptionSchema.fork(['slug', 'title', 'company', 'description', 'requirements'], (schema) =>
+  schema.optional()
 );
 
-export const validateJobDescription = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validateJobDescription = (req: Request, res: Response, next: NextFunction) => {
   const { error } = jobDescriptionSchema.validate(req.body);
   if (error) {
     throw new AppError(error.details[0].message, 400);
@@ -61,11 +51,7 @@ export const validateJobDescription = (
   next();
 };
 
-export const validateJobDescriptionUpdate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validateJobDescriptionUpdate = (req: Request, res: Response, next: NextFunction) => {
   const { error } = jobDescriptionUpdateSchema.validate(req.body);
   if (error) {
     throw new AppError(error.details[0].message, 400);
@@ -73,11 +59,7 @@ export const validateJobDescriptionUpdate = (
   next();
 };
 
-export const validateUpload = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validateUpload = (req: Request, res: Response, next: NextFunction) => {
   // Validation is handled by multer
   next();
 };

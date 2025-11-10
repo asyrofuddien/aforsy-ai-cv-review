@@ -3,14 +3,12 @@ import { Job } from 'bullmq';
 import Evaluation from '../../models/evaluation.model';
 import JobDescription from '../../models/jobDescription.model';
 import cvEvaluator from './cv.evaluator';
-import projectEvaluator from './project.evaluator';
 import chainService from '../llm/chains';
 import logger from '../../utils/logger';
 
 class EvaluationService {
   async processEvaluation(data: any): Promise<any> {
-    const { evaluationId, cvDocumentId, projectDocumentId, jobDescriptionId } =
-      data;
+    const { evaluationId, cvDocumentId, projectDocumentId, jobDescriptionId } = data;
 
     try {
       logger.info(`🚀 Starting evaluation ${evaluationId}`);
@@ -25,25 +23,12 @@ class EvaluationService {
       if (!jobDesc) throw new Error('Job description not found');
 
       // Step 1: Evaluate CV
-      logger.info(
-        '📄 Step 1: Evaluating CV with weights:',
-        jobDesc.scoringWeights
-      );
-      const cvResult = await cvEvaluator.evaluate(
-        cvDocumentId,
-        jobDescriptionId
-      );
-
-      // Step 2: Evaluate Project
-      logger.info('📁 Step 2: Evaluating project');
-      const projectResult = await projectEvaluator.evaluate(projectDocumentId);
+      logger.info('📄 Step 1: Evaluating CV with weights:', jobDesc.scoringWeights);
+      const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId);
 
       // Step 3: Generate final summary
       logger.info('📝 Step 3: Generating final summary');
-      const overallSummary = await chainService.generateFinalSummary(
-        cvResult.evaluation,
-        projectResult.evaluation
-      );
+      const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation);
 
       const summary = overallSummary?.overall_summary;
       const recommendation = overallSummary?.recommendation;
@@ -52,13 +37,10 @@ class EvaluationService {
       const finalResult = {
         cvMatchRate: cvResult.matchRate,
         cvFeedback: cvResult.evaluation.feedback,
-        projectScore: projectResult.score,
-        projectFeedback: projectResult.evaluation.feedback,
         overallSummary: summary,
         recommendation,
         detailedScores: {
           ...cvResult.evaluation.scores,
-          ...projectResult.evaluation.scores,
         },
         scoringWeightsUsed: jobDesc.scoringWeights,
       };

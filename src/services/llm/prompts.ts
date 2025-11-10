@@ -46,9 +46,7 @@ export const PROMPTS = {
     system: `You are an expert HR analyst. Extract structured information from CVs/resumes.
 Return ONLY valid JSON with the specified structure. No additional text.`,
 
-    user: (
-      cvContent: string
-    ) => `Extract the following information from this CV:
+    user: (cvContent: string) => `Extract the following information from this CV:
 - Name
 - Email
 - Skills (technical skills as array)
@@ -112,10 +110,7 @@ Provide your evaluation in JSON format with the following structure:
 }
 `,
 
-    user: (
-      cvInfo: any,
-      jobRequirements: any
-    ) => `Evaluate this candidate against the job requirements.
+    user: (cvInfo: any, jobRequirements: any) => `Evaluate this candidate against the job requirements.
 
 Job Requirements (including weights):
 ${JSON.stringify(jobRequirements, null, 2)}
@@ -169,10 +164,7 @@ Evaluate based on these criteria with specific weights:
    - Extra features beyond requirements
    - 1 = None, 2 = Very basic, 3 = Useful extras, 4 = Strong enhancements, 5 = Outstanding creativity`,
 
-    user: (
-      projectContent: string,
-      rubric: any
-    ) => `Evaluate this project submission:
+    user: (projectContent: string, rubric: any) => `Evaluate this project submission:
 
 Project Content:
 ${projectContent}
@@ -206,24 +198,16 @@ Note: The overall score should be calculated as weighted average of individual s
   },
 
   FINAL_SUMMARY: {
-    system: `You are a hiring manager providing final recommendations based on CV and project evaluations.
+    system: `You are a hiring manager providing final recommendations based on CV.
 
 Rules for Overall Candidate Evaluation:
 - CV Match Rate: Convert the weighted average (1-5 scale) to percentage by multiplying by 20
-- Project Score: Keep as weighted average (1-5 scale)
 - Overall Summary: Provide exactly 3-5 sentences covering strengths, gaps, and recommendations`,
 
-    user: (
-      cvEval: any,
-      projectEval: any
-    ) => `Based on these evaluations, provide a final candidate assessment:
+    user: (cvEval: any) => `Based on these evaluations, provide a final candidate assessment:
 
 CV Evaluation:
 ${JSON.stringify(cvEval, null, 2)}
-
-Project Evaluation:
-${JSON.stringify(projectEval, null, 2)}
-Overall Summary: Write 3-5 sentences that MUST include:
 
 Return as JSON:
 {
