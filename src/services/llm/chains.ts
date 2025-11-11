@@ -163,11 +163,36 @@ export class LLMChainService {
       throw error;
     }
   }
-  async RoleSuggestion(extractedCv: object): Promise<CVExtractedInfo> {
+  async RoleSuggestion(extractedCv: object): Promise<any> {
     try {
       logger.info('🔗 Chain: Role Suggestion');
       const response = await openaiService.completion(PROMPTS.ROLE_SUGGESTION.user(extractedCv), {
         systemPrompt: PROMPTS.ROLE_SUGGESTION.system,
+        temperature: 0.1,
+      });
+
+      const parsed = this.parseJSON(response, {
+        name: 'Unknown',
+        email: '',
+        skills: [],
+        experience_years: 0,
+        experiences: [],
+        education: [],
+        projects: [],
+      });
+
+      logger.info('✅ Chain: CV extraction completed');
+      return parsed;
+    } catch (error) {
+      logger.error('Chain: CV extraction error:', error);
+      throw error;
+    }
+  }
+  async SummaryRecommendation(extractedCv: object, roleSuggestion: object, jobListed: object): Promise<any> {
+    try {
+      logger.info('🔗 Chain: Summary Recommendation');
+      const response = await openaiService.completion(PROMPTS.SUMMARY_RECOMENDATION.user(extractedCv, roleSuggestion, jobListed), {
+        systemPrompt: PROMPTS.SUMMARY_RECOMENDATION.system,
         temperature: 0.1,
       });
 

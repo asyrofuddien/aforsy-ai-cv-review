@@ -8,6 +8,7 @@ import cvEvaluator from './cv.evaluator';
 import chainService from '../llm/chains';
 import logger from '../../utils/logger';
 import parserService from '../parser.service';
+import scrapingService from '../scraping.service';
 
 class EvaluationService {
   async processEvaluation(data: any): Promise<any> {
@@ -104,34 +105,36 @@ class EvaluationService {
       const roleSuggestion = await chainService.RoleSuggestion(extractedCv);
 
       logger.info('📄 Step 5: Scrape Job Listings');
+      const jobListed = await scrapingService.FindJobs(roleSuggestion);
 
-      // // Step 3: Generate final summary
-      // logger.info('📝 Step 3: Generating final summary');
-      // const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation);
+      logger.info('🔍 Step 6: Matching with available jobs');
+      const jobMatches = await scrapingService.matchWithJobs(extractedCv, jobListed);
 
-      // const summary = overallSummary?.overall_summary;
-      // const recommendation = overallSummary?.recommendation;
+      logger.info('📄 Step 7: Summary Recommendation');
+      const summaryRecommendation = await chainService.SummaryRecommendation(extractedCv, roleSuggestion, jobListed);
 
-      // // Compile final result dengan info weights yang digunakan
-      // const finalResult = {
-      //   cvMatchRate: cvResult.matchRate,
-      //   cvFeedback: cvResult.evaluation.feedback,
-      //   overallSummary: summary,
-      //   recommendation,
-      //   detailedScores: {
-      //     ...cvResult.evaluation.scores,
-      //   },
-      //   scoringWeightsUsed: jobDesc.scoringWeights,
-      // };
+      const summary = summaryRecommendation.summary;
+      logger.info('📄 Step 8: Final Result');
 
-      // // Update evaluation with result
-      // await Evaluation.findByIdAndUpdate(evaluationId, {
-      //   status: 'completed',
-      //   result: finalResult,
-      // });
+      const finalResult = {
+        user_profile: {
+          name: extractedCv?.name,
+          seniority: roleSuggestion?.seniority,
+          primary_skills: extractedCv?.skills,
+        },
+        suggested_roles: roleSuggestion?.suggested_roles,
+        jobs: jobMatches,
+        summary,
+      };
 
-      // logger.info(`✅ Evaluation ${evaluationId} completed successfully`);
-      return null;
+      // Update evaluation with result
+      await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
+        status: 'completed',
+        result: finalResult,
+      });
+
+      logger.info(`✅ CV-Matcher ${cvMatcherId} completed successfully`);
+      return finalResult;
     } catch (error) {
       let message = 'Unknown error';
       if (error instanceof Error) {

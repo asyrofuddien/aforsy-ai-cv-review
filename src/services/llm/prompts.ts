@@ -235,6 +235,8 @@ Return JSON with EXACT structure below:
       "position": "",
       "start_date": "",
       "end_date": "",
+      "description":"",
+      "achievement":"",
       "tech_stack": []
     }
   ],
@@ -245,14 +247,17 @@ Return JSON with EXACT structure below:
       "start_date": "",
       "end_date": ""
     }
-  ]
+  ],
+  "seniority": "",
 }
 
 Rules:
 - Do NOT add extra fields.
 - Do NOT guess info that does not exist.
 - If missing → return empty string or empty array.
-- Return ONLY JSON. No explanation.`,
+- Return ONLY JSON. No explanation.
+- seniority assuming based on other data
+- if description and achievements not on cv, create it based on cv data`,
   },
   ROLE_SUGGESTION: {
     system: 'You are a career role prediction model.',
@@ -269,5 +274,43 @@ Return JSON only:
   "suggested_roles": [],
   "seniority": ""
 }`,
+  },
+  SUMMARY_RECOMENDATION: {
+    system: 'You are a career advisor.',
+    user: (extractedCv: object, roleSuggestion: object, jobListed: object) => `Based on:
+CV:
+ ${JSON.stringify(extractedCv, null, 2)}
+
+Suggested Roles:
+ ${JSON.stringify(roleSuggestion, null, 2)}
+
+Job Match Results:
+${JSON.stringify(jobListed, null, 2)}
+
+Write a short summary in english:
+- strengths (max 3)
+- improvements (max 3)
+- next_steps (max 3)
+
+Format:
+{
+  "summary": { "strengths": [
+        "",
+        "",
+        ""
+      ],
+      "improvements": [
+        "",
+        "",
+        ""
+      ],
+      "next_steps": [
+        "",
+        "",
+        ""
+      ]},
+}
+
+Keep concise. No long paragraphs.`,
   },
 };

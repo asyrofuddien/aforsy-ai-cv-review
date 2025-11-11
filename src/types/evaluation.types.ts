@@ -43,6 +43,19 @@ export interface EvaluationJob {
   updatedAt: Date;
 }
 
+export interface JobListing {
+  title: string;
+  company: string;
+  location: string;
+  salary_range: string; // snake_case sesuai preferensi DB
+  job_type: string;
+  requirements: string[];
+  responsibilities: string[];
+  posted_at: string; // ISO date string
+  link: string;
+  seniority: string;
+}
+
 export interface CVExtractedInfo {
   name?: string;
   email?: string;
