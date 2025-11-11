@@ -2,6 +2,7 @@
 
 import mongoose, { Document, Schema } from 'mongoose';
 import { EvaluationResult, EvaluationStatus } from '../types/evaluation.types';
+import { required } from 'joi';
 
 export interface IEvaluation extends Document {
   candidateName?: string;
@@ -31,6 +32,7 @@ const JobSuggestionSchema = new Schema(
     skill_match: { type: Number, required: true },
     experience_match: { type: Number, required: true },
     responsibility_match: { type: Number, required: true },
+    job_description: { type: String, required: true },
     score: { type: Number, required: true },
     grade: { type: String, required: true },
     explanation: { type: String, required: true },

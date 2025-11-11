@@ -9,7 +9,6 @@ class ScrapingService {
       {
         title: 'Backend Engineer',
         company: 'Tokopedia',
-
         location: 'Jakarta, Indonesia',
         salary_range: 'IDR 15.000.000 – 25.000.000',
         job_type: 'Full-time',
@@ -21,6 +20,8 @@ class ScrapingService {
           'Collaborate with frontend and DevOps teams',
           'Write unit and integration tests',
         ],
+        job_description:
+          'Sebagai Backend Engineer di Tokopedia, kamu akan bertanggung jawab mengembangkan dan memelihara layanan backend yang scalable, mendesain API yang efisien, serta bekerja sama dengan tim lintas fungsi untuk menghadirkan solusi berkualitas tinggi.',
         posted_at: '2025-11-05',
         link: 'https://www.linkedin.com/jobs/view/backend-engineer-at-tokopedia-12345',
       },
@@ -38,6 +39,8 @@ class ScrapingService {
           'Mentor junior engineers',
           'Optimize system performance and reliability',
         ],
+        job_description:
+          'Sebagai Senior Node.js Developer di GoTo Financial, kamu akan memimpin pengembangan layanan keuangan inti, merancang arsitektur microservices yang scalable dan aman, serta membimbing tim junior dalam praktik terbaik pengembangan.',
         posted_at: '2025-11-07',
         link: 'https://glints.com/id/en/job/senior-nodejs-developer-goto-financial-67890',
       },
@@ -54,6 +57,8 @@ class ScrapingService {
           'Integrate with third-party payment and logistics providers',
           'Participate in agile development cycles',
         ],
+        job_description:
+          'Sebagai Backend Developer di Traveloka, kamu akan berfokus pada pengembangan API performa tinggi untuk sistem pemesanan perjalanan serta melakukan integrasi dengan penyedia pembayaran dan logistik pihak ketiga.',
         posted_at: '2025-11-01',
         link: 'https://www.jobstreet.co.id/job/backend-developer-traveloka-24680',
       },
@@ -71,6 +76,8 @@ class ScrapingService {
           'Ensure API documentation is up-to-date',
           'Monitor service health via logging and metrics',
         ],
+        job_description:
+          'Sebagai Node.js API Engineer di Bukalapak, kamu akan berperan dalam merancang dan mengembangkan API internal serta eksternal menggunakan GraphQL, memastikan dokumentasi selalu diperbarui, dan menjaga performa layanan.',
         posted_at: '2025-11-09',
         link: 'https://kalibrr.com/bukalapak/nodejs-api-engineer-13579',
       },
@@ -87,6 +94,8 @@ class ScrapingService {
           'Fix bugs and implement small features under supervision',
           'Write clean and maintainable code',
         ],
+        job_description:
+          'Sebagai Junior Backend Developer di Mekari, kamu akan membantu mengembangkan layanan internal HR dan payroll, memperbaiki bug, serta belajar praktik terbaik dalam pembangunan sistem backend.',
         posted_at: '2025-11-10',
         link: 'https://glints.com/id/en/job/junior-backend-mekari-97531',
       },
