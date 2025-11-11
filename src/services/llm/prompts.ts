@@ -254,4 +254,20 @@ Rules:
 - If missing → return empty string or empty array.
 - Return ONLY JSON. No explanation.`,
   },
+  ROLE_SUGGESTION: {
+    system: 'You are a career role prediction model.',
+    user: (extractedCv: object) => `Given this structured CV data:
+
+${JSON.stringify(extractedCv, null, 2)}
+
+Determine:
+- The top 3 most suitable job roles in the tech industry.
+- The correct seniority level (Junior / Mid / Senior).
+
+Return JSON only:
+{
+  "suggested_roles": [],
+  "seniority": ""
+}`,
+  },
 };

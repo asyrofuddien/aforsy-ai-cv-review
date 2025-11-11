@@ -99,7 +99,12 @@ class EvaluationService {
 
       logger.info('📄 Step 3: Extract CV Structured JSON');
       const extractedCv = await chainService.extractCVToJSON(rawText);
-      console.log(extractedCv);
+
+      logger.info('📄 Step 4: Role Suggestion');
+      const roleSuggestion = await chainService.RoleSuggestion(extractedCv);
+
+      logger.info('📄 Step 5: Scrape Job Listings');
+
       // // Step 3: Generate final summary
       // logger.info('📝 Step 3: Generating final summary');
       // const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation);
