@@ -213,6 +213,31 @@ export class LLMChainService {
       throw error;
     }
   }
+  async beautifyDescription(description: string): Promise<any> {
+    try {
+      logger.info('🔗 Chain: beautifyDescription');
+      const response = await openaiService.completion(PROMPTS.BEAUTIFY_DESCRIPTION.user(description), {
+        systemPrompt: PROMPTS.BEAUTIFY_DESCRIPTION.system,
+        temperature: 0.1,
+      });
+
+      const parsed = this.parseJSON(response, {
+        name: 'Unknown',
+        email: '',
+        skills: [],
+        experience_years: 0,
+        experiences: [],
+        education: [],
+        projects: [],
+      });
+
+      logger.info('✅ Chain: beautifyDescription completed');
+      return parsed;
+    } catch (error) {
+      logger.error('Chain: beautifyDescription error:', error);
+      throw error;
+    }
+  }
 }
 
 export default new LLMChainService();

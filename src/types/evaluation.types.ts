@@ -54,6 +54,7 @@ export interface JobListing {
   posted_at: string; // ISO date string
   link: string;
   seniority: string;
+  job_description: string;
 }
 
 export interface CVExtractedInfo {

@@ -313,4 +313,17 @@ Format:
 
 Keep concise. No long paragraphs.`,
   },
+  BEAUTIFY_DESCRIPTION: {
+    system: 'Good In Rewrite Description job',
+    user: (description: string) => `Based on:
+description:
+ ${description}
+
+re-wirte the description in 1-3 sentence
+Format:
+{
+  "description": 
+}
+`,
+  },
 };
