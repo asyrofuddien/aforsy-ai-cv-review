@@ -111,8 +111,8 @@ class ScrapingService {
       return {
         ...job,
         skill_match: parseFloat(skillMatch.toFixed(2)),
-        experience_match: experienceMatch,
-        responsibility_match: responsibilityMatch,
+        experience_match: parseFloat(experienceMatch.toFixed(2)),
+        responsibility_match: parseFloat(responsibilityMatch.toFixed(2)),
         score: parseFloat(totalScore.toFixed(2)),
         grade: grade,
         explanation: this.generateExplanation(skillMatch, experienceMatch, responsibilityMatch),
