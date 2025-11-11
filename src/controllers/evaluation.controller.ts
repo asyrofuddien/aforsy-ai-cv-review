@@ -5,6 +5,7 @@ import JobDescription from '../models/jobDescription.model';
 import Evaluation from '../models/evaluation.model';
 import { ERROR_MESSAGES } from '../utils/constants';
 import logger from '../utils/logger';
+import cvMatcherModel from '../models/cvMatcher.model';
 
 export class EvaluationController {
   startEvaluation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
@@ -135,6 +136,41 @@ export class EvaluationController {
       res.status(200).json({
         id: evaluation.id,
         status: evaluation.status,
+      });
+    }
+  });
+  CVMakerById = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    const cvMatcher = await cvMatcherModel
+      .findById(id)
+      .populate({
+        path: 'cvDocumentId',
+        select: '-content -__v',
+      })
+      .select('-__v')
+      .lean();
+
+    if (!cvMatcher) {
+      return res.status(404).json({
+        success: false,
+        message: ERROR_MESSAGES.EVALUATION_NOT_FOUND,
+      });
+    }
+
+    // Format response based on status
+    if (cvMatcher.status === 'completed' && cvMatcher.result) {
+      res.status(200).json({
+        success: true,
+        message: 'Retrived',
+        data: {
+          ...cvMatcher,
+        },
+      });
+    } else {
+      res.status(200).json({
+        id: cvMatcher.id,
+        status: cvMatcher.status,
       });
     }
   });
