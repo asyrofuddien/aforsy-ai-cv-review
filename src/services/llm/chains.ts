@@ -137,7 +137,7 @@ export class LLMChainService {
     }
   }
 
-  async extractCVToJSON(rawText: string): Promise<CVExtractedInfo> {
+  async extractCVToJSON(rawText: string): Promise<any> {
     try {
       logger.info('🔗 Chain: Extract CV Structured JSON');
 
