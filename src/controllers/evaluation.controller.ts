@@ -174,6 +174,26 @@ export class EvaluationController {
       });
     }
   });
+  getAllCvMatcher = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const cvMatcher = await cvMatcherModel
+      .find({ 'result.user_profile.name': { $nin: [null, undefined, ''] } })
+      .select('status result.user_profile.name createdAt updatedAt')
+      .lean();
+
+    const data = cvMatcher.map((item: any) => ({
+      _id: item._id,
+      name: item.result?.user_profile?.name || null,
+      status: item.status,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Retrieved',
+      data,
+    });
+  });
 }
 
 export default new EvaluationController();
