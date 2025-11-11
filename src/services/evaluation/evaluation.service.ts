@@ -102,7 +102,7 @@ class EvaluationService {
       const extractedCv = await chainService.extractCVToJSON(rawText);
 
       await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
-        'result.user_profile.name': extractedCv.user_profile.name,
+        'result.user_profile.name': extractedCv?.name,
       });
 
       logger.info('📄 Step 4: Role Suggestion');
