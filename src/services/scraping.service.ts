@@ -63,7 +63,7 @@ interface LinkedInJobDetailResponse {
 
 class ScrapingService {
   private config: RapidAPIConfig = {
-    apiKey: process.env.RAPIDAPI_KEY || '8b2a7d8bdemsha646ce2c8c34b3cp142b51jsnd51d3f8a759e',
+    apiKey: process.env.RAPIDAPI_KEY || 'fb4397004emsh469e668a1e1a18fp1aee54jsn9553247670c2',
     apiHost: 'jobs-api14.p.rapidapi.com',
     baseUrl: 'https://jobs-api14.p.rapidapi.com/v2/linkedin',
   };
