@@ -215,4 +215,43 @@ Return as JSON:
   "recommendation": "STRONG_YES | YES | CONDITIONAL | NO"
 }`,
   },
+
+  EXTRACT_CV_STRUCTURED_JSON: {
+    system: 'You are a CV Parsing Engine. Convert the following raw CV text into a strictly formatted JSON.',
+    user: (rawText: string) => `TEXT:
+"""
+${rawText}
+"""
+
+Return JSON with EXACT structure below:
+
+{
+  "name": "",
+  "summary": "",
+  "skills": [],
+  "work_experience": [
+    {
+      "company": "",
+      "position": "",
+      "start_date": "",
+      "end_date": "",
+      "tech_stack": []
+    }
+  ],
+  "education": [
+    {
+      "institution": "",
+      "degree": "",
+      "start_date": "",
+      "end_date": ""
+    }
+  ]
+}
+
+Rules:
+- Do NOT add extra fields.
+- Do NOT guess info that does not exist.
+- If missing → return empty string or empty array.
+- Return ONLY JSON. No explanation.`,
+  },
 };

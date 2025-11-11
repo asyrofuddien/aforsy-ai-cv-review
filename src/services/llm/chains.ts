@@ -136,6 +136,33 @@ export class LLMChainService {
       return defaultValue;
     }
   }
+
+  async extractCVToJSON(rawText: string): Promise<CVExtractedInfo> {
+    try {
+      logger.info('🔗 Chain: Extract CV Structured JSON');
+
+      const response = await openaiService.completion(PROMPTS.EXTRACT_CV_STRUCTURED_JSON.user(rawText), {
+        systemPrompt: PROMPTS.EXTRACT_CV_STRUCTURED_JSON.system,
+        temperature: 0.1, // Low temperature for consistent extraction
+      });
+
+      const parsed = this.parseJSON(response, {
+        name: 'Unknown',
+        email: '',
+        skills: [],
+        experience_years: 0,
+        experiences: [],
+        education: [],
+        projects: [],
+      });
+
+      logger.info('✅ Chain: CV extraction completed');
+      return parsed;
+    } catch (error) {
+      logger.error('Chain: CV extraction error:', error);
+      throw error;
+    }
+  }
 }
 
 export default new LLMChainService();

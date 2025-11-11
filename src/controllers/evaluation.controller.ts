@@ -49,7 +49,7 @@ export class EvaluationController {
       cvDocumentId,
     });
 
-    logger.info(`Evaluation job created: ${job.id}`);
+    logger.info(`CvMatcher job created: ${job.id}`);
 
     res.status(202).json({
       id: job.id,

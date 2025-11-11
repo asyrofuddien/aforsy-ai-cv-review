@@ -8,7 +8,10 @@ import logger from '../utils/logger';
 class QueueService {
   private evaluationQueue: Queue;
   private queueEvents: QueueEvents;
+  private cvMatcherQueue: Queue;
+  private cvMatcherQueueEvents: QueueEvents;
   private worker: Worker | null = null;
+  private cvMatcherWorker: Worker | null = null; // Tambah worker untuk cv-matcher
 
   constructor() {
     const connection = this.parseRedisUrl(config.database.redisUrl);
@@ -32,6 +35,28 @@ class QueueService {
     });
 
     this.queueEvents = new QueueEvents('evaluation-queue', {
+      connection,
+    });
+
+    this.cvMatcherQueue = new Queue('cv-matcher-queue', {
+      connection,
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000,
+        },
+        removeOnComplete: {
+          age: 3600,
+          count: 100,
+        },
+        removeOnFail: {
+          age: 24 * 3600,
+        },
+      },
+    });
+
+    this.cvMatcherQueueEvents = new QueueEvents('cv-matcher-queue', {
       connection,
     });
 
@@ -62,6 +87,19 @@ class QueueService {
 
     this.queueEvents.on('progress', ({ jobId, data }) => {
       logger.debug(`Job ${jobId} progress:`, data);
+    });
+
+    // Tambah event handlers untuk cvMatcherQueue
+    this.cvMatcherQueueEvents.on('completed', ({ jobId, returnvalue }) => {
+      logger.info(`CV Matcher job ${jobId} completed`);
+    });
+
+    this.cvMatcherQueueEvents.on('failed', ({ jobId, failedReason }) => {
+      logger.error(`CV Matcher job ${jobId} failed:`, failedReason);
+    });
+
+    this.cvMatcherQueueEvents.on('progress', ({ jobId, data }) => {
+      logger.debug(`CV Matcher job ${jobId} progress:`, data);
     });
   }
 
@@ -98,7 +136,7 @@ class QueueService {
     }
   }
 
-  initializeWorker(processor: (job: Job) => Promise<any>) {
+  initializeEvaluationWorker(processor: (job: Job) => Promise<any>) {
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.worker = new Worker('evaluation-queue', processor, {
@@ -115,19 +153,53 @@ class QueueService {
     });
   }
 
+  // Tambah worker untuk CV Matcher
+  initializeCVMatcherWorker(processor: (job: Job) => Promise<any>) {
+    const connection = this.parseRedisUrl(config.database.redisUrl);
+
+    this.cvMatcherWorker = new Worker('cv-matcher-queue', processor, {
+      connection,
+      concurrency: 10,
+    });
+
+    this.cvMatcherWorker.on('completed', (job) => {
+      logger.info(`CV Matcher worker completed job ${job.id}`);
+    });
+
+    this.cvMatcherWorker.on('failed', (job, error) => {
+      logger.error(`CV Matcher worker failed on job ${job?.id}:`, error);
+    });
+  }
+
   async getJob(jobId: string) {
     return await this.evaluationQueue.getJob(jobId);
+  }
+
+  // Tambah method untuk get CV Matcher job
+  async getCVMatcherJob(jobId: string) {
+    return await this.cvMatcherQueue.getJob(jobId);
   }
 
   async getJobCounts() {
     return await this.evaluationQueue.getJobCounts();
   }
 
+  // Tambah method untuk get CV Matcher job counts
+  async getCVMatcherJobCounts() {
+    return await this.cvMatcherQueue.getJobCounts();
+  }
+
   async close() {
     await this.queueEvents.close();
     await this.evaluationQueue.close();
+    await this.cvMatcherQueueEvents.close();
+    await this.cvMatcherQueue.close();
     if (this.worker) {
       await this.worker.close();
+    }
+    if (this.cvMatcherWorker) {
+      // Tambah close untuk cv matcher worker
+      await this.cvMatcherWorker.close();
     }
   }
 
@@ -135,19 +207,25 @@ class QueueService {
     return this.evaluationQueue;
   }
 
+  // Tambah method untuk get CV Matcher queue
+  getCVMatcherQueue() {
+    return this.cvMatcherQueue;
+  }
+
   async addCVMatcher(data: CVMatcherRequest): Promise<{
     id: string;
+    jobId: string;
   }> {
     try {
-      const evaluation = new cvMatcherModel({
+      const cvMatcher = new cvMatcherModel({
         cvDocumentId: data.cvDocumentId,
         status: 'queued',
       });
 
-      await evaluation.save();
+      await cvMatcher.save();
 
-      const job = await this.evaluationQueue.add('evaluate', {
-        evaluationId: evaluation.id,
+      const job = await this.cvMatcherQueue.add('cv-matcher', {
+        cvMatcherId: cvMatcher.id,
         ...data,
       });
 
@@ -156,10 +234,11 @@ class QueueService {
       }
 
       return {
-        id: evaluation.id,
+        id: cvMatcher.id,
+        jobId: job.id, // Tambah jobId
       };
     } catch (error) {
-      logger.error('Failed to add evaluation job:', error);
+      logger.error('Failed to add cvMatcher job:', error);
       throw error;
     }
   }
