@@ -1,7 +1,8 @@
 import { Queue, Worker, Job, QueueEvents, ConnectionOptions } from 'bullmq';
 import config from '../config/config';
 import Evaluation from '../models/evaluation.model';
-import { EvaluationRequest } from '../types/evaluation.types';
+import cvMatcherModel from '../models/cvMatcher.model';
+import { CVMatcherRequest, EvaluationRequest } from '../types/evaluation.types';
 import logger from '../utils/logger';
 
 class QueueService {
@@ -132,6 +133,35 @@ class QueueService {
 
   getQueue() {
     return this.evaluationQueue;
+  }
+
+  async addCVMatcher(data: CVMatcherRequest): Promise<{
+    id: string;
+  }> {
+    try {
+      const evaluation = new cvMatcherModel({
+        cvDocumentId: data.cvDocumentId,
+        status: 'queued',
+      });
+
+      await evaluation.save();
+
+      const job = await this.evaluationQueue.add('evaluate', {
+        evaluationId: evaluation.id,
+        ...data,
+      });
+
+      if (!job.id) {
+        throw new Error('Failed to create job - no job ID returned');
+      }
+
+      return {
+        id: evaluation.id,
+      };
+    } catch (error) {
+      logger.error('Failed to add evaluation job:', error);
+      throw error;
+    }
   }
 }
 

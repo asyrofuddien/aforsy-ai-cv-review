@@ -5,6 +5,7 @@ import { validateEvaluation } from '../middlewares/validation.middleware';
 const router = Router();
 
 router.post('/', validateEvaluation, evaluationController.startEvaluation);
+router.post('/cv-matcher', evaluationController.startCVMatcher);
 router.get('/:id', evaluationController.getResult);
 
 export default router;

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../middlewares/error.middleware';
+import { AppError, asyncHandler } from '../middlewares/error.middleware';
 import queueService from '../services/queue.service';
 import JobDescription from '../models/jobDescription.model';
 import Evaluation from '../models/evaluation.model';
@@ -29,6 +29,24 @@ export class EvaluationController {
       cvDocumentId,
       jobDescriptionId: actualJobDescriptionId,
       candidateName,
+    });
+
+    logger.info(`Evaluation job created: ${job.id}`);
+
+    res.status(202).json({
+      id: job.id,
+      status: 'queued',
+    });
+  });
+
+  startCVMatcher = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+    const { cvDocumentId } = req.body;
+
+    if (!cvDocumentId) throw new AppError('cvDocumentId file is required', 400);
+
+    // Add to queue
+    const job = await queueService.addCVMatcher({
+      cvDocumentId,
     });
 
     logger.info(`Evaluation job created: ${job.id}`);

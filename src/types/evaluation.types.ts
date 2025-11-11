@@ -4,6 +4,9 @@ export interface EvaluationRequest {
   candidateName?: string;
 }
 
+export interface CVMatcherRequest {
+  cvDocumentId: string;
+}
 export interface EvaluationResult {
   cvMatchRate: number;
   cvFeedback: string;
