@@ -326,4 +326,20 @@ Format:
 }
 `,
   },
+  CALCULATE_SKILL: {
+    system: 'You are an expert recruiter evaluating a CV against job requirements.',
+    user: (cvSkills: any, jobRequirements: any) => `Based on:
+cvSkills:
+ ${cvSkills}
+
+ jobRequirements:
+ ${jobRequirements}
+
+give score skill match scale 1-100
+Format:
+{
+  "score": Number
+}
+`,
+  },
 };

@@ -238,6 +238,31 @@ export class LLMChainService {
       throw error;
     }
   }
+  async calculateSkillmatch(cvSkills: any, jobRequirements: any): Promise<any> {
+    try {
+      logger.info('🔗 Chain: beautifyDescription');
+      const response = await openaiService.completion(PROMPTS.CALCULATE_SKILL.user(cvSkills, jobRequirements), {
+        systemPrompt: PROMPTS.CALCULATE_SKILL.system,
+        temperature: 0.1,
+      });
+
+      const parsed = this.parseJSON(response, {
+        name: 'Unknown',
+        email: '',
+        skills: [],
+        experience_years: 0,
+        experiences: [],
+        education: [],
+        projects: [],
+      });
+
+      logger.info('✅ Chain: beautifyDescription completed');
+      return parsed;
+    } catch (error) {
+      logger.error('Chain: beautifyDescription error:', error);
+      throw error;
+    }
+  }
 }
 
 export default new LLMChainService();

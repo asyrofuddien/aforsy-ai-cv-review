@@ -491,39 +491,34 @@ class ScrapingService {
   }
 
   async matchWithJobs(cvJson: any, suggestedRoles: JobListing[]): Promise<any[]> {
-    const scoredJobs = suggestedRoles.map((job) => {
-      const skillMatch = this.calculateSkillMatch(cvJson.skills, job.requirements);
-      const experienceMatch = this.calculateExperienceMatch(cvJson.seniority, job.seniority);
-      const responsibilityMatch = this.calculateResponsibilityMatch(cvJson.work_experience, job.responsibilities);
+    const scoredJobs = await Promise.all(
+      suggestedRoles.map(async (job) => {
+        const skillMatch = await this.calculateSkillMatch(cvJson.skills, job.requirements);
+        const experienceMatch = this.calculateExperienceMatch(cvJson.seniority, job.seniority);
+        const responsibilityMatch = this.calculateResponsibilityMatch(cvJson.work_experience, job.responsibilities);
 
-      const totalScore = (skillMatch + experienceMatch + responsibilityMatch) / 3;
-      const grade = this.getGrade(parseFloat(totalScore.toFixed(2)));
+        const totalScore = (skillMatch + experienceMatch + responsibilityMatch) / 3;
+        const grade = this.getGrade(parseFloat(totalScore.toFixed(2)));
 
-      return {
-        ...job,
-        skill_match: parseFloat(skillMatch.toFixed(2)),
-        experience_match: parseFloat(experienceMatch.toFixed(2)),
-        responsibility_match: parseFloat(responsibilityMatch.toFixed(2)),
-        score: parseFloat(totalScore.toFixed(2)),
-        grade: grade,
-        explanation: this.generateExplanation(skillMatch, experienceMatch, responsibilityMatch),
-      };
-    });
+        return {
+          ...job,
+          skill_match: parseFloat(skillMatch.toFixed(2)),
+          experience_match: parseFloat(experienceMatch.toFixed(2)),
+          responsibility_match: parseFloat(responsibilityMatch.toFixed(2)),
+          score: parseFloat(totalScore.toFixed(2)),
+          grade: grade,
+          explanation: this.generateExplanation(skillMatch, experienceMatch, responsibilityMatch),
+        };
+      })
+    );
 
     return scoredJobs.sort((a, b) => b.score - a.score).slice(0, 5);
   }
 
-  private calculateSkillMatch(cvSkills: string[], jobRequirements: string[]): number {
-    if (!cvSkills || cvSkills.length === 0 || !jobRequirements || jobRequirements.length === 0) {
-      return 0;
-    }
-
-    const cvSkillsLower = cvSkills.map((skill) => skill.toLowerCase());
-    const jobRequirementsLower = jobRequirements.map((req) => req.toLowerCase());
-
-    const matchedSkills = jobRequirementsLower.filter((req) => cvSkillsLower.some((skill) => skill.includes(req) || req.includes(skill)));
-
-    return (matchedSkills.length / jobRequirementsLower.length) * 100;
+  private async calculateSkillMatch(cvSkills: string[], jobRequirements: string[]) {
+    const skilMatch = await chainService.calculateSkillmatch(cvSkills, jobRequirements);
+    const result = skilMatch.score;
+    return parseFloat(result);
   }
 
   private calculateExperienceMatch(cvSeniority: string, jobExperienceLevel: string): number {
