@@ -175,10 +175,7 @@ export class EvaluationController {
     }
   });
   getAllCvMatcher = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    const cvMatcher = await cvMatcherModel
-      .find({ 'result.user_profile.name': { $nin: [null, undefined, ''] } })
-      .select('status result.user_profile.name createdAt updatedAt')
-      .lean();
+    const cvMatcher = await cvMatcherModel.find().select('status result.user_profile.name createdAt updatedAt').lean();
 
     const data = cvMatcher.map((item: any) => ({
       _id: item._id,
