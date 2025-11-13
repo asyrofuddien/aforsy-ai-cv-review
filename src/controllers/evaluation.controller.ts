@@ -197,6 +197,14 @@ export class EvaluationController {
     const { code } = req.params;
     const codeData = await codeModel.findOne({ code });
     const codeId = codeData?._id;
+
+    if (!codeId) {
+      return res.status(200).json({
+        success: true,
+        message: 'Retrieved',
+        data: [],
+      });
+    }
     const cvMatcher = await cvMatcherModel.find({ code_id: codeId }).select('status result.user_profile.name createdAt updatedAt').lean();
 
     const data = cvMatcher.map((item: any) => ({
