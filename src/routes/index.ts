@@ -8,6 +8,7 @@ import Evaluation from '../models/evaluation.model';
 import JobDescription from '../models/jobDescription.model';
 import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
+import CodeGeneratorController from '../controllers/code.controller';
 
 const router = Router();
 
@@ -15,6 +16,9 @@ const router = Router();
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/job-descriptions', jobDescriptionRoutes);
+
+router.get('/get-code', CodeGeneratorController.GenerateCode);
+router.get('/redeem-code/:id', CodeGeneratorController.RedeemCode);
 
 // Test route
 router.get('/test', (req, res) => {
@@ -39,11 +43,7 @@ router.get('/test', (req, res) => {
   ];
 
   if (isDev) {
-    endpoints.push(
-      '',
-      '===== DEVELOPMENT ONLY =====',
-      'DELETE /api/test/clear-test-data       - Clear all test data [DEV ONLY]'
-    );
+    endpoints.push('', '===== DEVELOPMENT ONLY =====', 'DELETE /api/test/clear-test-data       - Clear all test data [DEV ONLY]');
   }
 
   res.json({
@@ -56,9 +56,7 @@ router.get('/test', (req, res) => {
       evaluate: 'Returns evaluation ID for async processing',
       result: 'Poll this endpoint until status is "completed"',
       authentication: 'No authentication required (add for production)',
-      devOnly: isDev
-        ? 'Development endpoints are enabled'
-        : 'Development endpoints are disabled',
+      devOnly: isDev ? 'Development endpoints are enabled' : 'Development endpoints are disabled',
     },
   });
 });
@@ -82,10 +80,7 @@ router.get('/', (req, res) => {
 router.get('/test/recent-uploads', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
-    const documents = await Document.find()
-      .sort({ uploadedAt: -1 })
-      .limit(limit)
-      .select('originalName type size uploadedAt');
+    const documents = await Document.find().sort({ uploadedAt: -1 }).limit(limit).select('originalName type size uploadedAt');
 
     res.json({
       success: true,
@@ -104,10 +99,7 @@ router.get('/test/recent-uploads', async (req: Request, res: Response) => {
 router.get('/test/recent-evaluations', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
-    const evaluations = await Evaluation.find()
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .select('candidateName status createdAt updatedAt');
+    const evaluations = await Evaluation.find().sort({ createdAt: -1 }).limit(limit).select('candidateName status createdAt updatedAt');
 
     res.json({
       success: true,
@@ -125,9 +117,7 @@ router.get('/test/recent-evaluations', async (req: Request, res: Response) => {
 // Get available job descriptions
 router.get('/test/job-descriptions', async (req: Request, res: Response) => {
   try {
-    const jobs = await JobDescription.find().select(
-      'slug title company isDefault'
-    );
+    const jobs = await JobDescription.find().select('slug title company isDefault');
 
     res.json({
       success: true,

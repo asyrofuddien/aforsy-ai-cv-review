@@ -18,6 +18,11 @@ const DocumentSchema = new Schema({
   path: { type: String, required: true },
   size: { type: Number, required: true },
   content: { type: String },
+  code_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'Document',
+    required: true,
+  },
   type: {
     type: String,
     enum: ['cv', 'project'],

@@ -8,6 +8,7 @@ export interface IEvaluation extends Document {
   status: EvaluationStatus;
   result?: EvaluationResult;
   error?: string;
+  code_id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,11 @@ const EvaluationSchema = new Schema(
   {
     candidateName: { type: String },
     cvDocumentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Document',
+      required: true,
+    },
+    code_id: {
       type: Schema.Types.ObjectId,
       ref: 'Document',
       required: true,

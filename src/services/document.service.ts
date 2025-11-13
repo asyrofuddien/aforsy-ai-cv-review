@@ -4,11 +4,7 @@ import { AppError } from '../middlewares/error.middleware';
 import logger from '../utils/logger';
 
 export class DocumentService {
-  async saveDocument(
-    fileData: Express.Multer.File,
-    type: 'cv' | 'project',
-    content?: string
-  ): Promise<IDocument> {
+  async saveDocument(fileData: Express.Multer.File, type: 'cv' | 'project', codeId: string, content?: string): Promise<IDocument> {
     try {
       const document = new Document({
         filename: fileData.filename,
@@ -16,6 +12,7 @@ export class DocumentService {
         mimeType: fileData.mimetype,
         path: fileData.path,
         size: fileData.size,
+        code_id: codeId,
         type,
         content,
       });

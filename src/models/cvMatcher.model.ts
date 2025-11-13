@@ -11,6 +11,7 @@ export interface IEvaluation extends Document {
   status: EvaluationStatus;
   result?: EvaluationResult;
   error?: string;
+  code_id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -70,6 +71,11 @@ const CvMatcherSchema = new Schema(
       type: String,
       enum: ['queued', 'processing', 'completed', 'failed'],
       default: 'queued',
+      required: true,
+    },
+    code_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Document',
       required: true,
     },
     result: EvaluationResultSchema,

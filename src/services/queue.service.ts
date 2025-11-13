@@ -4,6 +4,7 @@ import Evaluation from '../models/evaluation.model';
 import cvMatcherModel from '../models/cvMatcher.model';
 import { CVMatcherRequest, EvaluationRequest } from '../types/evaluation.types';
 import logger from '../utils/logger';
+import codeModel from '../models/code.model';
 
 class QueueService {
   private evaluationQueue: Queue;
@@ -103,15 +104,21 @@ class QueueService {
     });
   }
 
-  async addEvaluationJob(data: EvaluationRequest): Promise<{
+  async addEvaluationJob(
+    data: EvaluationRequest,
+    code: string
+  ): Promise<{
     id: string;
     jobId: string;
   }> {
+    const codeData = await codeModel.findOne({ code });
+    const codeId = codeData?._id;
     try {
       const evaluation = new Evaluation({
         cvDocumentId: data.cvDocumentId,
         jobDescriptionId: data.jobDescriptionId,
         candidateName: data.candidateName,
+        code_id: codeId,
         status: 'queued',
       });
 
@@ -212,13 +219,17 @@ class QueueService {
     return this.cvMatcherQueue;
   }
 
-  async addCVMatcher(data: CVMatcherRequest): Promise<{
+  async addCVMatcher(
+    data: CVMatcherRequest,
+    codeId: string
+  ): Promise<{
     id: string;
     jobId: string;
   }> {
     try {
       const cvMatcher = new cvMatcherModel({
         cvDocumentId: data.cvDocumentId,
+        code_id: codeId,
         status: 'queued',
       });
 
