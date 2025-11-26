@@ -61,16 +61,18 @@ export class CVGeneratorController {
       }
 
       // Read template
-      const templatePath = path.join(process.cwd(), 'public/resume_template.html');
-      if (!fs.existsSync(templatePath)) {
+      const urlTemplate = `${baseUrl}/results/resume_template.html`;
+      const response = await fetch(urlTemplate);
+
+      if (!response.ok) {
         res.status(500).json({
           success: false,
-          message: 'Resume template not found',
+          message: 'Template not found on server',
         });
         return;
       }
 
-      const templateStr = fs.readFileSync(templatePath, 'utf8');
+      const templateStr = await response.text();
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
