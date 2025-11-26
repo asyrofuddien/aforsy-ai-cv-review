@@ -61,7 +61,7 @@ export class CVGeneratorController {
       }
 
       // Read template
-      const templatePath = path.join(process.cwd(), 'src/template-cv/resume_template.html');
+      const templatePath = path.join(process.cwd(), 'public/resume_template.html');
       if (!fs.existsSync(templatePath)) {
         res.status(500).json({
           success: false,
