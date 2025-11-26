@@ -59,7 +59,7 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-app.use('/results', express.static(path.join(__dirname, '../results')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/pdf/:filename', (req, res) => {
   const { filename } = req.params;
