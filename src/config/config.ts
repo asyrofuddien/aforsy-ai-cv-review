@@ -6,8 +6,7 @@ export default {
   nodeEnv: process.env.NODE_ENV || 'development',
 
   database: {
-    mongoUri:
-      process.env.MONGODB_URI || 'mongodb://localhost:27017/cv-evaluation',
+    mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/cv-evaluation',
     redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
   },
 
@@ -44,4 +43,6 @@ export default {
   cors: {
     allowedOrigins: (String(process.env.CORS_ORIGINS) || '').split(','),
   },
+
+  backendApi: process.env.BACKEND_API,
 };

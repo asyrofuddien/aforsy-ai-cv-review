@@ -9,6 +9,7 @@ import JobDescription from '../models/jobDescription.model';
 import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
 import CodeGeneratorController from '../controllers/code.controller';
+import CVGeneratorRoutes from '../routes/cvGenerator.routes';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ const router = Router();
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/job-descriptions', jobDescriptionRoutes);
+router.use('/cv-generator', CVGeneratorRoutes);
 
 router.get('/get-code', CodeGeneratorController.GenerateCode);
 router.get('/redeem-code/:id', CodeGeneratorController.RedeemCode);

@@ -84,3 +84,55 @@ export interface Project {
   description: string;
   technologies: string[];
 }
+
+export interface Resume {
+  name: string;
+  phone: string;
+  location: string;
+  email: string;
+  linkedin: string;
+  github: string;
+  portfolio: string;
+  summary: string;
+  experience: Experience[];
+  education: Education[];
+  project_and_certification: ProjectOrCertification[];
+  skills: Skills;
+  languages: string;
+  code: String;
+}
+
+export interface Experience {
+  title: string;
+  company: string;
+  location: string;
+  duration: string;
+  description: string;
+  bullets: string[];
+}
+
+export interface Education {
+  degree: string;
+  school: string;
+  gpa: string;
+  year: string;
+}
+
+export interface ProjectOrCertification {
+  title: string;
+  place?: string;
+  company?: string;
+  location?: string;
+  duration?: string;
+  date?: string;
+  description?: string;
+  bullets: string[];
+}
+
+export interface Skills {
+  Languages: string;
+  'Frameworks & Libraries': string;
+  Databases: string;
+  'Tools & Technologies': string;
+  'Other Skills': string;
+}
