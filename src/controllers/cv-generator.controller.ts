@@ -187,7 +187,7 @@ export class CVGeneratorController {
     const code = req.body.code;
     const codeData = await codeModel.findOne({ code: code });
     const codeId = codeData?._id;
-    const atsDatas = await AtsPdf.find({ code_id: codeId }).select('-__v -code_id');
+    const atsDatas = await AtsPdf.find({ code_id: codeId }).sort('-createdAt').select('-__v -code_id');
     res.status(201).json({
       success: true,
       message: 'CV generated successfully',
