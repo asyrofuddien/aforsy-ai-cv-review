@@ -49,6 +49,7 @@ export class CVGeneratorController {
       return;
     }
 
+    let browser;
     try {
       // Get current date and sanitized name
       const dateStr = getFormattedDate();
@@ -63,6 +64,7 @@ export class CVGeneratorController {
 
       const templateData = await TemplateModel.findOne().lean();
       const templateStr = templateData?.content;
+
       // Compile and render template
       const template = Handlebars.compile(templateStr);
       const html = template(resumeData);
@@ -72,25 +74,50 @@ export class CVGeneratorController {
       fs.writeFileSync(htmlPath, html);
       console.log(`✅ ${fileName}.html generated`);
 
-      // Generate PDF
-      const browser = await puppeteer.launch({
+      // Generate PDF with optimized settings
+      browser = await puppeteer.launch({
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: true,
-        protocolTimeout: 180000, // 3 minutes
+        protocolTimeout: 300000, // Increased to 5 minutes
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
           '--disable-gpu',
           '--disable-software-rasterizer',
-          '--disable-features=VizDisplayCompositor',
           '--no-zygote',
           '--single-process',
+          '--disable-web-security',
+          '--disable-features=IsolateOrigins,site-per-process,NetworkService', // Added NetworkService
         ],
+        timeout: 60000, // Browser launch timeout
       });
 
       const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
+
+      // 🔥 DISABLE NETWORK MONITORING HERE 🔥
+      try {
+        await page._client().send('Network.disable');
+        console.log('✅ Network monitoring disabled');
+      } catch (err: any) {
+        console.warn('⚠️ Could not disable network:', err.message);
+      }
+
+      // Disable request interception as additional safety
+      await page.setRequestInterception(false);
+
+      // Set viewport for consistent rendering
+      await page.setViewport({ width: 1200, height: 1600 });
+
+      // Use setContent instead of goto for inline HTML
+      // Remove 'networkidle0' since there are no network requests
+      await page.setContent(html, {
+        waitUntil: 'domcontentloaded', // Changed from 'networkidle0'
+        timeout: 60000,
+      });
+
+      // Wait a bit for any fonts or styles to load
+      await page.evaluateHandle('document.fonts.ready');
 
       const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
       await page.pdf({
@@ -103,9 +130,11 @@ export class CVGeneratorController {
           bottom: '0.4in',
           left: '0.4in',
         },
+        timeout: 60000, // Add PDF generation timeout
       });
 
       await browser.close();
+      browser = null; // Clear reference
 
       console.log(`✅ ${fileName}.pdf generated successfully!`);
       console.log(`📁 Location: ${pdfPath}`);
@@ -115,7 +144,7 @@ export class CVGeneratorController {
       const pdfBuffer = fs.readFileSync(pdfPath);
       const pdfBase64 = pdfBuffer.toString('base64');
 
-      const pdfCreated = await AtsPdf.create({
+      await AtsPdf.create({
         file_name: `${fileName}.pdf`,
         pdf_file: pdfBase64,
         html_file: `${baseUrl}/results/${fileName}.html`,
@@ -141,6 +170,15 @@ export class CVGeneratorController {
         message: 'Failed to generate CV',
         error: error.message,
       });
+    } finally {
+      // Always close browser in finally block
+      if (browser) {
+        try {
+          await browser.close();
+        } catch (e) {
+          console.error('Error closing browser:', e);
+        }
+      }
     }
   });
 
