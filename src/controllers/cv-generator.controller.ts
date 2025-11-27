@@ -100,9 +100,13 @@ export class CVGeneratorController {
       console.log(`📁 Location: ${pdfPath}`);
       console.log(`📅 Generated on: ${dateStr}`);
 
+      // Convert PDF to base64
+      const pdfBuffer = fs.readFileSync(pdfPath);
+      const pdfBase64 = pdfBuffer.toString('base64');
+
       const pdfCreated = await AtsPdf.create({
         file_name: `${fileName}.pdf`,
-        pdf_file: `${baseUrl}/results/${fileName}.pdf`,
+        pdf_file: pdfBase64,
         html_file: `${baseUrl}/results/${fileName}.html`,
         code_id: codeId,
         html_text: html,
