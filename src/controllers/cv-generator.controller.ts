@@ -97,7 +97,8 @@ export class CVGeneratorController {
 
       // 🔥 DISABLE NETWORK MONITORING HERE 🔥
       try {
-        await page._client().send('Network.disable');
+        const client = await page.target().createCDPSession();
+        await client.send('Network.disable');
         console.log('✅ Network monitoring disabled');
       } catch (err: any) {
         console.warn('⚠️ Could not disable network:', err.message);
