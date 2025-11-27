@@ -16,6 +16,9 @@ const CvAtsSchema = new Schema({
   pdf_file: {
     type: String,
   },
+  html_text: {
+    type: String,
+  },
   file_name: {
     type: String,
   },

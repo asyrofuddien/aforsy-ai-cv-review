@@ -7,6 +7,7 @@ import { asyncHandler } from '../middlewares/error.middleware';
 import { Resume } from '../types/evaluation.types';
 import codeModel from '../models/code.model';
 import AtsPdf from '../models/atsPDF.model';
+import TemplateModel from '../models/Template.model';
 import config from '../config/config';
 
 // Register Handlebars helper (register once, outside the class)
@@ -60,20 +61,8 @@ export class CVGeneratorController {
         fs.mkdirSync(resultsDir, { recursive: true });
       }
 
-      // Read template
-      const urlTemplate = `${baseUrl}/results/resume_template.html`;
-      const response = await fetch(urlTemplate);
-
-      if (!response.ok) {
-        res.status(500).json({
-          success: false,
-          message: 'Template not found on server',
-        });
-        return;
-      }
-
-      const templateStr = await response.text();
-
+      const templateData = await TemplateModel.findOne().lean();
+      const templateStr = templateData?.content;
       // Compile and render template
       const template = Handlebars.compile(templateStr);
       const html = template(resumeData);
@@ -116,9 +105,8 @@ export class CVGeneratorController {
         pdf_file: `${baseUrl}/results/${fileName}.pdf`,
         html_file: `${baseUrl}/results/${fileName}.html`,
         code_id: codeId,
+        html_text: html,
       });
-
-      console.log(pdfCreated);
 
       // Send success response
       res.status(201).json({
