@@ -74,8 +74,19 @@ export class CVGeneratorController {
 
       // Generate PDF
       const browser = await puppeteer.launch({
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        protocolTimeout: 180000, // 3 minutes
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--disable-software-rasterizer',
+          '--disable-features=VizDisplayCompositor',
+          '--no-zygote',
+          '--single-process',
+        ],
       });
 
       const page = await browser.newPage();
