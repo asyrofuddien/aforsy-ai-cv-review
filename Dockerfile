@@ -1,4 +1,4 @@
-# Build stage
+# ---- Build stage ----
 FROM node:18-alpine AS builder
 
 WORKDIR /app
@@ -16,10 +16,28 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Production stage
+
+# ---- Production stage ----
 FROM node:18-alpine
 
 WORKDIR /app
+
+######################################
+# Install Chromium + deps for Puppeteer
+######################################
+RUN apk update && apk add --no-cache \
+  chromium \
+  nss \
+  freetype \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont \
+  udev
+
+# Puppeteer config
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium-browser"
+######################################
 
 # Copy package files
 COPY package*.json ./
@@ -30,14 +48,14 @@ RUN npm ci --only=production
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy necessary directories
+# Copy src/data if needed at runtime
 COPY --from=builder /app/src/data ./src/data
 
-# Create required directories
-RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs
+# Directories your app expects
+RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs cached
 
-# Expose Railway's PORT
+# Expose Railway's port (they inject PORT env)
 EXPOSE $PORT
 
-# Start the application
+# Start the app
 CMD ["node", "dist/server.js"]
