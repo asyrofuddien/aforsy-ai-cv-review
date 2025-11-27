@@ -2,13 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
-import puppeteer from 'puppeteer';
 import { asyncHandler } from '../middlewares/error.middleware';
 import { Resume } from '../types/evaluation.types';
 import codeModel from '../models/code.model';
 import AtsPdf from '../models/atsPDF.model';
 import TemplateModel from '../models/Template.model';
 import config from '../config/config';
+import htmlPdf from 'html-pdf-node';
 
 // Register Handlebars helper (register once, outside the class)
 Handlebars.registerHelper('lookup', function (obj: Record<string, any>, field: string): any {
@@ -33,6 +33,7 @@ const sanitizeFilename = (name: string): string => {
 
 export class CVGeneratorController {
   // Generate CV as PDF
+
   GenerateCv = asyncHandler(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const resumeData: Resume = req.body;
     const baseUrl = config.backendApi;
@@ -63,6 +64,7 @@ export class CVGeneratorController {
 
       const templateData = await TemplateModel.findOne().lean();
       const templateStr = templateData?.content;
+
       // Compile and render template
       const template = Handlebars.compile(templateStr);
       const html = template(resumeData);
@@ -72,18 +74,9 @@ export class CVGeneratorController {
       fs.writeFileSync(htmlPath, html);
       console.log(`✅ ${fileName}.html generated`);
 
-      // Generate PDF
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-
-      const page = await browser.newPage();
-      await page.setContent(html, { waitUntil: 'networkidle0' });
-
-      const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
-      await page.pdf({
-        path: pdfPath,
+      // Generate PDF using html-pdf-node (NO BROWSER NEEDED)
+      const file = { content: html };
+      const options = {
         format: 'A4',
         printBackground: true,
         margin: {
@@ -92,16 +85,17 @@ export class CVGeneratorController {
           bottom: '0.4in',
           left: '0.4in',
         },
-      });
+      };
 
-      await browser.close();
+      const pdfBuffer = await htmlPdf.generatePdf(file, options);
+      const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
+      fs.writeFileSync(pdfPath, pdfBuffer);
 
       console.log(`✅ ${fileName}.pdf generated successfully!`);
       console.log(`📁 Location: ${pdfPath}`);
       console.log(`📅 Generated on: ${dateStr}`);
 
       // Convert PDF to base64
-      const pdfBuffer = fs.readFileSync(pdfPath);
       const pdfBase64 = pdfBuffer.toString('base64');
 
       const pdfCreated = await AtsPdf.create({
