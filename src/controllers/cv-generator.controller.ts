@@ -74,7 +74,7 @@ export class CVGeneratorController {
       fs.writeFileSync(htmlPath, html);
       console.log(`✅ ${fileName}.html generated`);
 
-      // Generate PDF using html-pdf-node (NO BROWSER NEEDED)
+      // Generate PDF using html-pdf-node
       const file = { content: html };
       const options = {
         format: 'A4',
@@ -87,7 +87,20 @@ export class CVGeneratorController {
         },
       };
 
-      const pdfBuffer = await htmlPdf.generatePdf(file, options);
+      // Generate PDF and normalize to Buffer (handle incorrect/missing types from html-pdf-node)
+      const pdfResult = (await htmlPdf.generatePdf(file, options)) as unknown;
+      let pdfBuffer: Buffer;
+      if (Buffer.isBuffer(pdfResult)) {
+        pdfBuffer = pdfResult;
+      } else if (pdfResult instanceof ArrayBuffer) {
+        pdfBuffer = Buffer.from(pdfResult);
+      } else if (ArrayBuffer.isView(pdfResult as any)) {
+        pdfBuffer = Buffer.from((pdfResult as any).buffer);
+      } else if (typeof pdfResult === 'string') {
+        pdfBuffer = Buffer.from(pdfResult, 'utf-8');
+      } else {
+        throw new Error('generatePdf returned unsupported result type');
+      }
       const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
       fs.writeFileSync(pdfPath, pdfBuffer);
 
