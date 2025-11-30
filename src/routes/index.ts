@@ -10,6 +10,7 @@ import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
 import CodeGeneratorController from '../controllers/code.controller';
 import CVGeneratorRoutes from '../routes/cvGenerator.routes';
+import CvMatcher from '../models/cvMatcher.model';
 
 const router = Router();
 
@@ -171,33 +172,101 @@ router.delete('/test/clear-test-data', async (req: Request, res: Response) => {
 // System stats
 router.get('/test/stats', async (req: Request, res: Response) => {
   try {
-    const [documentCount, evaluationCount, queueStats] = await Promise.all([
-      Document.countDocuments(),
-      Evaluation.countDocuments(),
+    const [documentStats, evaluationStats, jobDescStats, queueStats] = await Promise.all([
+      Promise.all([
+        Document.countDocuments(),
+        Document.aggregate([
+          {
+            $group: {
+              _id: '$type',
+              count: { $sum: 1 },
+              totalSize: { $sum: '$size' },
+              avgSize: { $avg: '$size' },
+            },
+          },
+        ]),
+      ]),
+      Promise.all([
+        Evaluation.countDocuments(),
+        Evaluation.aggregate([
+          {
+            $group: {
+              _id: '$status',
+              count: { $sum: 1 },
+            },
+          },
+        ]),
+        Evaluation.aggregate([
+          {
+            $match: { status: 'completed', 'result.cvMatchRate': { $exists: true } },
+          },
+          {
+            $group: {
+              _id: null,
+              avgCvMatchRate: { $avg: '$result.cvMatchRate' },
+              avgProjectScore: { $avg: '$result.projectScore' },
+            },
+          },
+        ]),
+      ]),
+      Promise.all([
+        JobDescription.countDocuments(),
+        JobDescription.countDocuments({ isDefault: true }),
+      ]),
       queueService.getJobCounts(),
     ]);
 
-    const evaluationStats = await Evaluation.aggregate([
-      {
-        $group: {
-          _id: '$status',
-          count: { $sum: 1 },
-        },
-      },
-    ]);
+    const [docCount, docsByType] = documentStats;
+    const [evalCount, evalByStatus, evalScores] = evaluationStats;
+    const [jobCount, defaultJobCount] = jobDescStats;
+
+    const docTypeBreakdown = docsByType.reduce((acc: any, stat: any) => {
+      acc[stat._id] = {
+        count: stat.count,
+        totalSize: (stat.totalSize / 1024 / 1024).toFixed(2) + ' MB',
+        avgSize: (stat.avgSize / 1024).toFixed(2) + ' KB',
+      };
+      return acc;
+    }, {});
+
+    const evalStatusBreakdown = evalByStatus.reduce((acc: any, stat: any) => {
+      acc[stat._id] = stat.count;
+      return acc;
+    }, {});
+
+    const completionRate = evalCount > 0 ? ((evalStatusBreakdown.completed || 0) / evalCount * 100).toFixed(2) : '0.00';
+
+    const avgScores = evalScores[0] || { avgCvMatchRate: 0, avgProjectScore: 0 };
 
     res.json({
       success: true,
+      timestamp: new Date(),
+      summary: {
+        totalDocuments: docCount,
+        totalEvaluations: evalCount,
+        totalJobDescriptions: jobCount,
+        evaluationCompletionRate: `${completionRate}%`,
+        averageCvMatchRate: (avgScores.avgCvMatchRate || 0).toFixed(2) + '%',
+        averageProjectScore: (avgScores.avgProjectScore || 0).toFixed(2),
+      },
       stats: {
         documents: {
-          total: documentCount,
+          total: docCount,
+          byType: docTypeBreakdown,
         },
         evaluations: {
-          total: evaluationCount,
-          byStatus: evaluationStats.reduce((acc, stat) => {
-            acc[stat._id] = stat.count;
-            return acc;
-          }, {}),
+          total: evalCount,
+          byStatus: evalStatusBreakdown,
+          completionRate: `${completionRate}%`,
+          averageScores: {
+            cvMatchRate: (avgScores.avgCvMatchRate || 0).toFixed(2) + '%',
+            projectScore: (avgScores.avgProjectScore || 0).toFixed(2),
+          },
+        },
+        jobDescriptions: {
+          total: jobCount,
+          default: defaultJobCount,
+          custom: jobCount - defaultJobCount,
         },
         queue: queueStats,
       },
