@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    image: ghcr.io/asyrofuddien/aforsy-ai-cv-review:main
+    container_name: aforsy-app
+    restart: always
+    depends_on:
+      - redis
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://redis:6379
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_INDEX_NAME=${PINECONE_INDEX_NAME}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=3000
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./results:/app/results
+    networks:
+      - aforsy-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: aforsy-redis
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - aforsy-network
+    command: redis-server --appendonly yes
+
+volumes:
+  redis_data:
+
+networks:
+  aforsy-network:
+    driver: bridge
