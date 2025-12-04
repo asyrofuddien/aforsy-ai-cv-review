@@ -31,7 +31,19 @@ log() {
 ##############################################################
 docker_login() {
   log "Logging into GitHub Container Registry..."
-  echo "$GH_TOKEN" | docker login $IMAGE_REGISTRY -u $GITHUB_USERNAME --password-stdin
+  
+  # Check if GH_TOKEN is set
+  if [ -z "$GH_TOKEN" ]; then
+    log "ERROR: GH_TOKEN not set in environment"
+    return 1
+  fi
+  
+  # Login to registry
+  echo "$GH_TOKEN" | docker login $IMAGE_REGISTRY -u $GITHUB_USERNAME --password-stdin 2>&1 || {
+    log "ERROR: Failed to login to Docker registry"
+    return 1
+  }
+  
   log "GitHub Container Registry login successful"
 }
 
