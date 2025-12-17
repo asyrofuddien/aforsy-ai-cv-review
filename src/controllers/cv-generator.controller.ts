@@ -63,6 +63,7 @@ export class CVGeneratorController {
       }
 
       const templateData = await TemplateModel.findOne().lean();
+      console.log('Using template:', templateData?.name);
       const templateStr = templateData?.content;
 
       // Compile and render template
