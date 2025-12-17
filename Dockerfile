@@ -32,7 +32,11 @@ RUN apk update && apk add --no-cache \
   harfbuzz \
   ca-certificates \
   ttf-freefont \
-  udev
+  udev \
+  atk \
+  at-spi2-atk \
+  gconf \
+  libxss
 
 # Puppeteer config
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
