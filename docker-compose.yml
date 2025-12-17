@@ -1,14 +1,100 @@
 version: '3.8'
 
 services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7-alpine
+    container_name: cv-evaluation-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme123}
+      MONGO_INITDB_DATABASE: cv-evaluation
+    ports:
+      - '${MONGO_PORT:-27017}:27017'
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - cv-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: mongod --auth
+
+  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: cv-evaluation-redis
     restart: always
-    ports:
-      - '6379:6379'
+    # No ports exposed - only accessible from app service
     volumes:
       - redis_data:/data
+    networks:
+      - cv-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # Main Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cv-evaluation-app
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3000}
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme123}@mongodb:27017/cv-evaluation?authSource=admin
+      REDIS_URL: redis://redis:6379
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4-turbo-preview}
+      LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.3}
+      LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-3}
+      LLM_RETRY_DELAY: ${LLM_RETRY_DELAY:-1000}
+      PINECONE_API_KEY: ${PINECONE_API_KEY}
+      PINECONE_ENVIRONMENT: ${PINECONE_ENVIRONMENT}
+      PINECONE_INDEX_NAME: ${PINECONE_INDEX_NAME:-cv-evaluation}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE:-10485760}
+      ALLOWED_FILE_TYPES: ${ALLOWED_FILE_TYPES:-.pdf,.docx,.doc,.txt}
+      UPLOAD_DIR: uploads
+      QUEUE_CONCURRENCY: ${QUEUE_CONCURRENCY:-2}
+      EVALUATION_TIMEOUT: ${EVALUATION_TIMEOUT:-300000}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-10}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      BACKEND_API: ${BACKEND_API}
+    ports:
+      - '${PORT:-3000}:3000'
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      - ./cached:/app/cached
+    networks:
+      - cv-network
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
+  mongodb_data:
+  mongodb_config:
   redis_data:
+
+networks:
+  cv-network:
+    driver: bridge
