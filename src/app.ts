@@ -17,6 +17,7 @@ const allowedOrigins = config.cors.allowedOrigins;
 app.use(
   cors({
     origin: (origin, callback) => {
+      console.log('Request from origin:', origin);
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -37,7 +38,11 @@ app.use('/api/', rateLimiterMiddleware);
 app.use('/docs', (req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; " + "script-src 'self'; " + "style-src 'self' 'unsafe-inline'; " + "img-src 'self' data:; " + "font-src 'self';"
+    "default-src 'self'; " +
+      "script-src 'self'; " +
+      "style-src 'self' 'unsafe-inline'; " +
+      "img-src 'self' data:; " +
+      "font-src 'self';"
   );
   next();
 });
