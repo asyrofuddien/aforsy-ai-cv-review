@@ -106,7 +106,7 @@ class QueueService {
 
   async addEvaluationJob(
     data: EvaluationRequest,
-    code: string
+    code: string,
   ): Promise<{
     id: string;
     jobId: string;
@@ -221,7 +221,7 @@ class QueueService {
 
   async addCVMatcher(
     data: CVMatcherRequest,
-    codeId: string
+    codeId: string,
   ): Promise<{
     id: string;
     jobId: string;

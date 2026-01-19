@@ -11,7 +11,6 @@ import codeModel from '../models/code.model';
 export class EvaluationController {
   startEvaluation = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
     const { cvDocumentId, jobDescriptionId, candidateName, code } = req.body;
-
     let actualJobDescriptionId = jobDescriptionId;
 
     // If no jobDescriptionId provided, use default
@@ -33,7 +32,7 @@ export class EvaluationController {
         jobDescriptionId: actualJobDescriptionId,
         candidateName,
       },
-      code
+      code,
     );
 
     logger.info(`Evaluation job created: ${job.id}`);
@@ -56,7 +55,7 @@ export class EvaluationController {
       {
         cvDocumentId,
       },
-      codeId
+      codeId,
     );
 
     logger.info(`CvMatcher job created: ${job.id}`);
@@ -72,7 +71,8 @@ export class EvaluationController {
       slug: 'default',
       title: 'Senior Backend Engineer',
       company: 'Tech Company',
-      description: 'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
+      description:
+        'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
       requirements: {
         technical: [
           '5+ years of backend development experience',
@@ -205,7 +205,10 @@ export class EvaluationController {
         data: [],
       });
     }
-    const cvMatcher = await cvMatcherModel.find({ code_id: codeId }).select('status result.user_profile.name createdAt updatedAt').lean();
+    const cvMatcher = await cvMatcherModel
+      .find({ code_id: codeId })
+      .select('status result.user_profile.name createdAt updatedAt')
+      .lean();
 
     const data = cvMatcher.map((item: any) => ({
       _id: item._id,

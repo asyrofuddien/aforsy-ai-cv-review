@@ -1,23 +1,23 @@
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
 import config from '../../config/config';
 import logger from '../../utils/logger';
 import { retryWithBackoff } from '../../utils/retry';
 import { AppError } from '../../middlewares/error.middleware';
 
 class OpenAIService {
-  private client!: Groq;
+  private client!: OpenAI;
   private isEnabled: boolean;
 
   constructor() {
-    this.isEnabled = !!config.groq.apiKey;
+    this.isEnabled = !!config.openai.apiKey;
 
     if (this.isEnabled) {
-      this.client = new Groq({
-        apiKey: config.groq.apiKey,
+      this.client = new OpenAI({
+        apiKey: config.openai.apiKey,
       });
-      logger.info('✅ GroqAI service initialized');
+      logger.info('✅ OpenAI service initialized');
     } else {
-      logger.warn('⚠️ GroqAI service disabled - using mock mode');
+      logger.warn('⚠️ OpenAI service disabled - using mock mode');
     }
   }
 
@@ -27,11 +27,11 @@ class OpenAIService {
       temperature?: number;
       maxTokens?: number;
       systemPrompt?: string;
-    } = {},
+    } = {}
   ): Promise<string> {
-    const temperature = options.temperature ?? config.groq.temperature;
+    const temperature = options.temperature ?? config.openai.temperature;
     const maxTokens = options.maxTokens ?? 2000;
-    const model = config.groq.model;
+    const model = config.openai.model;
 
     // Mock mode if no API key
     if (!this.isEnabled) {
@@ -39,7 +39,7 @@ class OpenAIService {
     }
 
     try {
-      const messages: { content: string; role: 'system' | 'user' }[] = [];
+      const messages: OpenAI.ChatCompletionMessageParam[] = [];
 
       if (options.systemPrompt) {
         messages.push({ role: 'system', content: options.systemPrompt });
@@ -53,21 +53,21 @@ class OpenAIService {
             model,
             messages,
             temperature,
-            max_completion_tokens: maxTokens,
+            max_tokens: maxTokens,
           });
         },
         {
-          maxRetries: config.groq.maxRetries,
-          delay: config.groq.retryDelay,
+          maxRetries: config.openai.maxRetries,
+          delay: config.openai.retryDelay,
           onRetry: (attempt, error) => {
-            logger.warn(`Groq retry attempt ${attempt}:`, error.message);
+            logger.warn(`OpenAI retry attempt ${attempt}:`, error.message);
           },
-        },
+        }
       );
 
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      logger.error('Groq completion error:', error);
+      logger.error('OpenAI completion error:', error);
 
       if (
         typeof error === 'object' &&
@@ -98,17 +98,12 @@ class OpenAIService {
         {
           maxRetries: 2,
           delay: 1000,
-        },
+        }
       );
 
-      const embedding = response.data[0].embedding;
-      if (typeof embedding === 'string') {
-        logger.error('Embedding returned as string, expected number[]');
-        throw new AppError('Embedding format error', 500);
-      }
-      return embedding;
+      return response.data[0].embedding;
     } catch (error) {
-      logger.error('Groq embedding error:', error);
+      logger.error('OpenAI embedding error:', error);
       throw new AppError('Failed to generate embedding', 500);
     }
   }

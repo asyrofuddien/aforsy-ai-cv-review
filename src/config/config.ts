@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { model } from 'mongoose';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
@@ -17,6 +18,14 @@ export default {
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
     maxRetries: parseInt(process.env.LLM_MAX_RETRIES || '3'),
     retryDelay: parseInt(process.env.LLM_RETRY_DELAY || '1000'),
+  },
+
+  groq: {
+    apiKey: process.env.GROQ_API_KEY || '',
+    model: process.env.GROQ_MODEL || 'groq-1',
+    temperature: parseFloat(process.env.GROQ_TEMPERATURE || '0.3'),
+    maxRetries: parseInt(process.env.GROQ_MAX_RETRIES || '3'),
+    retryDelay: parseInt(process.env.GROQ_RETRY_DELAY || '1000'),
   },
 
   pinecone: {

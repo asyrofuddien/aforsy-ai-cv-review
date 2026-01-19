@@ -39,8 +39,9 @@ const jobDescriptionSchema = Joi.object({
   isDefault: Joi.boolean().optional(),
 });
 
-const jobDescriptionUpdateSchema = jobDescriptionSchema.fork(['slug', 'title', 'company', 'description', 'requirements'], (schema) =>
-  schema.optional()
+const jobDescriptionUpdateSchema = jobDescriptionSchema.fork(
+  ['slug', 'title', 'company', 'description', 'requirements'],
+  (schema) => schema.optional(),
 );
 
 export const validateJobDescription = (req: Request, res: Response, next: NextFunction) => {
