@@ -15,13 +15,21 @@ app.use(helmet());
 const allowedOrigins = config.cors.allowedOrigins;
 
 app.use((req, res, next) => {
-  console.log('=== Headers ===');
-  console.log('Origin:', req.headers.origin);
-  console.log('Host:', req.headers.host);
-  console.log('Referer:', req.headers.referer);
-  console.log('X-Forwarded-For:', req.headers['x-forwarded-for']);
-  console.log('All Headers:', req.headers);
-  console.log('===============');
+  if (!req.headers.origin) {
+    // Coba ambil dari x-forwarded-host (Vercel proxy)
+    const forwardedHost = req.headers['x-forwarded-host'];
+    if (forwardedHost) {
+      const proto = req.headers['x-forwarded-proto'] || 'https';
+      req.headers.origin = `${proto}://${forwardedHost}`;
+    }
+    // Atau dari referer
+    else if (req.headers.referer) {
+      const match = req.headers.referer.match(/^https?:\/\/[^\/]+/);
+      if (match) {
+        req.headers.origin = match[0];
+      }
+    }
+  }
   next();
 });
 
@@ -29,8 +37,9 @@ app.use(
   cors({
     origin: (origin, callback) => {
       console.log('Origin:', origin);
-      console.log('Allowed Origins:', allowedOrigins);
+
       if (!origin) return callback(null, true);
+
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
