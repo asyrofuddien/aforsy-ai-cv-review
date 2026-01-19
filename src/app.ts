@@ -14,6 +14,17 @@ app.use(helmet());
 
 const allowedOrigins = config.cors.allowedOrigins;
 
+app.use((req, res, next) => {
+  console.log('=== Headers ===');
+  console.log('Origin:', req.headers.origin);
+  console.log('Host:', req.headers.host);
+  console.log('Referer:', req.headers.referer);
+  console.log('X-Forwarded-For:', req.headers['x-forwarded-for']);
+  console.log('All Headers:', req.headers);
+  console.log('===============');
+  next();
+});
+
 app.use(
   cors({
     origin: (origin, callback) => {
