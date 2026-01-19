@@ -18,7 +18,8 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-
+      console.log('Origin:', origin);
+      console.log('Allowed Origins:', allowedOrigins);
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
@@ -26,7 +27,7 @@ app.use(
       }
     },
     credentials: true,
-  })
+  }),
 );
 
 app.set('trust proxy', 1);
@@ -41,7 +42,7 @@ app.use('/docs', (req, res, next) => {
       "script-src 'self'; " +
       "style-src 'self' 'unsafe-inline'; " +
       "img-src 'self' data:; " +
-      "font-src 'self';"
+      "font-src 'self';",
   );
   next();
 });
