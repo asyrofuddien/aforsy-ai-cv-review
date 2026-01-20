@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "seed": "ts-node scripts/seed-job-descriptions.ts",
     "seed:vector": "ts-node scripts/seed-vector-db.ts",
+    "seed:models": "ts-node scripts/seed-final.ts",
     "seed:all": "npm run seed && npm run seed:vector",
     "test": "jest",
     "test:watch": "jest --watch",

@@ -6,11 +6,14 @@ import { Request, Response } from 'express';
 import Document from '../models/document.model';
 import Evaluation from '../models/evaluation.model';
 import JobDescription from '../models/jobDescription.model';
+import Code from '../models/code.model';
+import CvMatcher from '../models/cvMatcher.model';
+import AtsPDF from '../models/atsPDF.model';
+import Template from '../models/Template.model';
 import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
 import CodeGeneratorController from '../controllers/code.controller';
 import CVGeneratorRoutes from '../routes/cvGenerator.routes';
-import CvMatcher from '../models/cvMatcher.model';
 
 const router = Router();
 
@@ -42,7 +45,7 @@ router.get('/test', (req, res) => {
     'GET  /api/test/recent-uploads          - Get recent document uploads',
     'GET  /api/test/recent-evaluations      - Get recent evaluations',
     'GET  /api/test/job-descriptions        - Get available job descriptions',
-    'GET  /api/test/stats                   - Get system statistics',
+    'GET  /api/test/stats                   - Get comprehensive system statistics and product metrics',
   ];
 
   if (isDev) {
@@ -172,7 +175,39 @@ router.delete('/test/clear-test-data', async (req: Request, res: Response) => {
 // System stats
 router.get('/test/stats', async (req: Request, res: Response) => {
   try {
-    const [documentStats, evaluationStats, jobDescStats, queueStats] = await Promise.all([
+    // Get comprehensive stats from all models
+    const [
+      codeStats,
+      documentStats, 
+      evaluationStats, 
+      cvMatcherStats,
+      atsPdfStats,
+      templateStats,
+      jobDescStats, 
+      queueStats
+    ] = await Promise.all([
+      // Code statistics
+      Promise.all([
+        Code.countDocuments(),
+        Code.aggregate([
+          {
+            $project: {
+              codeLength: { $strLenCP: '$code' },
+              createdAt: 1
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              avgCodeLength: { $avg: '$codeLength' },
+              oldestCode: { $min: '$createdAt' },
+              newestCode: { $max: '$createdAt' }
+            }
+          }
+        ])
+      ]),
+      
+      // Document statistics
       Promise.all([
         Document.countDocuments(),
         Document.aggregate([
@@ -185,7 +220,19 @@ router.get('/test/stats', async (req: Request, res: Response) => {
             },
           },
         ]),
+        Document.aggregate([
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m', date: '$uploadedAt' } },
+              count: { $sum: 1 }
+            }
+          },
+          { $sort: { '_id': -1 } },
+          { $limit: 6 }
+        ])
       ]),
+      
+      // Evaluation statistics
       Promise.all([
         Evaluation.countDocuments(),
         Evaluation.aggregate([
@@ -205,21 +252,132 @@ router.get('/test/stats', async (req: Request, res: Response) => {
               _id: null,
               avgCvMatchRate: { $avg: '$result.cvMatchRate' },
               avgProjectScore: { $avg: '$result.projectScore' },
+              maxCvMatchRate: { $max: '$result.cvMatchRate' },
+              minCvMatchRate: { $min: '$result.cvMatchRate' },
             },
           },
         ]),
+        Evaluation.aggregate([
+          {
+            $match: { status: 'completed' }
+          },
+          {
+            $group: {
+              _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+              count: { $sum: 1 },
+              avgScore: { $avg: '$result.cvMatchRate' }
+            }
+          },
+          { $sort: { '_id': -1 } },
+          { $limit: 7 }
+        ])
       ]),
+      
+      // CV Matcher statistics
+      Promise.all([
+        CvMatcher.countDocuments(),
+        CvMatcher.aggregate([
+          {
+            $group: {
+              _id: '$status',
+              count: { $sum: 1 }
+            }
+          }
+        ]),
+        CvMatcher.aggregate([
+          {
+            $match: { status: 'completed', 'result.user_profile.seniority': { $exists: true } }
+          },
+          {
+            $group: {
+              _id: '$result.user_profile.seniority',
+              count: { $sum: 1 }
+            }
+          }
+        ]),
+        CvMatcher.aggregate([
+          {
+            $match: { status: 'completed', 'result.jobs': { $exists: true } }
+          },
+          {
+            $unwind: '$result.jobs'
+          },
+          {
+            $group: {
+              _id: '$result.jobs.grade',
+              count: { $sum: 1 },
+              avgScore: { $avg: '$result.jobs.score' }
+            }
+          }
+        ])
+      ]),
+      
+      // ATS PDF statistics
+      Promise.all([
+        AtsPDF.countDocuments(),
+        AtsPDF.aggregate([
+          {
+            $project: {
+              htmlLength: { $strLenCP: '$html_text' },
+              createdAt: 1
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              avgHtmlLength: { $avg: '$htmlLength' },
+              totalReports: { $sum: 1 }
+            }
+          }
+        ])
+      ]),
+      
+      // Template statistics
+      Promise.all([
+        Template.countDocuments(),
+        Template.aggregate([
+          {
+            $project: {
+              name: 1,
+              contentLength: { $strLenCP: '$content' },
+              createdAt: 1
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              avgContentLength: { $avg: '$contentLength' },
+              templates: { $push: { name: '$name', length: '$contentLength' } }
+            }
+          }
+        ])
+      ]),
+      
+      // Job Description statistics
       Promise.all([
         JobDescription.countDocuments(),
         JobDescription.countDocuments({ isDefault: true }),
+        JobDescription.aggregate([
+          {
+            $group: {
+              _id: '$company',
+              count: { $sum: 1 },
+              positions: { $push: '$title' }
+            }
+          }
+        ])
       ]),
+      
+      // Queue statistics
       queueService.getJobCounts(),
     ]);
 
-    const [docCount, docsByType] = documentStats;
-    const [evalCount, evalByStatus, evalScores] = evaluationStats;
-    const [jobCount, defaultJobCount] = jobDescStats;
+    // Process code stats
+    const [codeCount, codeDetails] = codeStats;
+    const codeInfo = codeDetails[0] || { avgCodeLength: 0, oldestCode: null, newestCode: null };
 
+    // Process document stats
+    const [docCount, docsByType, docsByMonth] = documentStats;
     const docTypeBreakdown = docsByType.reduce((acc: any, stat: any) => {
       acc[stat._id] = {
         count: stat.count,
@@ -229,52 +387,161 @@ router.get('/test/stats', async (req: Request, res: Response) => {
       return acc;
     }, {});
 
+    // Process evaluation stats
+    const [evalCount, evalByStatus, evalScores, evalTrends] = evaluationStats;
     const evalStatusBreakdown = evalByStatus.reduce((acc: any, stat: any) => {
       acc[stat._id] = stat.count;
       return acc;
     }, {});
-
     const completionRate = evalCount > 0 ? ((evalStatusBreakdown.completed || 0) / evalCount * 100).toFixed(2) : '0.00';
+    const avgScores = evalScores[0] || { avgCvMatchRate: 0, avgProjectScore: 0, maxCvMatchRate: 0, minCvMatchRate: 0 };
 
-    const avgScores = evalScores[0] || { avgCvMatchRate: 0, avgProjectScore: 0 };
+    // Process CV Matcher stats
+    const [cvMatcherCount, cvMatcherByStatus, cvMatcherBySeniority, cvMatcherByGrade] = cvMatcherStats;
+    const cvMatcherStatusBreakdown = cvMatcherByStatus.reduce((acc: any, stat: any) => {
+      acc[stat._id] = stat.count;
+      return acc;
+    }, {});
+
+    // Process ATS PDF stats
+    const [atsPdfCount, atsPdfDetails] = atsPdfStats;
+    const atsPdfInfo = atsPdfDetails[0] || { avgHtmlLength: 0, totalReports: 0 };
+
+    // Process template stats
+    const [templateCount, templateDetails] = templateStats;
+    const templateInfo = templateDetails[0] || { avgContentLength: 0, templates: [] };
+
+    // Process job description stats
+    const [jobCount, defaultJobCount, jobsByCompany] = jobDescStats;
+
+    // Calculate system health metrics
+    const totalProcessedItems = (evalStatusBreakdown.completed || 0) + (cvMatcherStatusBreakdown.completed || 0);
+    const totalFailedItems = (evalStatusBreakdown.failed || 0) + (cvMatcherStatusBreakdown.failed || 0);
+    const systemReliability = totalProcessedItems + totalFailedItems > 0 
+      ? ((totalProcessedItems / (totalProcessedItems + totalFailedItems)) * 100).toFixed(2)
+      : '100.00';
 
     res.json({
       success: true,
       timestamp: new Date(),
-      summary: {
+      productOverview: {
+        name: 'AFORSY AI CV Review System',
+        version: '1.0.0',
+        totalCodes: codeCount,
         totalDocuments: docCount,
         totalEvaluations: evalCount,
-        totalJobDescriptions: jobCount,
+        totalCvMatches: cvMatcherCount,
+        totalAtsReports: atsPdfCount,
+        systemReliability: `${systemReliability}%`,
         evaluationCompletionRate: `${completionRate}%`,
-        averageCvMatchRate: (avgScores.avgCvMatchRate || 0).toFixed(2) + '%',
-        averageProjectScore: (avgScores.avgProjectScore || 0).toFixed(2),
       },
-      stats: {
+      
+      coreMetrics: {
+        averageCvMatchRate: `${(avgScores.avgCvMatchRate || 0).toFixed(2)}%`,
+        averageProjectScore: (avgScores.avgProjectScore || 0).toFixed(2),
+        highestCvMatchRate: `${(avgScores.maxCvMatchRate || 0).toFixed(2)}%`,
+        lowestCvMatchRate: `${(avgScores.minCvMatchRate || 0).toFixed(2)}%`,
+        totalJobDescriptions: jobCount,
+        activeTemplates: templateCount,
+      },
+
+      detailedStats: {
+        codes: {
+          total: codeCount,
+          averageLength: Math.round(codeInfo.avgCodeLength || 0),
+          format: 'AFORSY-XXXXXXXX',
+          oldestGenerated: codeInfo.oldestCode,
+          newestGenerated: codeInfo.newestCode,
+        },
+        
         documents: {
           total: docCount,
           byType: docTypeBreakdown,
+          monthlyUploads: docsByMonth.slice(0, 6),
         },
+        
         evaluations: {
           total: evalCount,
           byStatus: evalStatusBreakdown,
           completionRate: `${completionRate}%`,
           averageScores: {
-            cvMatchRate: (avgScores.avgCvMatchRate || 0).toFixed(2) + '%',
+            cvMatchRate: `${(avgScores.avgCvMatchRate || 0).toFixed(2)}%`,
             projectScore: (avgScores.avgProjectScore || 0).toFixed(2),
           },
+          performanceRange: {
+            highest: `${(avgScores.maxCvMatchRate || 0).toFixed(2)}%`,
+            lowest: `${(avgScores.minCvMatchRate || 0).toFixed(2)}%`,
+          },
+          recentTrends: evalTrends.slice(0, 7),
         },
+        
+        cvMatcher: {
+          total: cvMatcherCount,
+          byStatus: cvMatcherStatusBreakdown,
+          candidateProfiles: {
+            bySeniority: cvMatcherBySeniority,
+            byJobGrade: cvMatcherByGrade,
+          },
+          completionRate: cvMatcherCount > 0 
+            ? `${(((cvMatcherStatusBreakdown.completed || 0) / cvMatcherCount) * 100).toFixed(2)}%`
+            : '0.00%',
+        },
+        
+        atsReports: {
+          total: atsPdfCount,
+          averageHtmlLength: Math.round(atsPdfInfo.avgHtmlLength || 0),
+          formats: ['HTML', 'PDF'],
+          generatedReports: atsPdfInfo.totalReports || 0,
+        },
+        
+        templates: {
+          total: templateCount,
+          averageContentLength: Math.round(templateInfo.avgContentLength || 0),
+          availableTemplates: templateInfo.templates.map((t: any) => ({
+            name: t.name,
+            size: `${Math.round(t.length / 1024)} KB`
+          })),
+        },
+        
         jobDescriptions: {
           total: jobCount,
           default: defaultJobCount,
           custom: jobCount - defaultJobCount,
+          byCompany: jobsByCompany,
         },
-        queue: queueStats,
+        
+        systemQueue: queueStats,
       },
+
+      businessInsights: {
+        productUtilization: {
+          documentProcessingRate: docCount > 0 ? `${((evalCount / docCount) * 100).toFixed(2)}%` : '0%',
+          cvMatchingAdoption: docCount > 0 ? `${((cvMatcherCount / docCount) * 100).toFixed(2)}%` : '0%',
+          atsReportGeneration: docCount > 0 ? `${((atsPdfCount / docCount) * 100).toFixed(2)}%` : '0%',
+        },
+        
+        qualityMetrics: {
+          systemReliability: `${systemReliability}%`,
+          averageProcessingSuccess: `${completionRate}%`,
+          dataIntegrity: codeCount === 1223 ? 'Excellent' : 'Needs Review',
+        },
+        
+        capacityMetrics: {
+          totalCodesGenerated: codeCount,
+          codesUtilized: evalCount + cvMatcherCount + atsPdfCount,
+          remainingCapacity: Math.max(0, codeCount - (evalCount + cvMatcherCount + atsPdfCount)),
+          utilizationRate: codeCount > 0 
+            ? `${(((evalCount + cvMatcherCount + atsPdfCount) / codeCount) * 100).toFixed(2)}%`
+            : '0%',
+        }
+      }
     });
+    
   } catch (error: any) {
     res.status(500).json({
       success: false,
       error: error.message,
+      timestamp: new Date(),
     });
   }
 });
