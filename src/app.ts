@@ -80,7 +80,7 @@ app.use('/api', routes);
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    version: 'v 1.0.1',
+    version: 'v 2.0.0',
     timestamp: new Date().toISOString(),
   });
 });
