@@ -89,6 +89,9 @@ class EvaluationService {
       if (!cvDocument) {
         throw new Error(`CV Document not found with ID: ${cvDocumentId}`);
       }
+
+      logger.info(`📄 CV Document found: ${cvDocument.filename} at ${cvDocument.path}`);
+
       const file = {
         path: cvDocument.path,
         mimetype: cvDocument.mimeType,
@@ -96,10 +99,39 @@ class EvaluationService {
       };
 
       logger.info('📄 Step 2: Extracting Raw Text from CV');
-      const rawText = await parserService.parseFile(file.path, file.mimetype);
+      let rawText: string;
+      
+      try {
+        rawText = await parserService.parseFile(file.path, file.mimetype);
+      } catch (parseError: any) {
+        logger.error(`Failed to parse CV file: ${parseError.message}`);
+        
+        // If file not found, check if we have cached content
+        if (cvDocument.content) {
+          logger.info('Using cached content from database');
+          rawText = cvDocument.content;
+        } else {
+          throw new Error(`Failed to parse CV file and no cached content available: ${parseError.message}`);
+        }
+      }
+
+      if (!rawText || rawText.trim().length === 0) {
+        throw new Error('CV file is empty or contains no readable text');
+      }
+
+      logger.info(`📄 Extracted ${rawText.length} characters from CV`);
 
       logger.info('📄 Step 3: Extract CV Structured JSON');
       const extractedCv = await chainService.extractCVToJSON(rawText);
+
+      // Ensure name is extracted, fallback to filename if not found
+      if (!extractedCv?.name || extractedCv.name === '' || extractedCv.name === 'Unknown Candidate') {
+        // Try to extract name from filename or use a placeholder
+        const filenameParts = cvDocument.filename.split('.');
+        const possibleName = filenameParts[0].replace(/[-_]/g, ' ').trim();
+        extractedCv.name = possibleName || 'Candidate';
+        logger.warn(`Name not found in CV, using fallback: ${extractedCv.name}`);
+      }
 
       await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
         'result.user_profile.name': extractedCv?.name,
@@ -109,7 +141,20 @@ class EvaluationService {
       const roleSuggestion = await chainService.RoleSuggestion(extractedCv);
 
       logger.info('📄 Step 5: Scrape Job Listings');
-      const jobListed = await scrapingService.FindJobs(roleSuggestion);
+      let jobListed: any[] = [];
+      try {
+        jobListed = await scrapingService.FindJobs(roleSuggestion);
+        
+        // If no jobs found, use dummy data
+        if (!jobListed || jobListed.length === 0) {
+          logger.warn('No jobs found from scraping, using dummy data');
+          jobListed = await scrapingService.FindJobs({ suggested_roles: [], seniority: 'Mid-level' });
+        }
+      } catch (error) {
+        logger.error('Error scraping jobs, using dummy data:', error);
+        // Fallback to dummy data on error
+        jobListed = await scrapingService.FindJobs({ suggested_roles: [], seniority: 'Mid-level' });
+      }
 
       logger.info('🔍 Step 6: Matching with available jobs');
       const jobMatches = await scrapingService.matchWithJobs(extractedCv, jobListed);
@@ -145,7 +190,9 @@ class EvaluationService {
         message = error.message;
       }
 
-      await Evaluation.findByIdAndUpdate(data.evaluationId, {
+      logger.error(`❌ CV-Matcher ${cvMatcherId} failed:`, message);
+
+      await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
         status: 'failed',
         error: message,
       });

@@ -125,14 +125,36 @@ export class LLMChainService {
   private parseJSON(text: string, defaultValue: any): any {
     try {
       // Clean the response - remove markdown code blocks if present
-      const cleaned = text
+      let cleaned = text
         .replace(/```json\n?/g, '')
         .replace(/```\n?/g, '')
         .trim();
-      return JSON.parse(cleaned);
+
+      // Try to fix common JSON issues
+      // 1. Remove trailing commas
+      cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+      
+      // 2. Try to find and extract valid JSON if embedded in text
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}|\[[\s\S]*\]/);
+      if (jsonMatch) {
+        cleaned = jsonMatch[0];
+      }
+
+      // 3. Attempt to parse
+      const parsed = JSON.parse(cleaned);
+      return parsed;
     } catch (error) {
-      logger.error('Failed to parse JSON response:', text);
+      logger.error('Failed to parse JSON response:');
       logger.error('Parse error:', error);
+      
+      // Try to extract partial JSON for debugging
+      try {
+        const truncated = text.substring(0, 500);
+        logger.error('Response preview:', truncated);
+      } catch (e) {
+        // Ignore logging errors
+      }
+      
       return defaultValue;
     }
   }
@@ -147,14 +169,36 @@ export class LLMChainService {
       });
 
       const parsed = this.parseJSON(response, {
-        name: 'Unknown',
+        name: 'Unknown Candidate',
         email: '',
+        phone: '',
+        location: '',
+        summary: '',
         skills: [],
-        experience_years: 0,
-        experiences: [],
+        work_experience: [],
         education: [],
-        projects: [],
+        seniority: 'Mid-level',
       });
+
+      // Validate critical fields
+      if (!parsed.name || parsed.name === '' || parsed.name === 'Unknown Candidate') {
+        logger.warn('Name field is empty in parsed CV, attempting manual extraction');
+        
+        // Try to extract name manually from raw text
+        const extractedName = this.extractNameFromText(rawText);
+        if (extractedName) {
+          parsed.name = extractedName;
+          logger.info(`Manually extracted name: ${extractedName}`);
+        } else {
+          parsed.name = 'Unknown Candidate';
+          logger.warn('Could not extract name from CV text');
+        }
+      }
+
+      if (!parsed.skills || parsed.skills.length === 0) {
+        logger.warn('No skills extracted from CV');
+        parsed.skills = [];
+      }
 
       logger.info('✅ Chain: CV extraction completed');
       return parsed;
@@ -162,6 +206,59 @@ export class LLMChainService {
       logger.error('Chain: CV extraction error:', error);
       throw error;
     }
+  }
+
+  /**
+   * Attempt to extract name from raw CV text using pattern matching
+   */
+  private extractNameFromText(text: string): string | null {
+    // Get first 500 characters where name is most likely to be
+    const topSection = text.substring(0, 500);
+    
+    // Split into lines
+    const lines = topSection.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    // Pattern 1: Look for capitalized words (2-4 words) in first few lines
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      const line = lines[i];
+      
+      // Skip lines that look like headers or labels
+      if (line.toLowerCase().includes('resume') || 
+          line.toLowerCase().includes('curriculum') ||
+          line.toLowerCase().includes('cv') ||
+          line.includes('@') ||
+          line.includes('http') ||
+          line.length > 50) {
+        continue;
+      }
+      
+      // Check if line looks like a name (2-4 capitalized words)
+      const words = line.split(/\s+/);
+      if (words.length >= 2 && words.length <= 4) {
+        // Check if all words start with capital letter
+        const allCapitalized = words.every(word => /^[A-Z]/.test(word));
+        if (allCapitalized) {
+          logger.info(`Found potential name in line ${i}: ${line}`);
+          return line;
+        }
+      }
+    }
+    
+    // Pattern 2: Look for name after common CV headers
+    const namePatterns = [
+      /(?:Name|Full Name|Candidate):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/i,
+      /^([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})$/m,
+    ];
+    
+    for (const pattern of namePatterns) {
+      const match = topSection.match(pattern);
+      if (match && match[1]) {
+        logger.info(`Found name using pattern: ${match[1]}`);
+        return match[1];
+      }
+    }
+    
+    return null;
   }
   async RoleSuggestion(extractedCv: object): Promise<any> {
     try {
@@ -172,19 +269,27 @@ export class LLMChainService {
       });
 
       const parsed = this.parseJSON(response, {
-        name: 'Unknown',
-        email: '',
-        skills: [],
-        experience_years: 0,
-        experiences: [],
-        education: [],
-        projects: [],
+        suggested_roles: ['Software Engineer', 'Backend Developer', 'Full Stack Developer'],
+        seniority: 'Mid-level',
       });
 
-      logger.info('✅ Chain: CV extraction completed');
+      // Validate suggested_roles
+      if (!parsed.suggested_roles || parsed.suggested_roles.length === 0) {
+        parsed.suggested_roles = ['Software Engineer', 'Backend Developer', 'Full Stack Developer'];
+        logger.warn('No roles suggested, using defaults');
+      }
+
+      // Validate seniority
+      const validSeniorities = ['Entry-level', 'Junior', 'Mid-level', 'Senior', 'Lead', 'Principal'];
+      if (!parsed.seniority || !validSeniorities.includes(parsed.seniority)) {
+        parsed.seniority = 'Mid-level';
+        logger.warn('Invalid seniority, using default: Mid-level');
+      }
+
+      logger.info('✅ Chain: Role suggestion completed');
       return parsed;
     } catch (error) {
-      logger.error('Chain: CV extraction error:', error);
+      logger.error('Chain: Role suggestion error:', error);
       throw error;
     }
   }
@@ -197,19 +302,27 @@ export class LLMChainService {
       });
 
       const parsed = this.parseJSON(response, {
-        name: 'Unknown',
-        email: '',
-        skills: [],
-        experience_years: 0,
-        experiences: [],
-        education: [],
-        projects: [],
+        summary: {
+          strengths: ['Strong technical background', 'Good problem-solving skills', 'Relevant experience'],
+          improvements: ['Expand skill set', 'Gain more experience', 'Improve documentation'],
+          next_steps: ['Apply to matching roles', 'Build portfolio projects', 'Network with professionals'],
+        },
       });
 
-      logger.info('✅ Chain: CV extraction completed');
+      // Validate summary structure
+      if (!parsed.summary) {
+        parsed.summary = {
+          strengths: ['Strong technical background', 'Good problem-solving skills', 'Relevant experience'],
+          improvements: ['Expand skill set', 'Gain more experience', 'Improve documentation'],
+          next_steps: ['Apply to matching roles', 'Build portfolio projects', 'Network with professionals'],
+        };
+        logger.warn('Summary not found, using defaults');
+      }
+
+      logger.info('✅ Chain: Summary recommendation completed');
       return parsed;
     } catch (error) {
-      logger.error('Chain: CV extraction error:', error);
+      logger.error('Chain: Summary recommendation error:', error);
       throw error;
     }
   }
@@ -222,45 +335,50 @@ export class LLMChainService {
       });
 
       const parsed = this.parseJSON(response, {
-        name: 'Unknown',
-        email: '',
-        skills: [],
-        experience_years: 0,
-        experiences: [],
-        education: [],
-        projects: [],
+        description: description.substring(0, 200) + '...', // Fallback to truncated original
       });
+
+      // Validate description exists
+      if (!parsed.description || parsed.description === '') {
+        parsed.description = description.substring(0, 200) + '...';
+        logger.warn('Description beautification failed, using truncated original');
+      }
 
       logger.info('✅ Chain: beautifyDescription completed');
       return parsed;
     } catch (error) {
       logger.error('Chain: beautifyDescription error:', error);
-      throw error;
+      return {
+        description: description.substring(0, 200) + '...',
+      };
     }
   }
   async calculateSkillmatch(cvSkills: any, jobRequirements: any): Promise<any> {
     try {
-      logger.info('🔗 Chain: beautifyDescription');
+      logger.info('🔗 Chain: calculateSkillmatch');
       const response = await openaiService.completion(PROMPTS.CALCULATE_SKILL.user(cvSkills, jobRequirements), {
         systemPrompt: PROMPTS.CALCULATE_SKILL.system,
         temperature: 0.1,
       });
 
       const parsed = this.parseJSON(response, {
-        name: 'Unknown',
-        email: '',
-        skills: [],
-        experience_years: 0,
-        experiences: [],
-        education: [],
-        projects: [],
+        score: 0,
+        explanation: 'Unable to calculate skill match',
       });
 
-      logger.info('✅ Chain: beautifyDescription completed');
+      // Ensure score is a valid number
+      if (typeof parsed.score !== 'number' || isNaN(parsed.score)) {
+        parsed.score = 0;
+      }
+
+      logger.info('✅ Chain: calculateSkillmatch completed');
       return parsed;
     } catch (error) {
-      logger.error('Chain: beautifyDescription error:', error);
-      throw error;
+      logger.error('Chain: calculateSkillmatch error:', error);
+      return {
+        score: 0,
+        explanation: 'Error calculating skill match',
+      };
     }
   }
 }

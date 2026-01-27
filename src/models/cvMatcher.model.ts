@@ -29,14 +29,45 @@ const JobSuggestionSchema = new Schema(
   {
     title: { type: String, required: true },
     company: { type: String, required: true },
+    location: { type: String },
+    salary_range: { type: String },
+    job_type: { type: String },
+    seniority: { type: String },
+    requirements: [{ type: String }],
+    responsibilities: [{ type: String }],
+    job_description: { type: String },
+    posted_at: { type: String },
     link: { type: String, required: true },
-    skill_match: { type: Number, required: true },
-    experience_match: { type: Number, required: true },
-    responsibility_match: { type: Number, required: true },
-    job_description: { type: String, required: true },
-    score: { type: Number, required: true },
-    grade: { type: String, required: true },
-    explanation: { type: String, required: true },
+    skill_match: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      max: 100,
+      default: 0
+    },
+    experience_match: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      max: 100,
+      default: 0
+    },
+    responsibility_match: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      max: 100,
+      default: 0
+    },
+    score: { 
+      type: Number, 
+      required: true,
+      min: 0,
+      max: 100,
+      default: 0
+    },
+    grade: { type: String, required: true, default: 'F' },
+    explanation: { type: String, required: true, default: 'No explanation available' },
   },
   { _id: false }
 );

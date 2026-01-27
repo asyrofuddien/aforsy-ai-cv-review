@@ -155,9 +155,9 @@ class ScrapingService {
   }
 
   /**
-   * Search jobs dari LinkedIn API
+   * Search jobs dari LinkedIn API with retry logic
    */
-  private async searchJobs(params: JobSearchParams): Promise<any> {
+  private async searchJobs(params: JobSearchParams, retries = 3): Promise<any> {
     const queryParams = new URLSearchParams({
       query: params.query || '',
       ...(params.location && { location: params.location }),
@@ -169,19 +169,39 @@ class ScrapingService {
 
     const url = `${this.config.baseUrl}/search?${queryParams.toString()}`;
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-host': this.config.apiHost,
-        'x-rapidapi-key': this.config.apiKey,
-      },
-    });
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'x-rapidapi-host': this.config.apiHost,
+            'x-rapidapi-key': this.config.apiKey,
+          },
+        });
 
-    if (!response.ok) {
-      throw new Error(`Search API failed with status ${response.status}`);
+        if (response.ok) {
+          return await response.json();
+        }
+
+        // If rate limited (429), wait and retry
+        if (response.status === 429 && attempt < retries) {
+          const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff
+          console.log(`Rate limited, waiting ${waitTime}ms before retry ${attempt}/${retries}`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+
+        throw new Error(`Search API failed with status ${response.status}`);
+      } catch (error) {
+        if (attempt === retries) {
+          throw error;
+        }
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+      }
     }
 
-    return await response.json();
+    throw new Error('Search API failed after all retries');
   }
 
   /**
@@ -493,32 +513,79 @@ class ScrapingService {
   async matchWithJobs(cvJson: any, suggestedRoles: JobListing[]): Promise<any[]> {
     const scoredJobs = await Promise.all(
       suggestedRoles.map(async (job) => {
-        const skillMatch = await this.calculateSkillMatch(cvJson.skills, job.requirements);
-        const experienceMatch = this.calculateExperienceMatch(cvJson.seniority, job.seniority);
-        const responsibilityMatch = this.calculateResponsibilityMatch(cvJson.work_experience, job.responsibilities);
+        try {
+          const skillMatch = await this.calculateSkillMatch(cvJson.skills, job.requirements);
+          const experienceMatch = this.calculateExperienceMatch(cvJson.seniority, job.seniority);
+          const responsibilityMatch = this.calculateResponsibilityMatch(cvJson.work_experience, job.responsibilities);
 
-        const totalScore = (skillMatch + experienceMatch + responsibilityMatch) / 3;
-        const grade = this.getGrade(parseFloat(totalScore.toFixed(2)));
+          // Validate all scores are valid numbers
+          const validSkillMatch = this.validateScore(skillMatch);
+          const validExperienceMatch = this.validateScore(experienceMatch);
+          const validResponsibilityMatch = this.validateScore(responsibilityMatch);
 
-        return {
-          ...job,
-          skill_match: parseFloat(skillMatch.toFixed(2)),
-          experience_match: parseFloat(experienceMatch.toFixed(2)),
-          responsibility_match: parseFloat(responsibilityMatch.toFixed(2)),
-          score: parseFloat(totalScore.toFixed(2)),
-          grade: grade,
-          explanation: this.generateExplanation(skillMatch, experienceMatch, responsibilityMatch),
-        };
+          const totalScore = (validSkillMatch + validExperienceMatch + validResponsibilityMatch) / 3;
+          const finalScore = this.validateScore(totalScore);
+          const grade = this.getGrade(finalScore);
+
+          return {
+            ...job,
+            skill_match: validSkillMatch,
+            experience_match: validExperienceMatch,
+            responsibility_match: validResponsibilityMatch,
+            score: finalScore,
+            grade: grade,
+            explanation: this.generateExplanation(validSkillMatch, validExperienceMatch, validResponsibilityMatch),
+          };
+        } catch (error) {
+          console.error(`Error matching job ${job.title}:`, error);
+          // Return job with default scores on error
+          return {
+            ...job,
+            skill_match: 0,
+            experience_match: 0,
+            responsibility_match: 0,
+            score: 0,
+            grade: 'F',
+            explanation: 'Unable to calculate match score due to an error.',
+          };
+        }
       })
     );
 
     return scoredJobs.sort((a, b) => b.score - a.score).slice(0, 5);
   }
 
-  private async calculateSkillMatch(cvSkills: string[], jobRequirements: string[]) {
-    const skilMatch = await chainService.calculateSkillmatch(cvSkills, jobRequirements);
-    const result = skilMatch.score;
-    return parseFloat(result);
+  /**
+   * Validate and sanitize score values
+   */
+  private validateScore(score: number): number {
+    if (typeof score !== 'number' || isNaN(score) || !isFinite(score)) {
+      return 0;
+    }
+    // Clamp between 0 and 100
+    return Math.max(0, Math.min(100, parseFloat(score.toFixed(2))));
+  }
+
+  private async calculateSkillMatch(cvSkills: string[], jobRequirements: string[]): Promise<number> {
+    try {
+      if (!cvSkills || cvSkills.length === 0 || !jobRequirements || jobRequirements.length === 0) {
+        return 0;
+      }
+
+      const skillMatch = await chainService.calculateSkillmatch(cvSkills, jobRequirements);
+      const result = parseFloat(skillMatch?.score);
+      
+      // Validate the result
+      if (isNaN(result) || !isFinite(result)) {
+        console.warn('Invalid skill match score received, defaulting to 0');
+        return 0;
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error calculating skill match:', error);
+      return 0;
+    }
   }
 
   private calculateExperienceMatch(cvSeniority: string, jobExperienceLevel: string): number {

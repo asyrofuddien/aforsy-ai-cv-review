@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "check:queue": "ts-node scripts/check-queue.ts",
-    "test:api": "./test-api.sh"
+    "test:api": "./test-api.sh",
+    "fix:paths": "ts-node scripts/fix-document-paths.ts"
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^6.1.2",

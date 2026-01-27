@@ -217,129 +217,185 @@ Return as JSON:
   },
 
   EXTRACT_CV_STRUCTURED_JSON: {
-    system: 'You are a CV Parsing Engine. Convert the following raw CV text into a strictly formatted JSON.',
-    user: (rawText: string) => `TEXT:
+    system: 'You are an expert CV Parsing Engine. Your PRIMARY task is to extract the candidate\'s NAME accurately. Extract ALL information from the CV text and convert it into structured JSON format.',
+    user: (rawText: string) => `Extract information from this CV text:
+
 """
 ${rawText}
 """
 
-Return JSON with EXACT structure below:
+CRITICAL INSTRUCTIONS FOR NAME EXTRACTION:
+1. The candidate's NAME is ALWAYS the MOST IMPORTANT field - you MUST find it
+2. Look for the name in these locations (in order of priority):
+   - First H1 heading or largest text at the top
+   - After words like "Resume", "CV", "Curriculum Vitae"
+   - In contact information section
+   - Before email/phone/address
+   - Any text that looks like a person's full name (2-4 words, capitalized)
+3. The name is typically 2-4 words and appears BEFORE contact details (email, phone, LinkedIn)
+4. If you see text like "Muhammad Asyrofuddien" or similar patterns, that is the NAME
+5. DO NOT use "Unknown Candidate" unless you absolutely cannot find ANY name-like text
+
+EXAMPLE PATTERNS TO RECOGNIZE:
+- "Muhammad Asyrofuddien" ✓
+- "John Doe" ✓
+- "Jane Smith" ✓
+- Any capitalized words at the very beginning ✓
+
+OTHER EXTRACTION RULES:
+- Extract email, phone, location from contact information
+- List ALL technical skills mentioned (programming languages, frameworks, tools, databases, etc.)
+- For work experience: extract company, position, dates, responsibilities, and achievements
+- Calculate seniority based on total years of experience:
+  - 0-2 years = "Entry-level" or "Junior"
+  - 2-5 years = "Mid-level"
+  - 5+ years = "Senior"
+  - 8+ years = "Lead" or "Principal"
+
+Return ONLY this JSON structure (no markdown, no explanation):
 
 {
-  "name": "",
-  "summary": "",
-  "skills": [],
+  "name": "FULL NAME HERE - THIS IS MANDATORY",
+  "email": "email@example.com",
+  "phone": "",
+  "location": "",
+  "summary": "Brief professional summary if available",
+  "skills": ["skill1", "skill2", "skill3"],
   "work_experience": [
     {
-      "company": "",
-      "position": "",
-      "start_date": "",
-      "end_date": "",
-      "description":"",
-      "achievement":"",
-      "tech_stack": []
+      "company": "Company Name",
+      "position": "Job Title",
+      "start_date": "YYYY-MM or YYYY",
+      "end_date": "YYYY-MM or YYYY or Present",
+      "description": "What they did in this role",
+      "achievements": "Key achievements and impact",
+      "tech_stack": ["tech1", "tech2"]
     }
   ],
   "education": [
     {
-      "institution": "",
-      "degree": "",
-      "start_date": "",
-      "end_date": ""
+      "institution": "University/School Name",
+      "degree": "Degree Name",
+      "start_date": "YYYY",
+      "end_date": "YYYY"
     }
   ],
-  "seniority": "",
+  "seniority": "Entry-level|Junior|Mid-level|Senior|Lead"
 }
 
-Rules:
-- Do NOT add extra fields.
-- Do NOT guess info that does not exist.
-- If missing → return empty string or empty array.
-- Return ONLY JSON. No explanation.
-- seniority assuming based on other data
-- if description and achievements not on cv, create it based on cv data`,
+REMEMBER: The "name" field is the MOST CRITICAL field. Look at the VERY TOP of the CV text for the largest/first text that looks like a person's name. DO NOT skip this field!`,
   },
   ROLE_SUGGESTION: {
-    system: 'You are a career role prediction model.',
-    user: (extractedCv: object) => `Given this structured CV data:
+    system: 'You are an expert career advisor specializing in tech industry role matching.',
+    user: (extractedCv: object) => `Analyze this CV and suggest the most suitable job roles:
 
 ${JSON.stringify(extractedCv, null, 2)}
 
-Determine:
-- The top 3 most suitable job roles in the tech industry.
-- The correct seniority level (Junior / Mid / Senior).
+Based on their skills, experience, and background:
+1. Suggest 3 most suitable job roles in the tech industry
+2. Confirm or adjust the seniority level based on:
+   - Years of experience
+   - Complexity of past projects
+   - Leadership/mentoring experience
+   - Technical depth and breadth
 
-Return JSON only:
+Seniority levels:
+- "Entry-level" or "Junior": 0-2 years
+- "Mid-level": 2-5 years
+- "Senior": 5-8 years
+- "Lead" or "Principal": 8+ years
+
+Return ONLY this JSON (no markdown, no explanation):
 {
-  "suggested_roles": [],
-  "seniority": ""
+  "suggested_roles": ["Role 1", "Role 2", "Role 3"],
+  "seniority": "Entry-level|Junior|Mid-level|Senior|Lead"
 }`,
   },
   SUMMARY_RECOMENDATION: {
-    system: 'You are a career advisor.',
-    user: (extractedCv: object, roleSuggestion: object, jobListed: object) => `Based on:
-CV:
- ${JSON.stringify(extractedCv, null, 2)}
+    system: 'You are an expert career advisor providing actionable recommendations.',
+    user: (extractedCv: object, roleSuggestion: object, jobListed: object) => `Analyze this candidate's profile and job matches to provide career recommendations:
+
+CV Profile:
+${JSON.stringify(extractedCv, null, 2)}
 
 Suggested Roles:
- ${JSON.stringify(roleSuggestion, null, 2)}
+${JSON.stringify(roleSuggestion, null, 2)}
 
 Job Match Results:
 ${JSON.stringify(jobListed, null, 2)}
 
-Write a short summary in english:
-- strengths (max 3)
-- improvements (max 3)
-- next_steps (max 3)
+Provide a concise career summary with:
+- Top 3 strengths (what makes them stand out)
+- Top 3 areas for improvement (skills/experience gaps)
+- Top 3 actionable next steps (specific recommendations)
 
-Format:
+Return ONLY this JSON (no markdown, no explanation):
 {
-  "summary": { "strengths": [
-        "",
-        "",
-        ""
-      ],
-      "improvements": [
-        "",
-        "",
-        ""
-      ],
-      "next_steps": [
-        "",
-        "",
-        ""
-      ]},
+  "summary": {
+    "strengths": [
+      "Specific strength 1",
+      "Specific strength 2",
+      "Specific strength 3"
+    ],
+    "improvements": [
+      "Specific improvement area 1",
+      "Specific improvement area 2",
+      "Specific improvement area 3"
+    ],
+    "next_steps": [
+      "Actionable step 1",
+      "Actionable step 2",
+      "Actionable step 3"
+    ]
+  }
 }
 
-Keep concise. No long paragraphs.`,
+Keep each point concise (1 sentence max).`,
   },
   BEAUTIFY_DESCRIPTION: {
-    system: 'Good In Rewrite Description job',
-    user: (description: string) => `Based on:
-description:
- ${description}
+    system: 'You are an expert at summarizing job descriptions concisely while preserving key information.',
+    user: (description: string) => `Rewrite this job description into 1-3 clear, concise sentences that capture the main responsibilities and requirements:
 
-re-wirte the description in 1-3 sentence
-Format:
+${description}
+
+Focus on:
+- Main role responsibilities
+- Key technical requirements
+- Team/company context if relevant
+
+Return ONLY this JSON (no markdown, no explanation):
 {
-  "description": 
-}
-`,
+  "description": "1-3 sentence summary"
+}`,
   },
   CALCULATE_SKILL: {
-    system: 'You are an expert recruiter evaluating a CV against job requirements.',
-    user: (cvSkills: any, jobRequirements: any) => `Based on:
-cvSkills:
- ${cvSkills}
+    system: 'You are an expert technical recruiter evaluating skill alignment between candidates and job requirements.',
+    user: (cvSkills: any, jobRequirements: any) => `Calculate the skill match percentage between the candidate's skills and job requirements.
 
- jobRequirements:
- ${jobRequirements}
+Candidate Skills:
+${JSON.stringify(cvSkills, null, 2)}
 
-give score skill match scale 1-100
-Format:
+Job Requirements:
+${JSON.stringify(jobRequirements, null, 2)}
+
+Scoring Guidelines:
+- 90-100: Excellent match - has all or most required skills plus relevant extras
+- 70-89: Strong match - has most required skills with minor gaps
+- 50-69: Moderate match - has some required skills but missing key ones
+- 30-49: Weak match - has few required skills
+- 0-29: Poor match - minimal skill overlap
+
+Consider:
+1. Direct skill matches (exact technology/tool names)
+2. Related/transferable skills (e.g., React → Vue, Python → Java)
+3. Depth of experience with each skill
+4. Bonus for rare/specialized skills
+
+Return ONLY this JSON (no markdown, no explanation):
 {
-  "score": Number
+  "score": 0-100
 }
-`,
+
+IMPORTANT: "score" must be a valid number between 0 and 100`,
   },
 };
