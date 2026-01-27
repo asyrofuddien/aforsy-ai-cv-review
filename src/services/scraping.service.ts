@@ -255,6 +255,7 @@ class ScrapingService {
 
   /**
    * Extract skills/requirements dan responsibilities dari job description
+   * Now supports both tech and non-tech skills
    */
   private extractSkillsAndResponsibilities(description: string): {
     requirements: string[];
@@ -281,6 +282,8 @@ class ScrapingService {
       'knowledge',
       'what you need',
       "what we're looking for",
+      'proficiency',
+      'expertise',
     ];
     const responsibilityKeywords = [
       'responsibilit',
@@ -291,6 +294,7 @@ class ScrapingService {
       'role includes',
       "what you'll do",
       'day to day',
+      'tasks',
     ];
 
     for (const line of lines) {
@@ -325,15 +329,15 @@ class ScrapingService {
     }
 
     if (requirements.length === 0) {
-      requirements.push(...this.extractTechSkills(description));
+      requirements.push(...this.extractSkillsFromDescription(description));
     }
 
     if (responsibilities.length === 0) {
       responsibilities.push(
-        'Contribute to product development and feature implementation',
+        'Contribute to projects and deliverables',
         'Collaborate with cross-functional teams',
-        'Write clean, maintainable code',
-        'Participate in code reviews and knowledge sharing'
+        'Maintain quality standards and best practices',
+        'Participate in team meetings and knowledge sharing'
       );
     }
 
@@ -344,54 +348,53 @@ class ScrapingService {
   }
 
   /**
-   * Extract tech skills from description
+   * Extract skills from description - supports ALL industries
    */
-  private extractTechSkills(description: string): string[] {
-    const commonSkills = [
-      'JavaScript',
-      'TypeScript',
-      'Python',
-      'Java',
-      'Kotlin',
-      'Swift',
-      'React',
-      'Angular',
-      'Vue',
-      'Node.js',
-      'Express',
-      'Django',
-      'Flask',
-      'Spring',
-      'MongoDB',
-      'PostgreSQL',
-      'MySQL',
-      'Redis',
-      'Docker',
-      'Kubernetes',
-      'AWS',
-      'GCP',
-      'Azure',
-      'Git',
-      'REST',
-      'RESTful',
-      'GraphQL',
-      'CI/CD',
-      'Agile',
-      'Scrum',
-      'Android',
-      'iOS',
+  private extractSkillsFromDescription(description: string): string[] {
+    // Tech skills
+    const techSkills = [
+      'JavaScript', 'TypeScript', 'Python', 'Java', 'Kotlin', 'Swift', 'Go', 'PHP',
+      'React', 'Angular', 'Vue', 'Node.js', 'Express', 'Django', 'Flask', 'Spring',
+      'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Docker', 'Kubernetes',
+      'AWS', 'GCP', 'Azure', 'Git', 'REST', 'RESTful', 'GraphQL', 'CI/CD',
+      'Agile', 'Scrum', 'Android', 'iOS',
     ];
+
+    // Creative/Design skills
+    const creativeSkills = [
+      'Adobe Photoshop', 'Photoshop', 'Illustrator', 'InDesign', 'After Effects',
+      'Premiere Pro', 'Final Cut Pro', 'DaVinci Resolve', 'Figma', 'Sketch',
+      'Adobe XD', 'Lightroom', 'Cinema 4D', 'Blender', 'Maya',
+      'Video Editing', 'Motion Graphics', 'Color Grading', 'Photography',
+      'Videography', 'UI Design', 'UX Design', 'Graphic Design',
+    ];
+
+    // Business/Marketing skills
+    const businessSkills = [
+      'Google Ads', 'Facebook Ads', 'Instagram Ads', 'SEO', 'SEM',
+      'Google Analytics', 'Content Marketing', 'Social Media Marketing',
+      'Email Marketing', 'CRM', 'Salesforce', 'HubSpot', 'Excel',
+      'PowerPoint', 'Data Analysis', 'Project Management', 'Jira', 'Trello',
+    ];
+
+    // Combine all skills
+    const allSkills = [...techSkills, ...creativeSkills, ...businessSkills];
 
     const foundSkills: string[] = [];
     const lowerDescription = description.toLowerCase();
 
-    for (const skill of commonSkills) {
+    for (const skill of allSkills) {
       if (lowerDescription.includes(skill.toLowerCase())) {
         foundSkills.push(skill);
       }
     }
 
-    return foundSkills.length > 0 ? foundSkills : ['Programming', 'Problem Solving', 'Team Collaboration'];
+    // If no specific skills found, return generic ones
+    if (foundSkills.length === 0) {
+      return ['Communication', 'Problem Solving', 'Team Collaboration', 'Time Management'];
+    }
+
+    return foundSkills;
   }
 
   /**
@@ -446,7 +449,7 @@ class ScrapingService {
   }
 
   /**
-   * Get dummy jobs for testing/fallback
+   * Get dummy jobs for testing/fallback - now supports multiple industries
    */
   private getDummyJobs(): JobListing[] {
     return [
@@ -470,42 +473,42 @@ class ScrapingService {
         link: 'https://www.linkedin.com/jobs/view/backend-engineer-at-tokopedia-12345',
       },
       {
-        title: 'Frontend Developer',
-        company: 'Gojek',
+        title: 'Video Editor',
+        company: 'Creative Studio Indonesia',
         location: 'Jakarta, Indonesia',
-        salary_range: 'IDR 12.000.000 – 20.000.000',
+        salary_range: 'IDR 8.000.000 – 15.000.000',
         job_type: 'Full-time',
         seniority: 'Mid-level',
-        requirements: ['React', 'TypeScript', 'Redux', 'HTML/CSS', 'Git'],
+        requirements: ['Adobe Premiere Pro', 'After Effects', 'DaVinci Resolve', 'Color Grading', 'Motion Graphics'],
         responsibilities: [
-          'Build responsive web applications',
-          'Optimize application performance',
-          'Work with designers and backend engineers',
-          'Maintain code quality and documentation',
+          'Edit video content for various platforms (YouTube, Instagram, TikTok)',
+          'Create engaging motion graphics and animations',
+          'Collaborate with content creators and directors',
+          'Manage multiple projects with tight deadlines',
         ],
         job_description:
-          'Join Gojek as a Frontend Developer to create amazing user experiences. Work with modern technologies and collaborate with talented teams.',
+          'Join our creative team as a Video Editor to produce high-quality video content for brands and digital platforms. Work with modern editing tools and collaborate with talented creators.',
         posted_at: '2025-11-03',
-        link: 'https://www.linkedin.com/jobs/view/frontend-developer-at-gojek-67890',
+        link: 'https://www.linkedin.com/jobs/view/video-editor-at-creative-studio-67890',
       },
       {
-        title: 'Full Stack Developer',
-        company: 'Bukalapak',
+        title: 'Digital Marketing Specialist',
+        company: 'Marketing Agency',
         location: 'Jakarta, Indonesia',
-        salary_range: 'IDR 18.000.000 – 28.000.000',
+        salary_range: 'IDR 10.000.000 – 18.000.000',
         job_type: 'Full-time',
-        seniority: 'Senior',
-        requirements: ['JavaScript', 'React', 'Node.js', 'PostgreSQL', 'AWS'],
+        seniority: 'Mid-level',
+        requirements: ['Google Ads', 'Facebook Ads', 'SEO', 'Google Analytics', 'Content Marketing'],
         responsibilities: [
-          'Develop full-stack features from conception to deployment',
-          'Lead technical decisions and architecture',
-          'Mentor junior developers',
-          'Ensure code quality and best practices',
+          'Plan and execute digital marketing campaigns',
+          'Manage social media advertising budgets',
+          'Analyze campaign performance and optimize ROI',
+          'Create marketing reports and presentations',
         ],
         job_description:
-          'As a Full Stack Developer at Bukalapak, you will lead the development of innovative features and mentor team members.',
+          'We are looking for a Digital Marketing Specialist to drive online growth for our clients through strategic campaigns and data-driven decisions.',
         posted_at: '2025-10-28',
-        link: 'https://www.linkedin.com/jobs/view/fullstack-developer-at-bukalapak-11223',
+        link: 'https://www.linkedin.com/jobs/view/digital-marketing-at-agency-11223',
       },
     ];
   }

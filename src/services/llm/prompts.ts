@@ -217,7 +217,7 @@ Return as JSON:
   },
 
   EXTRACT_CV_STRUCTURED_JSON: {
-    system: 'You are an expert CV Parsing Engine. Your PRIMARY task is to extract the candidate\'s NAME accurately. Extract ALL information from the CV text and convert it into structured JSON format.',
+    system: 'You are an expert CV Parsing Engine. Your PRIMARY task is to extract the candidate\'s NAME accurately. Extract ALL information from ANY type of CV (tech, creative, business, etc.) and convert it into structured JSON format.',
     user: (rawText: string) => `Extract information from this CV text:
 
 """
@@ -233,24 +233,25 @@ CRITICAL INSTRUCTIONS FOR NAME EXTRACTION:
    - Before email/phone/address
    - Any text that looks like a person's full name (2-4 words, capitalized)
 3. The name is typically 2-4 words and appears BEFORE contact details (email, phone, LinkedIn)
-4. If you see text like "Muhammad Asyrofuddien" or similar patterns, that is the NAME
-5. DO NOT use "Unknown Candidate" unless you absolutely cannot find ANY name-like text
-
-EXAMPLE PATTERNS TO RECOGNIZE:
-- "Muhammad Asyrofuddien" ✓
-- "John Doe" ✓
-- "Jane Smith" ✓
-- Any capitalized words at the very beginning ✓
+4. DO NOT use "Unknown Candidate" unless you absolutely cannot find ANY name-like text
 
 OTHER EXTRACTION RULES:
 - Extract email, phone, location from contact information
-- List ALL technical skills mentioned (programming languages, frameworks, tools, databases, etc.)
+- List ALL skills mentioned (technical, creative, soft skills, tools, software, etc.)
 - For work experience: extract company, position, dates, responsibilities, and achievements
 - Calculate seniority based on total years of experience:
   - 0-2 years = "Entry-level" or "Junior"
   - 2-5 years = "Mid-level"
   - 5+ years = "Senior"
   - 8+ years = "Lead" or "Principal"
+
+IMPORTANT: This CV can be from ANY industry:
+- Tech/IT: Developer, Engineer, Data Scientist
+- Creative: Designer, Videographer, Photographer, Content Creator
+- Business: Marketing, Sales, HR, Finance
+- Other: Healthcare, Education, Manufacturing, etc.
+
+Extract skills relevant to THEIR industry, not just tech skills!
 
 Return ONLY this JSON structure (no markdown, no explanation):
 
@@ -269,7 +270,7 @@ Return ONLY this JSON structure (no markdown, no explanation):
       "end_date": "YYYY-MM or YYYY or Present",
       "description": "What they did in this role",
       "achievements": "Key achievements and impact",
-      "tech_stack": ["tech1", "tech2"]
+      "tech_stack": ["tool1", "tool2", "software1"]
     }
   ],
   "education": [
@@ -283,27 +284,36 @@ Return ONLY this JSON structure (no markdown, no explanation):
   "seniority": "Entry-level|Junior|Mid-level|Senior|Lead"
 }
 
-REMEMBER: The "name" field is the MOST CRITICAL field. Look at the VERY TOP of the CV text for the largest/first text that looks like a person's name. DO NOT skip this field!`,
+REMEMBER: The "name" field is the MOST CRITICAL field. Look at the VERY TOP of the CV text for the largest/first text that looks like a person's name.`,
   },
   ROLE_SUGGESTION: {
-    system: 'You are an expert career advisor specializing in tech industry role matching.',
-    user: (extractedCv: object) => `Analyze this CV and suggest the most suitable job roles:
+    system: 'You are an expert career advisor with knowledge across ALL industries (tech, creative, business, healthcare, etc.).',
+    user: (extractedCv: object) => `Analyze this CV and suggest the most suitable job roles based on their background:
 
 ${JSON.stringify(extractedCv, null, 2)}
 
 Based on their skills, experience, and background:
-1. Suggest 3 most suitable job roles in the tech industry
-2. Confirm or adjust the seniority level based on:
+1. Identify their PRIMARY industry/field (e.g., Tech, Creative/Design, Marketing, Healthcare, Finance, etc.)
+2. Suggest 3 most suitable job roles in THEIR industry
+3. Confirm or adjust the seniority level based on:
    - Years of experience
-   - Complexity of past projects
+   - Complexity of past projects/work
    - Leadership/mentoring experience
-   - Technical depth and breadth
+   - Depth and breadth of expertise
 
-Seniority levels:
+Seniority levels (applicable to ALL industries):
 - "Entry-level" or "Junior": 0-2 years
 - "Mid-level": 2-5 years
 - "Senior": 5-8 years
 - "Lead" or "Principal": 8+ years
+
+EXAMPLES OF ROLE SUGGESTIONS BY INDUSTRY:
+- Tech: Backend Developer, Full Stack Engineer, DevOps Engineer
+- Creative: Video Editor, Motion Graphics Designer, Content Creator
+- Design: UI/UX Designer, Graphic Designer, Product Designer
+- Marketing: Digital Marketing Specialist, Social Media Manager, Content Strategist
+- Business: Business Analyst, Project Manager, Operations Manager
+- Finance: Financial Analyst, Accountant, Investment Analyst
 
 Return ONLY this JSON (no markdown, no explanation):
 {
@@ -369,7 +379,7 @@ Return ONLY this JSON (no markdown, no explanation):
 }`,
   },
   CALCULATE_SKILL: {
-    system: 'You are an expert technical recruiter evaluating skill alignment between candidates and job requirements.',
+    system: 'You are an expert recruiter evaluating skill alignment between candidates and job requirements across ALL industries.',
     user: (cvSkills: any, jobRequirements: any) => `Calculate the skill match percentage between the candidate's skills and job requirements.
 
 Candidate Skills:
@@ -385,11 +395,19 @@ Scoring Guidelines:
 - 30-49: Weak match - has few required skills
 - 0-29: Poor match - minimal skill overlap
 
-Consider:
-1. Direct skill matches (exact technology/tool names)
-2. Related/transferable skills (e.g., React → Vue, Python → Java)
-3. Depth of experience with each skill
-4. Bonus for rare/specialized skills
+Consider ALL types of skills:
+1. Technical/Hard Skills: Programming languages, software, tools, equipment
+2. Creative Skills: Design software (Adobe Suite, Figma), video editing (Premiere, After Effects), photography
+3. Business Skills: Excel, CRM systems, project management tools, analytics platforms
+4. Soft Skills: Communication, leadership, teamwork, problem-solving
+5. Industry-Specific Skills: Medical equipment, teaching methods, sales techniques, etc.
+
+Matching Rules:
+- Direct skill matches (exact tool/software/skill names)
+- Related/transferable skills (e.g., Photoshop → Illustrator, Excel → Google Sheets)
+- Similar tools in same category (e.g., Premiere Pro → Final Cut Pro)
+- Depth of experience with each skill
+- Bonus for rare/specialized skills
 
 Return ONLY this JSON (no markdown, no explanation):
 {
