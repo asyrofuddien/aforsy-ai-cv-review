@@ -227,7 +227,7 @@ ${rawText}
 CRITICAL INSTRUCTIONS FOR NAME EXTRACTION:
 1. The candidate's NAME is ALWAYS the MOST IMPORTANT field - you MUST find it
 2. Look for the name in these locations (in order of priority):
-   - First H1 heading or largest text at the top
+   - First H1 heading or largest text at the top With class CandidateName
    - After words like "Resume", "CV", "Curriculum Vitae"
    - In contact information section
    - Before email/phone/address
