@@ -13,6 +13,7 @@ interface JobSearchParams {
   experienceLevels?: string;
   workplaceTypes?: string;
   datePosted?: string;
+  geoId?: string;
   employmentTypes?: string;
 }
 
@@ -124,7 +125,8 @@ class ScrapingService {
 
     return {
       query: role,
-      location: 'Indonesia',
+      // location: 'Indonesia',
+      geoId: '102478259',
       experienceLevels: experienceLevels,
       workplaceTypes: 'remote;hybrid;onSite',
       datePosted: 'month',
