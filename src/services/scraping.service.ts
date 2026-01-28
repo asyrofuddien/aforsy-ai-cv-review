@@ -125,8 +125,8 @@ class ScrapingService {
 
     return {
       query: role,
-      // location: 'Indonesia',
-      geoId: '102478259',
+      location: 'Indonesia',
+      // geoId: '102478259',
       experienceLevels: experienceLevels,
       workplaceTypes: 'remote;hybrid;onSite',
       datePosted: 'month',
@@ -160,7 +160,7 @@ class ScrapingService {
   private async searchJobs(params: JobSearchParams, retries = 3): Promise<any> {
     const queryParams = new URLSearchParams({
       query: params.query || '',
-      ...(params.location && { location: params.location }),
+      geoId: '102478259',
       ...(params.experienceLevels && { experienceLevels: params.experienceLevels }),
       ...(params.workplaceTypes && { workplaceTypes: params.workplaceTypes }),
       ...(params.datePosted && { datePosted: params.datePosted }),
