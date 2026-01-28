@@ -75,7 +75,6 @@ class ScrapingService {
     try {
       // Validasi input
       if (!roleSuggestion.suggested_roles || roleSuggestion.suggested_roles.length === 0) {
-        console.log('No suggested roles found, returning dummy data');
         return this.getDummyJobs();
       }
 
@@ -106,7 +105,6 @@ class ScrapingService {
 
       // If no jobs found from API, return dummy data
       if (allJobs.length === 0) {
-        console.log('No jobs found from API, returning dummy data');
         return this.getDummyJobs();
       }
 
@@ -186,8 +184,7 @@ class ScrapingService {
         // If rate limited (429), wait and retry
         if (response.status === 429 && attempt < retries) {
           const waitTime = Math.pow(2, attempt) * 1000; // Exponential backoff
-          console.log(`Rate limited, waiting ${waitTime}ms before retry ${attempt}/${retries}`);
-          await new Promise(resolve => setTimeout(resolve, waitTime));
+          await new Promise((resolve) => setTimeout(resolve, waitTime));
           continue;
         }
 
@@ -197,7 +194,7 @@ class ScrapingService {
           throw error;
         }
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
       }
     }
 
@@ -337,7 +334,7 @@ class ScrapingService {
         'Contribute to projects and deliverables',
         'Collaborate with cross-functional teams',
         'Maintain quality standards and best practices',
-        'Participate in team meetings and knowledge sharing'
+        'Participate in team meetings and knowledge sharing',
       );
     }
 
@@ -353,28 +350,89 @@ class ScrapingService {
   private extractSkillsFromDescription(description: string): string[] {
     // Tech skills
     const techSkills = [
-      'JavaScript', 'TypeScript', 'Python', 'Java', 'Kotlin', 'Swift', 'Go', 'PHP',
-      'React', 'Angular', 'Vue', 'Node.js', 'Express', 'Django', 'Flask', 'Spring',
-      'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Docker', 'Kubernetes',
-      'AWS', 'GCP', 'Azure', 'Git', 'REST', 'RESTful', 'GraphQL', 'CI/CD',
-      'Agile', 'Scrum', 'Android', 'iOS',
+      'JavaScript',
+      'TypeScript',
+      'Python',
+      'Java',
+      'Kotlin',
+      'Swift',
+      'Go',
+      'PHP',
+      'React',
+      'Angular',
+      'Vue',
+      'Node.js',
+      'Express',
+      'Django',
+      'Flask',
+      'Spring',
+      'MongoDB',
+      'PostgreSQL',
+      'MySQL',
+      'Redis',
+      'Docker',
+      'Kubernetes',
+      'AWS',
+      'GCP',
+      'Azure',
+      'Git',
+      'REST',
+      'RESTful',
+      'GraphQL',
+      'CI/CD',
+      'Agile',
+      'Scrum',
+      'Android',
+      'iOS',
     ];
 
     // Creative/Design skills
     const creativeSkills = [
-      'Adobe Photoshop', 'Photoshop', 'Illustrator', 'InDesign', 'After Effects',
-      'Premiere Pro', 'Final Cut Pro', 'DaVinci Resolve', 'Figma', 'Sketch',
-      'Adobe XD', 'Lightroom', 'Cinema 4D', 'Blender', 'Maya',
-      'Video Editing', 'Motion Graphics', 'Color Grading', 'Photography',
-      'Videography', 'UI Design', 'UX Design', 'Graphic Design',
+      'Adobe Photoshop',
+      'Photoshop',
+      'Illustrator',
+      'InDesign',
+      'After Effects',
+      'Premiere Pro',
+      'Final Cut Pro',
+      'DaVinci Resolve',
+      'Figma',
+      'Sketch',
+      'Adobe XD',
+      'Lightroom',
+      'Cinema 4D',
+      'Blender',
+      'Maya',
+      'Video Editing',
+      'Motion Graphics',
+      'Color Grading',
+      'Photography',
+      'Videography',
+      'UI Design',
+      'UX Design',
+      'Graphic Design',
     ];
 
     // Business/Marketing skills
     const businessSkills = [
-      'Google Ads', 'Facebook Ads', 'Instagram Ads', 'SEO', 'SEM',
-      'Google Analytics', 'Content Marketing', 'Social Media Marketing',
-      'Email Marketing', 'CRM', 'Salesforce', 'HubSpot', 'Excel',
-      'PowerPoint', 'Data Analysis', 'Project Management', 'Jira', 'Trello',
+      'Google Ads',
+      'Facebook Ads',
+      'Instagram Ads',
+      'SEO',
+      'SEM',
+      'Google Analytics',
+      'Content Marketing',
+      'Social Media Marketing',
+      'Email Marketing',
+      'CRM',
+      'Salesforce',
+      'HubSpot',
+      'Excel',
+      'PowerPoint',
+      'Data Analysis',
+      'Project Management',
+      'Jira',
+      'Trello',
     ];
 
     // Combine all skills
@@ -454,7 +512,7 @@ class ScrapingService {
   private getDummyJobs(): JobListing[] {
     return [
       {
-        title: 'Backend Engineer',
+        title: 'Backend Engineer (Dummy Data)',
         company: 'Tokopedia',
         location: 'Jakarta, Indonesia',
         salary_range: 'IDR 15.000.000 – 25.000.000',
@@ -473,7 +531,7 @@ class ScrapingService {
         link: 'https://www.linkedin.com/jobs/view/backend-engineer-at-tokopedia-12345',
       },
       {
-        title: 'Video Editor',
+        title: 'Video Editor  (Dummy Data)',
         company: 'Creative Studio Indonesia',
         location: 'Jakarta, Indonesia',
         salary_range: 'IDR 8.000.000 – 15.000.000',
@@ -492,7 +550,7 @@ class ScrapingService {
         link: 'https://www.linkedin.com/jobs/view/video-editor-at-creative-studio-67890',
       },
       {
-        title: 'Digital Marketing Specialist',
+        title: 'Digital Marketing Specialist  (Dummy Data)',
         company: 'Marketing Agency',
         location: 'Jakarta, Indonesia',
         salary_range: 'IDR 10.000.000 – 18.000.000',
@@ -552,7 +610,7 @@ class ScrapingService {
             explanation: 'Unable to calculate match score due to an error.',
           };
         }
-      })
+      }),
     );
 
     return scoredJobs.sort((a, b) => b.score - a.score).slice(0, 5);
@@ -577,13 +635,13 @@ class ScrapingService {
 
       const skillMatch = await chainService.calculateSkillmatch(cvSkills, jobRequirements);
       const result = parseFloat(skillMatch?.score);
-      
+
       // Validate the result
       if (isNaN(result) || !isFinite(result)) {
         console.warn('Invalid skill match score received, defaulting to 0');
         return 0;
       }
-      
+
       return result;
     } catch (error) {
       console.error('Error calculating skill match:', error);
@@ -623,7 +681,9 @@ class ScrapingService {
       return 0;
     }
 
-    const cvExperienceText = cvExperience.map((exp) => ((exp.description || '') + ' ' + (exp.achievements || '')).toLowerCase()).join(' ');
+    const cvExperienceText = cvExperience
+      .map((exp) => ((exp.description || '') + ' ' + (exp.achievements || '')).toLowerCase())
+      .join(' ');
 
     const matchedResponsibilities = jobResponsibilities.filter((responsibility) => {
       const words = responsibility
@@ -657,7 +717,7 @@ class ScrapingService {
       responsibilityMatch >= 70 ? 'highly relevant' : responsibilityMatch >= 50 ? 'relevant' : 'somewhat relevant';
 
     return `Skills match is ${skillLevel} (${skillMatch.toFixed(1)}%), experience level is ${experienceLevel} (${experienceMatch.toFixed(
-      1
+      1,
     )}%), and past responsibilities are ${responsibilityLevel} (${responsibilityMatch.toFixed(1)}%).`;
   }
 }

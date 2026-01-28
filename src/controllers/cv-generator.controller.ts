@@ -63,7 +63,6 @@ export class CVGeneratorController {
       }
 
       const templateData = await TemplateModel.findOne().lean();
-      console.log('Using template:', templateData?.name);
       const templateStr = templateData?.content;
 
       // Compile and render template
@@ -73,7 +72,6 @@ export class CVGeneratorController {
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
       fs.writeFileSync(htmlPath, html);
-      console.log(`✅ ${fileName}.html generated`);
 
       // Generate PDF with optimized settings
       browser = await puppeteer.launch({
@@ -100,7 +98,6 @@ export class CVGeneratorController {
       try {
         const client = await page.target().createCDPSession();
         await client.send('Network.disable');
-        console.log('✅ Network monitoring disabled');
       } catch (err: any) {
         console.warn('⚠️ Could not disable network:', err.message);
       }
@@ -137,10 +134,6 @@ export class CVGeneratorController {
 
       await browser.close();
       browser = null; // Clear reference
-
-      console.log(`✅ ${fileName}.pdf generated successfully!`);
-      console.log(`📁 Location: ${pdfPath}`);
-      console.log(`📅 Generated on: ${dateStr}`);
 
       // Convert PDF to base64
       const pdfBuffer = fs.readFileSync(pdfPath);
@@ -223,8 +216,6 @@ export class CVGeneratorController {
 
       const templateStr = templateData?.content;
 
-      console.log('Using template:', templateData?.content?.substring(0, 30));
-
       // Compile and render template
       const template = Handlebars.compile(templateStr);
       const html = template(resumeData);
@@ -232,7 +223,6 @@ export class CVGeneratorController {
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
       fs.writeFileSync(htmlPath, html);
-      console.log(`✅ ${fileName}.html generated`);
 
       // Generate PDF with optimized settings
       browser = await puppeteer.launch({
@@ -259,7 +249,6 @@ export class CVGeneratorController {
       try {
         const client = await page.target().createCDPSession();
         await client.send('Network.disable');
-        console.log('✅ Network monitoring disabled');
       } catch (err: any) {
         console.warn('⚠️ Could not disable network:', err.message);
       }
@@ -296,10 +285,6 @@ export class CVGeneratorController {
 
       await browser.close();
       browser = null; // Clear reference
-
-      console.log(`✅ ${fileName}.pdf generated successfully!`);
-      console.log(`📁 Location: ${pdfPath}`);
-      console.log(`📅 Generated on: ${dateStr}`);
 
       // Convert PDF to base64
       const pdfBuffer = fs.readFileSync(pdfPath);

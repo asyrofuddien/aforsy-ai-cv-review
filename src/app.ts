@@ -36,8 +36,6 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: (origin, callback) => {
-      console.log('Origin:', origin);
-
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
