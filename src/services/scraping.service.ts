@@ -167,6 +167,8 @@ class ScrapingService {
       ...(params.employmentTypes && { employmentTypes: params.employmentTypes }),
     });
 
+    console.log('Searching jobs with params:', queryParams.toString());
+
     const url = `${this.config.baseUrl}/search?${queryParams.toString()}`;
 
     for (let attempt = 1; attempt <= retries; attempt++) {
