@@ -124,7 +124,7 @@ class ScrapingService {
 
     return {
       query: role,
-      location: 'Worldwide',
+      location: 'Indonesia',
       experienceLevels: experienceLevels,
       workplaceTypes: 'remote;hybrid;onSite',
       datePosted: 'month',
