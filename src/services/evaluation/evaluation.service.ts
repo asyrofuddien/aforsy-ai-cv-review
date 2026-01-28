@@ -45,7 +45,7 @@ class EvaluationService {
         location: params.location,
       });
 
-      const response = await fetch('http://localhost:3000/api/scrape-jobs', {
+      const response = await fetch('http://localhost:9092/api/scrape-jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
