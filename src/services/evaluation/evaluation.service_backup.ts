@@ -9,106 +9,8 @@ import chainService from '../llm/chains';
 import logger from '../../utils/logger';
 import parserService from '../parser.service';
 import scrapingService from '../scraping.service';
-import { JobListing } from '@/types/evaluation.types';
-
-interface ScrapeJobsParams {
-  roleSuggestion: string[];
-  seniority?: string;
-  location: string;
-}
-
-interface ApiResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    jobs: JobListing[];
-    meta: {
-      total_jobs: number;
-      keywords_searched: string[];
-      seniority_level: string;
-      location: string;
-      scraping_duration: string;
-      scraped_at: string;
-    };
-  };
-}
 
 class EvaluationService {
-  /**
-   * Private method untuk scrape jobs dari API
-   */
-  private async scrapeJobsFromAPI(params: ScrapeJobsParams): Promise<JobListing[]> {
-    try {
-      logger.info(`🌐 Calling scrape API with params:`, {
-        job_suggestions: params.roleSuggestion,
-        seniority: params.seniority || 'Mid',
-        location: params.location,
-      });
-
-      const response = await fetch('http://localhost:3000/api/scrape-jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          job_suggestions: params.roleSuggestion,
-          seniority: params.seniority || 'Mid',
-          location: 'Indonesia',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data: ApiResponse = (await response.json()) as ApiResponse;
-
-      if (!data.success) {
-        throw new Error(data.message || 'API returned error');
-      }
-
-      const jobs = data.data?.jobs || [];
-      logger.info(`✅ Successfully fetched ${jobs.length} jobs from API`);
-
-      return jobs;
-    } catch (error) {
-      logger.error('❌ Error calling scrape API:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Private method untuk get jobs dengan fallback ke dummy data
-   */
-  private async getJobListings(roleSuggestion: string[], seniority?: string): Promise<JobListing[]> {
-    let jobListed: JobListing[] = [];
-
-    try {
-      // Try to scrape from API first
-      jobListed = await this.scrapeJobsFromAPI({
-        roleSuggestion,
-        seniority: seniority || 'Mid',
-        location: 'indonesia',
-      });
-
-      // If no jobs found, use dummy data
-      if (jobListed.length === 0) {
-        logger.warn('No jobs found from scraping, using dummy data');
-        jobListed = await scrapingService.FindJobs({
-          suggested_roles: roleSuggestion,
-          seniority: seniority || 'Mid-level',
-        });
-      }
-    } catch (error) {
-      logger.error('Error scraping jobs, using dummy data:', error);
-      // Fallback to dummy data on error
-      jobListed = await scrapingService.FindJobs({
-        suggested_roles: roleSuggestion,
-        seniority: seniority || 'Mid-level',
-      });
-    }
-
-    return jobListed;
-  }
-
   async processEvaluation(data: any): Promise<any> {
     const { evaluationId, cvDocumentId, projectDocumentId, jobDescriptionId } = data;
 
@@ -198,12 +100,12 @@ class EvaluationService {
 
       logger.info('📄 Step 2: Extracting Raw Text from CV');
       let rawText: string;
-
+      
       try {
         rawText = await parserService.parseFile(file.path, file.mimetype);
       } catch (parseError: any) {
         logger.error(`Failed to parse CV file: ${parseError.message}`);
-
+        
         // If file not found, check if we have cached content
         if (cvDocument.content) {
           logger.info('Using cached content from database');
@@ -239,7 +141,20 @@ class EvaluationService {
       const roleSuggestion = await chainService.RoleSuggestion(extractedCv);
 
       logger.info('📄 Step 5: Scrape Job Listings');
-      const jobListed = await this.getJobListings(roleSuggestion.suggested_roles, roleSuggestion.seniority);
+      let jobListed: any[] = [];
+      try {
+        jobListed = await scrapingService.FindJobs(roleSuggestion);
+        
+        // If no jobs found, use dummy data
+        if (!jobListed || jobListed.length === 0) {
+          logger.warn('No jobs found from scraping, using dummy data');
+          jobListed = await scrapingService.FindJobs({ suggested_roles: [], seniority: 'Mid-level' });
+        }
+      } catch (error) {
+        logger.error('Error scraping jobs, using dummy data:', error);
+        // Fallback to dummy data on error
+        jobListed = await scrapingService.FindJobs({ suggested_roles: [], seniority: 'Mid-level' });
+      }
 
       logger.info('🔍 Step 6: Matching with available jobs');
       const jobMatches = await scrapingService.matchWithJobs(extractedCv, jobListed);
@@ -282,27 +197,6 @@ class EvaluationService {
         error: message,
       });
 
-      throw error;
-    }
-  }
-
-  /**
-   * Public method untuk testing scraping functionality
-   */
-  async testJobScraping(jobSuggestions: string[], seniority?: string, location = 'indonesia'): Promise<JobListing[]> {
-    try {
-      logger.info('🧪 Testing job scraping functionality');
-
-      const jobs = await this.scrapeJobsFromAPI({
-        roleSuggestion: jobSuggestions,
-        seniority,
-        location,
-      });
-
-      logger.info(`✅ Test completed: Found ${jobs.length} jobs`);
-      return jobs;
-    } catch (error) {
-      logger.error('❌ Test failed:', error);
       throw error;
     }
   }
