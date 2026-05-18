@@ -257,7 +257,7 @@ export class CVGeneratorController {
       await page.setRequestInterception(false);
 
       // Set viewport for consistent rendering
-      await page.setViewport({ width: 1200, height: 1600 });
+      await page.setViewport({ width: 2480, height: 3508 });
 
       // Use setContent instead of goto for inline HTML
       // Remove 'networkidle0' since there are no network requests
