@@ -31,6 +31,18 @@ const sanitizeFilename = (name: string): string => {
   return name.replace(/[^a-zA-Z0-9]/g, '_');
 };
 
+const loadTemplate = (storedContent: string | undefined, relativePath: string): string => {
+  if (storedContent?.trim()) return storedContent;
+
+  const templatePath = path.join(process.cwd(), relativePath);
+  if (!fs.existsSync(templatePath)) {
+    throw new Error(`CV template is missing: ${templatePath}`);
+  }
+  const content = fs.readFileSync(templatePath, 'utf8');
+  if (!content.trim()) throw new Error(`CV template is empty: ${templatePath}`);
+  return content;
+};
+
 export class CVGeneratorController {
   GetDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const draft = await CvDraft.findOne({ userId: req.authUser!.userId }).lean();
@@ -86,7 +98,7 @@ export class CVGeneratorController {
       }
 
       const templateData = await TemplateModel.findOne().lean();
-      const templateStr = templateData?.content;
+      const templateStr = loadTemplate(templateData?.content, 'src/template-cv/resume_template.html');
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
@@ -235,7 +247,7 @@ export class CVGeneratorController {
 
       const templateData = await TemplateModel.findOne({ name: 'new_template' }).lean();
 
-      const templateStr = templateData?.content;
+      const templateStr = loadTemplate(templateData?.content, 'public/templates/template.html');
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
