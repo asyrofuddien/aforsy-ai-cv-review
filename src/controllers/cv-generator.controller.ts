@@ -43,6 +43,26 @@ const loadTemplate = (storedContent: string | undefined, relativePath: string): 
   return content;
 };
 
+const atsTemplateStyles = `
+  body.ats-template--modern { font-family: Arial, Helvetica, sans-serif; color: #172033; }
+  body.ats-template--modern .personal-info { text-align: left; border-bottom: 2px solid #2563eb; padding-bottom: 12px; }
+  body.ats-template--modern .personal-info h1, body.ats-template--modern h2.section-title { color: #1e3a8a; }
+  body.ats-template--modern h2.section-title { border-bottom-color: #2563eb; letter-spacing: .5px; }
+  body.ats-template--compact { font-size: 9pt; line-height: 1.28; padding: 28px 38px; }
+  body.ats-template--compact .personal-info { margin-bottom: 12px; }
+  body.ats-template--compact .personal-info h1 { font-size: 23pt; }
+  body.ats-template--compact .section { margin-bottom: 9px; }
+  body.ats-template--compact .entry { margin-bottom: 7px; }
+  body.ats-template--compact h2.section-title { font-size: 10.5pt; margin-bottom: 5px; }
+  body.ats-template--compact li, body.ats-template--compact .entry-description, body.ats-template--compact .simple-text { font-size: 8.5pt; line-height: 1.25; }
+`;
+
+const applyAtsTemplateStyle = (html: string, style?: string): string => {
+  const selectedStyle = style === 'modern' || style === 'compact' ? style : 'classic';
+  const styledHtml = html.replace(/<body\b[^>]*>/i, `<body class="ats-template--${selectedStyle}">`);
+  return styledHtml.replace(/<\/head>/i, `<style>${atsTemplateStyles}</style></head>`);
+};
+
 export class CVGeneratorController {
   GetDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const draft = await CvDraft.findOne({ userId: req.authUser!.userId }).lean();
@@ -260,7 +280,7 @@ export class CVGeneratorController {
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
-      const html = template(resumeData);
+      const html = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplate);
 
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
