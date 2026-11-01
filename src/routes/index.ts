@@ -20,6 +20,15 @@ const router = Router();
 
 router.use('/auth', authRoutes);
 
+// Public health endpoint used by the reverse proxy and deployment checks.
+router.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    version: '2.0.0',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Test route
 router.get('/test', (req, res) => {
   const isDev = process.env.NODE_ENV === 'development';
