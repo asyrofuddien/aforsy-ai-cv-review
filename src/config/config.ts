@@ -1,11 +1,15 @@
 import dotenv from 'dotenv';
 import { model } from 'mongoose';
 import path from 'path';
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+// Resolve from the process working directory so PM2 can load the same backend .env
+// from both ts-node development (`src/`) and compiled runtime (`dist/`).
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+const nodeEnv = process.env.NODE_ENV || 'development';
+const emailProvider = process.env.EMAIL_PROVIDER || (nodeEnv === 'production' ? 'resend' : 'smtp');
 
 export default {
   port: process.env.PORT || 3000,
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
 
   database: {
     mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/cv-evaluation',
@@ -62,8 +66,11 @@ export default {
     googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
     adminEmails: process.env.ADMIN_EMAILS || '',
     emailFrom: process.env.EMAIL_FROM || 'Landly <noreply@localhost>',
-    smtpHost: process.env.SMTP_HOST || (process.env.NODE_ENV === 'development' ? 'localhost' : ''),
-    smtpPort: parseInt(process.env.SMTP_PORT || (process.env.NODE_ENV === 'development' ? '1025' : '587')),
+    emailProvider: emailProvider.toLowerCase(),
+    resendApiKey: process.env.RESEND_API_KEY || '',
+    resendApiUrl: (process.env.RESEND_API_URL || 'https://api.resend.com').replace(/\/$/, ''),
+    smtpHost: process.env.SMTP_HOST || (nodeEnv === 'development' ? 'localhost' : ''),
+    smtpPort: parseInt(process.env.SMTP_PORT || (nodeEnv === 'development' ? '1025' : '587')),
     smtpSecure: process.env.SMTP_SECURE === 'true',
     smtpUser: process.env.SMTP_USER || '',
     smtpPassword: process.env.SMTP_PASSWORD || '',

@@ -46,6 +46,40 @@ export const sendAuthEmail = async ({ email, displayName, purpose, url }: AuthEm
   </body>
 </html>`;
 
+  if (config.auth.emailProvider === 'resend') {
+    if (!config.auth.resendApiKey) throw new Error('RESEND_API_KEY is required when EMAIL_PROVIDER=resend');
+    if (config.auth.emailFrom.includes('@localhost') || config.auth.emailFrom.includes('@example.com')) {
+      throw new Error('Set EMAIL_FROM to an address on a verified Resend domain');
+    }
+
+    const response = await fetch(`${config.auth.resendApiUrl}/emails`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${config.auth.resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: config.auth.emailFrom,
+        to: [email],
+        subject,
+        text,
+        html,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    const result = (await response.json().catch(() => ({}))) as { message?: unknown };
+    if (!response.ok) {
+      const message = typeof result.message === 'string' ? result.message : 'Unknown Resend API error';
+      throw new Error(`Resend email delivery failed (${response.status}): ${message}`);
+    }
+    logger.info(`Auth email sent through Resend (${purpose}) to ${email}`);
+    return;
+  }
+
+  if (config.auth.emailProvider !== 'smtp') {
+    throw new Error(`Unsupported EMAIL_PROVIDER: ${config.auth.emailProvider}`);
+  }
+
   if (!config.auth.smtpHost) {
     if (config.nodeEnv === 'production') throw new Error('Email delivery is not configured');
     logger.info(`Development auth email (${purpose}) for ${email}: ${url}`);

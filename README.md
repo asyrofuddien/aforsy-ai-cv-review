@@ -365,7 +365,9 @@ src/
 
 # Local email and CV template setup
 
-Development email is captured by Mailpit. Run `docker compose up -d mailpit`; open the inbox at `http://localhost:8025`. The SMTP listener is available at `localhost:1025` for a backend running directly on the host. The Compose app is configured to use the `mailpit` service automatically.
+Development email is captured by Mailpit. Run `docker compose up -d mailpit`; open the inbox at `http://localhost:8025`. The SMTP listener is available at `localhost:1025` for a backend running directly on the host. The Compose app is configured to use the `mailpit` service automatically. Keep `EMAIL_PROVIDER=smtp` locally.
+
+For VPS email delivery, set `NODE_ENV=production`, `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and `EMAIL_FROM` in the backend `.env` (for example, `Landly <accounts@aforsy.biz.id>`). Add and verify the sending domain in Resend first; use the exact SPF/DKIM DNS records Resend provides. Keep the API key out of Git. Local development continues to use Mailpit unless `EMAIL_PROVIDER` is explicitly changed.
 
 Seed or refresh the ATS CV template used by the backend generator with `npm run seed:cv-template`. This safely upserts only the `new_template` record from `public/templates/template.html` and does not clear other database collections.
 
