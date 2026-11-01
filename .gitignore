@@ -5,6 +5,8 @@ uploads/*
 !uploads/.gitkeep
 logs/*
 !logs/.gitkeep
+results/*
+!results/resume_template.html
 *.log
 .DS_Store
 coverage/
