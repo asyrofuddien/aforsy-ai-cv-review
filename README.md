@@ -84,48 +84,32 @@ This service provides automated evaluation of job candidates by:
 
 ## 🚀 Installation
 
-1. **Clone the repository**
+This backend is the API for the Next.js frontend in the sibling `cv-evaluation-frontend` directory.
+
+1. **Install dependencies and configure local services**
 
 ```bash
-git clone https://github.com/asyrofuddien/cv-evaluation-api.git
-cd cv-evaluation-api
-```
-
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Set up environment variables**
-
-```bash
+npm ci
 cp .env.example .env
-# Edit .env with your configuration
 ```
 
-4. **Start MongoDB and Redis (if local)**
+2. **Start MongoDB and Redis**
 
 ```bash
-docker-compose up -d
+docker compose up -d mongodb redis
 ```
 
-5. **Seed the database**
-
-```bash
-npm run seed:all
-```
-
-6. **Create Temp Folder**
-
-```bash
-mkdir uploads/temp
-```
-7. **Start the development server**
+3. **Start the backend**
 
 ```bash
 npm run dev
 ```
+
+The API listens at `http://localhost:3001`; health check: `http://localhost:3001/api/health`. MongoDB and Redis are required. OpenAI and Pinecone keys are optional for local development.
+
+4. **Start the frontend** in `../cv-evaluation-frontend` with `NEXT_PUBLIC_API_URL=http://localhost:3001/api` (see its README). It listens at `http://localhost:3000`.
+
+To run the full backend stack in Docker, use `docker compose up --build`.
 
 ## ⚙️ Configuration
 
@@ -133,7 +117,7 @@ npm run dev
 
 ```env
 # Server
-PORT=3000
+PORT=3001
 NODE_ENV=development
 
 # Database
@@ -160,7 +144,7 @@ ALLOWED_FILE_TYPES=application/pdf,application/vnd.openxmlformats-officedocument
 ### Base URL
 
 ```
-http://localhost:3000/api
+http://localhost:3001/api
 ```
 
 ### Endpoints
@@ -228,7 +212,7 @@ Response (Completed):
 
 ### Additional Endpoints
 
-- `GET /health` - Health check
+- `GET /api/health` - Health check
 - `GET /api/test` - API documentation
 - `GET /api/test/stats` - System statistics
 
@@ -257,12 +241,12 @@ npm run test:integration
 
 ```bash
 # Upload files
-curl -X POST http://localhost:3000/api/upload \
+curl -X POST http://localhost:3001/api/upload \
   -F "cv=@test-files/sample-cv.txt" \
   -F "project=@test-files/sample-project.txt"
 
 # Start evaluation (use IDs from upload response)
-curl -X POST http://localhost:3000/api/evaluate \
+curl -X POST http://localhost:3001/api/evaluate \
   -H "Content-Type: application/json" \
   -d '{
     "cvDocumentId": "your-cv-id",
@@ -271,7 +255,7 @@ curl -X POST http://localhost:3000/api/evaluate \
   }'
 
 # Check result (use ID from evaluate response)
-curl http://localhost:3000/api/result/your-evaluation-id
+curl http://localhost:3001/api/result/your-evaluation-id
 ```
 
 ## 🚢 Deployment

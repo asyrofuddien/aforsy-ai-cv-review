@@ -58,12 +58,12 @@ COPY --from=builder /app/src/data ./src/data
 # Directories your app expects
 RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs cached
 
-# Expose port 3000 (configurable via PORT env var at runtime)
-EXPOSE 3000
+# Expose port 3001 (configurable via PORT env var at runtime)
+EXPOSE 3001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
 
 # Start the app
 CMD ["node", "dist/server.js"]
