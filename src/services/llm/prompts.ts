@@ -84,7 +84,7 @@ Return as JSON with this structure:
   },
 
   CV_EVALUATION: {
-    system: `You are an expert recruiter evaluating a CV against job requirements.
+    system: `You are an expert CV reviewer. Follow the evaluation mode provided in the input.
 Use the following scoring guide for each criterion:
 
 ${JSON.stringify(scoringGuide, null, 2)}
@@ -110,7 +110,14 @@ Provide your evaluation in JSON format with the following structure:
 }
 `,
 
-    user: (cvInfo: any, jobRequirements: any) => `Evaluate this candidate against the job requirements.
+    user: (cvInfo: any, jobRequirements: any) => jobRequirements.mode === 'general' ? `Review this CV as a document for a general job search. Do not infer a target profession, job fit, hiring recommendation, or skills the person may have but did not include.
+
+Review these dimensions: ATS readability and structure, clarity of profile and information consistency, clarity of experience and responsibilities, evidence and impact of achievements, relevant section completeness, and spelling/grammar/format consistency. Base every observation on the supplied CV information. Treat absent details as "not visible in the CV", not as facts about the candidate. Provide concrete revision suggestions and examples where possible.
+
+Candidate Information:
+${JSON.stringify(cvInfo, null, 2)}
+
+Return ONLY JSON with match_rate as a document-quality estimate from 0 to 5, strengths and gaps as evidence-based items, feedback, scores (use technicalSkillsMatch for ATS/readability, experienceLevel for clarity/completeness of experience, relevantAchievements for evidence/impact, culturalFit for clarity/consistency of written information, and aiExperience for spelling/format consistency), and missing_information as a string array. Do not describe role fit or recommend hiring. The score is an estimate of this document, not a guarantee of employment.` : `Evaluate this CV against the supplied job description and requirements. Do not invent requirements. For every match or gap, point to the stated requirement and evidence (or lack of evidence) in the CV; missing evidence does not prove the candidate lacks the skill.
 
 Job Requirements (including weights):
 ${JSON.stringify(jobRequirements, null, 2)}
@@ -198,13 +205,18 @@ Note: The overall score should be calculated as weighted average of individual s
   },
 
   FINAL_SUMMARY: {
-    system: `You are a hiring manager providing final recommendations based on CV.
+    system: `You are an expert CV reviewer. Follow the mode provided in the input.
 
 Rules for Overall Candidate Evaluation:
 - CV Match Rate: Convert the weighted average (1-5 scale) to percentage by multiplying by 20
 - Overall Summary: Provide exactly 3-5 sentences covering strengths, gaps, and recommendations`,
 
-    user: (cvEval: any) => `Based on these evaluations, provide a final candidate assessment:
+    user: (cvEval: any, mode: 'general' | 'job_specific' = 'job_specific') => mode === 'general' ? `Summarize this general CV document review. Do not assess candidate/job fit, give a hiring recommendation, or treat missing CV details as facts about the candidate.
+
+Evaluation:
+${JSON.stringify(cvEval, null, 2)}
+
+Return JSON with "overall_summary" (2-4 neutral sentences about document quality and the most useful improvements), "recommendation" as an empty string, and "missing_information" as an array of information that cannot be assessed from the CV.` : `Based on this job-specific CV evaluation, provide a concise candidate assessment:
 
 CV Evaluation:
 ${JSON.stringify(cvEval, null, 2)}
@@ -212,7 +224,7 @@ ${JSON.stringify(cvEval, null, 2)}
 Return as JSON:
 {
   "overall_summary": "3-5 sentences covering strengths, gaps, and recommendations",
-  "recommendation": "STRONG_YES | YES | CONDITIONAL | NO"
+"recommendation": "STRONG_YES | YES | CONDITIONAL | NO"
 }`,
   },
 

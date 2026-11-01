@@ -15,25 +15,15 @@ export class EvaluationController {
       if (!cvDocumentId) throw new AppError('cvDocumentId is required', 400);
       const cvDocument = await Document.findOne({ _id: cvDocumentId, userId: req.authUser!.userId });
       if (!cvDocument) throw new AppError('CV document not found', 404);
-      let actualJobDescriptionId = jobDescriptionId;
-
-      // If no jobDescriptionId provided, use default
-      if (!jobDescriptionId) {
-        const defaultJob = await JobDescription.findOne({ isDefault: true });
-        if (!defaultJob) {
-          // Create default if not exists
-          const defaultJobDesc = await this.createDefaultJobDescription();
-          actualJobDescriptionId = defaultJobDesc._id;
-        } else {
-          actualJobDescriptionId = defaultJob._id;
-        }
+      if (jobDescriptionId && !(await JobDescription.exists({ _id: jobDescriptionId }))) {
+        throw new AppError('Job description not found', 404);
       }
 
       // Add to queue
       const job = await queueService.addEvaluationJob(
         {
           cvDocumentId,
-          jobDescriptionId: actualJobDescriptionId,
+          jobDescriptionId: jobDescriptionId || undefined,
           candidateName,
         },
         req.authUser!.userId,
@@ -71,38 +61,6 @@ export class EvaluationController {
     },
   );
 
-  private async createDefaultJobDescription() {
-    const defaultData = {
-      slug: 'default',
-      title: 'Senior Backend Engineer',
-      company: 'Tech Company',
-      description:
-        'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
-      requirements: {
-        technical: [
-          '5+ years of backend development experience',
-          'Strong proficiency in Node.js and TypeScript',
-          'Experience with databases (MongoDB, PostgreSQL)',
-          'Knowledge of cloud platforms (AWS, GCP)',
-          'Experience with microservices architecture',
-          'Understanding of AI/ML concepts is a plus',
-        ],
-        soft_skills: [
-          'Strong communication skills',
-          'Team leadership experience',
-          'Problem-solving mindset',
-          'Continuous learning attitude',
-        ],
-      },
-      isDefault: true,
-    };
-
-    const jobDesc = new JobDescription(defaultData);
-    await jobDesc.save();
-    logger.info('Default job description created');
-    return jobDesc;
-  }
-
   // Optional: Add method to get queue status
   getQueueStatus = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
@@ -139,6 +97,7 @@ export class EvaluationController {
       if (evaluation.status === 'completed' && evaluation.result) {
         res.status(200).json({
           id: evaluation.id,
+          candidateName: evaluation.candidateName,
           status: evaluation.status,
           result: {
             cv_match_rate: evaluation.result.cvMatchRate,
@@ -147,6 +106,10 @@ export class EvaluationController {
             project_feedback: evaluation.result.projectFeedback,
             overall_summary: evaluation.result.overallSummary,
             recommendation: evaluation.result.recommendation,
+            mode: evaluation.result.mode || evaluation.evaluationMode,
+            job_description: evaluation.result.jobDescription,
+            missing_information: evaluation.result.missingInformation || [],
+            detailed_scores: evaluation.result.detailedScores,
           },
         });
       } else {

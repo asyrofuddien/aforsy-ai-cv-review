@@ -110,7 +110,7 @@ class EvaluationService {
   }
 
   async processEvaluation(data: any): Promise<any> {
-    const { evaluationId, cvDocumentId, projectDocumentId, jobDescriptionId } = data;
+    const { evaluationId, cvDocumentId, jobDescriptionId } = data;
 
     try {
       logger.info(`🚀 Starting evaluation ${evaluationId}`);
@@ -121,19 +121,20 @@ class EvaluationService {
       });
 
       // Get job description for weights info
-      const jobDesc = await JobDescription.findById(jobDescriptionId);
-      if (!jobDesc) throw new Error('Job description not found');
+      const jobDesc = jobDescriptionId ? await JobDescription.findById(jobDescriptionId) : null;
+      if (jobDescriptionId && !jobDesc) throw new Error('Job description not found');
 
       // Step 1: Evaluate CV
-      logger.info('📄 Step 1: Evaluating CV with weights:', jobDesc.scoringWeights);
+      logger.info('📄 Step 1: Evaluating CV', { mode: jobDesc ? 'job_specific' : 'general' });
       const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId);
 
       // Step 3: Generate final summary
       logger.info('📝 Step 3: Generating final summary');
-      const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation);
+      const mode = jobDesc ? 'job_specific' : 'general';
+      const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation, mode);
 
       const summary = overallSummary?.overall_summary;
-      const recommendation = overallSummary?.recommendation;
+      const recommendation = mode === 'general' ? '' : overallSummary?.recommendation;
 
       // Compile final result dengan info weights yang digunakan
       const finalResult = {
@@ -141,10 +142,13 @@ class EvaluationService {
         cvFeedback: cvResult.evaluation.feedback,
         overallSummary: summary,
         recommendation,
+        mode,
+        jobDescription: jobDesc ? { id: jobDesc.id, title: jobDesc.title, company: jobDesc.company } : undefined,
+        missingInformation: overallSummary?.missing_information || cvResult.evaluation.missing_information || [],
         detailedScores: {
           ...cvResult.evaluation.scores,
         },
-        scoringWeightsUsed: jobDesc.scoringWeights,
+        scoringWeightsUsed: jobDesc?.scoringWeights,
       };
 
       // Update evaluation with result

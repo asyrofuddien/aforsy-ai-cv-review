@@ -4,7 +4,8 @@ import { EvaluationResult, EvaluationStatus } from '../types/evaluation.types';
 export interface IEvaluation extends Document {
   candidateName?: string;
   cvDocumentId: mongoose.Types.ObjectId;
-  jobDescriptionId: mongoose.Types.ObjectId;
+  jobDescriptionId?: mongoose.Types.ObjectId;
+  evaluationMode: 'general' | 'job_specific';
   status: EvaluationStatus;
   result?: EvaluationResult;
   error?: string;
@@ -34,8 +35,10 @@ const EvaluationSchema = new Schema(
     jobDescriptionId: {
       type: Schema.Types.ObjectId,
       ref: 'JobDescription',
-      required: true,
+      required: false,
+      default: undefined,
     },
+    evaluationMode: { type: String, enum: ['general', 'job_specific'], default: 'job_specific', required: true },
     status: {
       type: String,
       enum: ['queued', 'processing', 'completed', 'failed'],
@@ -49,6 +52,13 @@ const EvaluationSchema = new Schema(
       projectFeedback: String,
       overallSummary: String,
       recommendation: String,
+      mode: { type: String, enum: ['general', 'job_specific'] },
+      jobDescription: {
+        id: String,
+        title: String,
+        company: String,
+      },
+      missingInformation: [String],
       detailedScores: {
         technicalSkillsMatch: Number,
         experienceLevel: Number,

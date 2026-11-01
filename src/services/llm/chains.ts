@@ -33,10 +33,12 @@ export class LLMChainService {
 
   async evaluateCV(cvInfo: CVExtractedInfo, jobRequirements: any): Promise<any> {
     try {
-      logger.info('🔗 Chain: Evaluating CV against job requirements');
+      logger.info(`🔗 Chain: Evaluating CV in ${jobRequirements.mode || 'job_specific'} mode`);
 
       const response = await openaiService.completion(PROMPTS.CV_EVALUATION.user(cvInfo, jobRequirements), {
-        systemPrompt: PROMPTS.CV_EVALUATION.system,
+        systemPrompt: jobRequirements.mode === 'general'
+          ? 'You are an expert CV document reviewer. Score document quality only, using evidence from the CV. Do not infer a target role or candidate ability from missing information. Return only the requested JSON.'
+          : PROMPTS.CV_EVALUATION.system,
         temperature: 0.3,
       });
 
@@ -96,12 +98,14 @@ export class LLMChainService {
     }
   }
 
-  async generateFinalSummary(cvEval: any) {
+  async generateFinalSummary(cvEval: any, mode: 'general' | 'job_specific' = 'job_specific') {
     try {
       logger.info('🔗 Chain: Generating final summary');
 
-      const response = await openaiService.completion(PROMPTS.FINAL_SUMMARY.user(cvEval), {
-        systemPrompt: PROMPTS.FINAL_SUMMARY.system,
+      const response = await openaiService.completion(PROMPTS.FINAL_SUMMARY.user(cvEval, mode), {
+        systemPrompt: mode === 'general'
+          ? 'You summarize CV document quality neutrally. Never provide hiring recommendations or job-fit judgments.'
+          : PROMPTS.FINAL_SUMMARY.system,
         temperature: 0.4,
         maxTokens: 500,
       });

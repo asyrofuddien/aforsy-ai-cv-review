@@ -9,6 +9,7 @@ const emailProvider = process.env.EMAIL_PROVIDER || (nodeEnv === 'production' ? 
 
 export default {
   port: process.env.PORT || 3000,
+  host: process.env.HOST || '0.0.0.0',
   nodeEnv,
 
   database: {

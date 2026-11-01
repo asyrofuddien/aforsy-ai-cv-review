@@ -4,8 +4,8 @@ import { AppError } from './error.middleware';
 
 const evaluationSchema = Joi.object({
   cvDocumentId: Joi.string().required(),
-  jobDescriptionId: Joi.string().allow(null).optional(),
-  candidateName: Joi.string().optional(),
+  jobDescriptionId: Joi.string().allow(null, '').optional(),
+  candidateName: Joi.string().trim().max(120).allow('').optional(),
 });
 
 export const validateEvaluation = (req: Request, res: Response, next: NextFunction) => {

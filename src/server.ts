@@ -38,9 +38,9 @@ const start = async () => {
     startWorker();
 
     // Start server
-    const port = config.port;
-    app.listen(port, () => {
-      logger.info(`Server running on port ${port} in ${config.nodeEnv} mode`);
+    const port = Number(config.port);
+    app.listen(port, config.host, () => {
+      logger.info(`Server running on ${config.host}:${port} in ${config.nodeEnv} mode`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

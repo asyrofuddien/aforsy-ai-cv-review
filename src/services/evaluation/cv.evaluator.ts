@@ -7,7 +7,7 @@ import scoringService from './scoring.service';
 import logger from '../../utils/logger';
 
 export class CVEvaluator {
-  async evaluate(cvDocumentId: string, jobDescriptionId: string) {
+  async evaluate(cvDocumentId: string, jobDescriptionId?: string) {
     try {
       logger.info('📄 CV Evaluator: Starting evaluation');
 
@@ -16,25 +16,26 @@ export class CVEvaluator {
       if (!cvDoc) throw new Error('CV document not found');
 
       // Get job description
-      const jobDesc = await JobDescription.findById(jobDescriptionId);
-      if (!jobDesc) throw new Error('Job description not found');
+      const jobDesc = jobDescriptionId ? await JobDescription.findById(jobDescriptionId) : null;
+      if (jobDescriptionId && !jobDesc) throw new Error('Job description not found');
 
       // Extract CV information
       const cvInfo = await chainService.extractCVInfo(cvDoc.content || '');
 
       // Get relevant context from vector DB
-      const relevantContext = await vectordbService.search(
-        `job requirements ${jobDesc.title}`,
-        3,
-        { type: 'job_description' }
-      );
+      const relevantContext = jobDesc
+        ? await vectordbService.search(`job requirements ${jobDesc.title}`, 3, { type: 'job_description' })
+        : [];
 
       // Evaluate CV
       const evaluation = await chainService.evaluateCV(cvInfo, {
-        title: jobDesc.title,
-        requirements: jobDesc.requirements,
+        mode: jobDesc ? 'job_specific' : 'general',
+        title: jobDesc?.title,
+        company: jobDesc?.company,
+        description: jobDesc?.description,
+        requirements: jobDesc?.requirements,
         context: relevantContext,
-        scoringWeigths: jobDesc.scoringWeights,
+        scoringWeigths: jobDesc?.scoringWeights,
       });
 
       // Calculate weighted score using real weights from job description
@@ -43,9 +44,9 @@ export class CVEvaluator {
       );
 
       // Generate detailed feedback
-      const detailedFeedback = scoringService.generateDetailedFeedback(
-        evaluation.scores
-      );
+      const detailedFeedback = jobDesc
+        ? scoringService.generateDetailedFeedback(evaluation.scores)
+        : { strengths: evaluation.strengths || [], improvements: evaluation.gaps || [], recommendations: [] };
 
       return {
         extractedInfo: cvInfo,

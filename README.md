@@ -1,13 +1,14 @@
 # CV Evaluation API
 
-An AI-powered backend service that evaluates candidate CVs and project reports against job descriptions using LLM technology, vector embeddings, and asynchronous processing.
+An AI-powered backend service for reviewing CV documents, with an optional comparison against a saved job description. Reviews run asynchronously using LLM technology and optional vector search.
 
 ## 🎯 Overview
 
 This service provides automated evaluation of job candidates by:
 
-- Accepting CV and project report uploads (PDF, DOCX, TXT)
-- Comparing them against job descriptions using AI
+- Accepting CV uploads (PDF, DOCX, TXT)
+- General document-quality review when no job description is selected
+- Optional comparison against a saved job description
 - Providing detailed scoring and feedback
 - Processing evaluations asynchronously for scalability
 
@@ -150,7 +151,7 @@ http://localhost:3001/api
 
 ### Endpoints
 
-#### 1. Upload Documents
+#### 1. Upload a CV
 
 ```http
 POST /api/upload
@@ -158,20 +159,18 @@ Content-Type: multipart/form-data
 
 Body:
 - cv: file (required)
-- project: file (required)
 
 Response:
 {
   "success": true,
   "message": "File uploaded successfully",
   "data": {
-    "cvDocumentId": "507f1f77bcf86cd799439011",
-    "projectDocumentId": "507f1f77bcf86cd799439012"
+    "cvDocumentId": "507f1f77bcf86cd799439011"
   }
 }
 ```
 
-#### 2. Start Evaluation
+#### 2. Start CV Review
 
 ```http
 POST /api/evaluate
@@ -180,7 +179,6 @@ Content-Type: application/json
 Body:
 {
   "cvDocumentId": "507f1f77bcf86cd799439011",
-  "projectDocumentId": "507f1f77bcf86cd799439012",
   "candidateName": "John Doe",
   "jobDescriptionId": "optional-job-id"
 }
@@ -192,21 +190,24 @@ Response:
 }
 ```
 
+`candidateName` and `jobDescriptionId` are optional. Omitting `jobDescriptionId` reviews document quality without assuming a target role. Providing it enables job-specific review. Project reports are not part of this endpoint.
+
 #### 3. Get Result
 
 ```http
-GET /api/result/{evaluationId}
+GET /api/evaluate/{evaluationId}
 
 Response (Completed):
 {
   "id": "507f1f77bcf86cd799439013",
   "status": "completed",
   "result": {
-    "cv_match_rate": 0.82,
-    "cv_feedback": "Strong in backend and cloud, limited AI integration experience.",
-    "project_score": 7.5,
-    "project_feedback": "Meets prompt chaining requirements, lacks error handling robustness.",
-    "overall_summary": "Good candidate fit, would benefit from deeper RAG knowledge."
+    "mode": "general",
+    "job_description": null,
+    "cv_match_rate": 82,
+    "cv_feedback": "Document quality feedback based on the CV content.",
+    "missing_information": [],
+    "overall_summary": "A neutral summary of CV document quality and improvements."
   }
 }
 ```
