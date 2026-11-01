@@ -1,3 +1,7 @@
+www.aforsy.biz.id {
+	redir https://aforsy.biz.id{uri} permanent
+}
+
 aforsy.biz.id {
 	encode zstd gzip
 
