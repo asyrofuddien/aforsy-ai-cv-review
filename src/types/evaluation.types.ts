@@ -217,6 +217,7 @@ export interface Resume {
 }
 
 export interface EvaluationRequest {
+  jobDescriptionText?: string;
   cvDocumentId: string;
   jobDescriptionId?: string;
   candidateName?: string;
@@ -228,8 +229,9 @@ export interface CVMatcherRequest {
 }
 
 export interface EvaluationResult {
+  criteria?: { name: string; score: number; evidence: string; suggestion: string }[];
   mode?: 'general' | 'job_specific';
-  jobDescription?: { id: string; title: string; company: string };
+  jobDescription?: { id: string; title: string; company: string; text?: string };
   missingInformation?: string[];
   cvMatchRate: number;
   cvFeedback: string;

@@ -366,6 +366,13 @@ src/
 
 # Local email and CV template setup
 
+## AI CV Review (Phase 3)
+
+The authenticated `/evaluate` workflow uploads a CV only (PDF, DOCX or TXT), then posts to `/api/evaluate` with `cvDocumentId` and optional `candidateName`. Supply either `jobDescriptionText` (up to 20,000 characters) or `jobDescriptionId`, or omit both for a general document review. Whitespace-only text selects general mode; invalid types, oversized text and conflicting sources return 400. Existing document ownership checks apply.
+
+Results include `mode`, `criteria` (name, score from 0–5, CV evidence, suggested revision), `missing_information` and an equal-weight aggregate `cv_match_rate` from 0–100. In general mode this is a document quality estimate, not role fit. A job-specific result preserves the supplied job description in `job_description.text`. Review relies on extracted text and cannot verify visual layout. Incomplete AI criterion output fails the job instead of displaying a fabricated score. Project uploads are not part of this workflow; CV Matcher remains a separate job discovery feature.
+
+
 Development email is captured by Mailpit. Run `docker compose up -d mailpit`; open the inbox at `http://localhost:8025`. The SMTP listener is available at `localhost:1025` for a backend running directly on the host. The Compose app is configured to use the `mailpit` service automatically. Keep `EMAIL_PROVIDER=smtp` locally.
 
 For VPS email delivery, set `NODE_ENV=production`, `EMAIL_PROVIDER=resend`, `RESEND_API_KEY`, and `EMAIL_FROM` in the backend `.env` (for example, `Landly <accounts@aforsy.biz.id>`). Add and verify the sending domain in Resend first; use the exact SPF/DKIM DNS records Resend provides. Keep the API key out of Git. Local development continues to use Mailpit unless `EMAIL_PROVIDER` is explicitly changed.

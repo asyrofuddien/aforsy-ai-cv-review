@@ -57,8 +57,10 @@ const EvaluationSchema = new Schema(
         id: String,
         title: String,
         company: String,
+        text: String,
       },
       missingInformation: [String],
+      criteria: [{ name: String, score: Number, evidence: String, suggestion: String }],
       detailedScores: {
         technicalSkillsMatch: Number,
         experienceLevel: Number,

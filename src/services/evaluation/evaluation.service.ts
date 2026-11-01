@@ -110,7 +110,7 @@ class EvaluationService {
   }
 
   async processEvaluation(data: any): Promise<any> {
-    const { evaluationId, cvDocumentId, jobDescriptionId } = data;
+    const { evaluationId, cvDocumentId, jobDescriptionId, jobDescriptionText } = data;
 
     try {
       logger.info(`🚀 Starting evaluation ${evaluationId}`);
@@ -126,24 +126,25 @@ class EvaluationService {
 
       // Step 1: Evaluate CV
       logger.info('📄 Step 1: Evaluating CV', { mode: jobDesc ? 'job_specific' : 'general' });
-      const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId);
+      const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId, jobDescriptionText);
 
       // Step 3: Generate final summary
       logger.info('📝 Step 3: Generating final summary');
-      const mode = jobDesc ? 'job_specific' : 'general';
+      const mode = jobDesc || jobDescriptionText ? 'job_specific' : 'general';
       const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation, mode);
 
-      const summary = overallSummary?.overall_summary;
+      const summary = overallSummary?.overall_summary || cvResult.evaluation.feedback;
       const recommendation = mode === 'general' ? '' : overallSummary?.recommendation;
 
       // Compile final result dengan info weights yang digunakan
       const finalResult = {
         cvMatchRate: cvResult.matchRate,
+        criteria: cvResult.evaluation.criteria,
         cvFeedback: cvResult.evaluation.feedback,
         overallSummary: summary,
         recommendation,
         mode,
-        jobDescription: jobDesc ? { id: jobDesc.id, title: jobDesc.title, company: jobDesc.company } : undefined,
+        jobDescription: jobDesc ? { id: jobDesc.id, title: jobDesc.title, company: jobDesc.company, text: JSON.stringify({ description: jobDesc.description, requirements: jobDesc.requirements }) } : jobDescriptionText ? { id: '', title: 'Pasted job description', company: '', text: jobDescriptionText } : undefined,
         missingInformation: overallSummary?.missing_information || cvResult.evaluation.missing_information || [],
         detailedScores: {
           ...cvResult.evaluation.scores,

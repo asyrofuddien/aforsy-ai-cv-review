@@ -3,8 +3,9 @@ import Joi from 'joi';
 import { AppError } from './error.middleware';
 
 const evaluationSchema = Joi.object({
-  cvDocumentId: Joi.string().required(),
-  jobDescriptionId: Joi.string().allow(null, '').optional(),
+  cvDocumentId: Joi.string().hex().length(24).required(),
+  jobDescriptionId: Joi.string().hex().length(24).allow(null, '').optional(),
+  jobDescriptionText: Joi.string().trim().max(20000).allow('', null).optional(),
   candidateName: Joi.string().trim().max(120).allow('').optional(),
 });
 

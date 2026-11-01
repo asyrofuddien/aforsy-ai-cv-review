@@ -12,6 +12,8 @@ export class EvaluationController {
   startEvaluation = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
       const { cvDocumentId, jobDescriptionId, candidateName } = req.body;
+      const jobDescriptionText = req.body.jobDescriptionText?.trim() || undefined;
+      if (jobDescriptionText && jobDescriptionId) throw new AppError('Use either pasted job description or a saved job, not both', 400);
       if (!cvDocumentId) throw new AppError('cvDocumentId is required', 400);
       const cvDocument = await Document.findOne({ _id: cvDocumentId, userId: req.authUser!.userId });
       if (!cvDocument) throw new AppError('CV document not found', 404);
@@ -25,6 +27,7 @@ export class EvaluationController {
           cvDocumentId,
           jobDescriptionId: jobDescriptionId || undefined,
           candidateName,
+          jobDescriptionText,
         },
         req.authUser!.userId,
       );
@@ -110,12 +113,14 @@ export class EvaluationController {
             job_description: evaluation.result.jobDescription,
             missing_information: evaluation.result.missingInformation || [],
             detailed_scores: evaluation.result.detailedScores,
+            criteria: evaluation.result.criteria || [],
           },
         });
       } else {
         res.status(200).json({
           id: evaluation.id,
           status: evaluation.status,
+          error: evaluation.status === 'failed' ? 'Review could not be completed. Please try again with a readable CV.' : undefined,
         });
       }
     },
