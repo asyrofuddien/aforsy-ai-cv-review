@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import puppeteer from 'puppeteer';
+import pdf from 'pdf-parse';
 import { randomUUID } from 'crypto';
 import { asyncHandler } from '../middlewares/error.middleware';
 import { Resume, ResumeNew } from '../types/evaluation.types';
@@ -57,10 +58,21 @@ const atsTemplateStyles = `
   body.ats-template--compact li, body.ats-template--compact .entry-description, body.ats-template--compact .simple-text { font-size: 8.5pt; line-height: 1.25; }
 `;
 
-const applyAtsTemplateStyle = (html: string, style?: string): string => {
-  const selectedStyle = style === 'modern' || style === 'compact' ? style : 'classic';
+const applyAtsTemplateStyle = (html: string, templateId?: string): string => {
+  if (templateId && !['classic', 'modern', 'compact'].includes(templateId)) {
+    throw new Error('Unsupported ATS template');
+  }
+  const selectedStyle = templateId || 'classic';
   const styledHtml = html.replace(/<body\b[^>]*>/i, `<body class="ats-template--${selectedStyle}">`);
-  return styledHtml.replace(/<\/head>/i, `<style>${atsTemplateStyles}</style></head>`);
+  const result = styledHtml.replace(/<\/head>/i, `<style>${atsTemplateStyles}</style></head>`);
+  const hasSemanticHeadings = /<h1\b/i.test(result) && /<h2\b/i.test(result);
+  const hasFontAndMargins = /font-family\s*:/i.test(result) && /(?:padding|margin)\s*:/i.test(result);
+  const hasUnsupportedLayout = /<(?:table|img)\b/i.test(result);
+  const hasUnsafeLinks = [...result.matchAll(/\bhref\s*=\s*["']([^"']*)["']/gi)].some(([, href]) => /^\s*(?:javascript|data):/i.test(href));
+  if (!hasSemanticHeadings || !hasFontAndMargins || hasUnsupportedLayout || hasUnsafeLinks) {
+    throw new Error('ATS template validation failed');
+  }
+  return result;
 };
 
 export class CVGeneratorController {
@@ -280,7 +292,7 @@ export class CVGeneratorController {
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
-      const html = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplate);
+      const html = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplateId);
 
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
@@ -352,6 +364,11 @@ export class CVGeneratorController {
 
       // Convert PDF to base64
       const pdfBuffer = fs.readFileSync(pdfPath);
+      const parsedPdf = await pdf(pdfBuffer);
+      const extractedText = parsedPdf.text.replace(/\s+/g, ' ').trim();
+      if (parsedPdf.numpages < 1 || !extractedText.includes(resumeData.personalInfo.name.trim())) {
+        throw new Error('Generated PDF failed ATS text extraction validation');
+      }
       const pdfBase64 = pdfBuffer.toString('base64');
 
       const generatedRecord = await AtsPdf.create({
