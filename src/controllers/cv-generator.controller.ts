@@ -58,7 +58,7 @@ const atsTemplateStyles = `
   body.ats-template--compact li, body.ats-template--compact .entry-description, body.ats-template--compact .simple-text { font-size: 8.5pt; line-height: 1.25; }
 `;
 
-const applyAtsTemplateStyle = (html: string, templateId?: string): string => {
+const applyAtsTemplateStyle = (html: string, templateId?: string): { html: string; pageMargin: string } => {
   if (templateId && !['classic', 'modern', 'compact'].includes(templateId)) {
     throw new Error('Unsupported ATS template');
   }
@@ -72,7 +72,7 @@ const applyAtsTemplateStyle = (html: string, templateId?: string): string => {
   if (!hasSemanticHeadings || !hasFontAndMargins || hasUnsupportedLayout || hasUnsafeLinks) {
     throw new Error('ATS template validation failed');
   }
-  return result;
+  return { html: result, pageMargin: selectedStyle === 'compact' ? '0.3in' : '0.4in' };
 };
 
 export class CVGeneratorController {
@@ -292,7 +292,8 @@ export class CVGeneratorController {
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
-      const html = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplateId);
+      const renderedTemplate = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplateId);
+      const html = renderedTemplate.html;
 
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
@@ -351,10 +352,10 @@ export class CVGeneratorController {
         format: 'A4',
         printBackground: true,
         margin: {
-          top: '0.4in',
-          right: '0.4in',
-          bottom: '0.4in',
-          left: '0.4in',
+          top: renderedTemplate.pageMargin,
+          right: renderedTemplate.pageMargin,
+          bottom: renderedTemplate.pageMargin,
+          left: renderedTemplate.pageMargin,
         },
         timeout: 60000, // Add PDF generation timeout
       });
