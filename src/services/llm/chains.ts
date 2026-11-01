@@ -11,6 +11,7 @@ export class LLMChainService {
       const response = await openaiService.completion(PROMPTS.CV_EXTRACTION.user(cvContent), {
         systemPrompt: PROMPTS.CV_EXTRACTION.system,
         temperature: 0.1, // Low temperature for consistent extraction
+        maxTokens: 3500,
       });
 
       const parsed = this.parseJSON(response, {
@@ -21,7 +22,7 @@ export class LLMChainService {
         experiences: [],
         education: [],
         projects: [],
-      });
+      }, true);
 
       logger.info('✅ Chain: CV extraction completed');
       return parsed;
@@ -50,7 +51,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
         gaps: [],
         feedback: 'Unable to evaluate',
         scores: {},
-      });
+      }, true);
 
       logger.info('✅ Chain: CV evaluation completed');
       return parsed;
@@ -109,7 +110,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
           ? 'You summarize CV document quality neutrally. Never provide hiring recommendations or job-fit judgments.'
           : PROMPTS.FINAL_SUMMARY.system,
         temperature: 0.4,
-        maxTokens: 500,
+        maxTokens: 1000,
       });
 
       const parsed = this.parseJSON(response, {
@@ -118,7 +119,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
         gaps: [],
         feedback: 'Unable to evaluate',
         scores: {},
-      });
+      }, true);
 
       logger.info('✅ Chain: Final summary generated');
       return parsed;
@@ -128,7 +129,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
     }
   }
 
-  private parseJSON(text: string, defaultValue: any): any {
+  private parseJSON(text: string, defaultValue: any, strict = false): any {
     try {
       // Clean the response - remove markdown code blocks if present
       let cleaned = text
@@ -152,6 +153,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
     } catch (error) {
       logger.error('Failed to parse JSON response:');
       logger.error('Parse error:', error);
+      if (strict) throw new Error('AI returned malformed or truncated JSON. Please retry the review.');
       
       // Try to extract partial JSON for debugging
       try {
@@ -172,6 +174,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
       const response = await openaiService.completion(PROMPTS.EXTRACT_CV_STRUCTURED_JSON.user(rawText), {
         systemPrompt: PROMPTS.EXTRACT_CV_STRUCTURED_JSON.system,
         temperature: 0.1, // Low temperature for consistent extraction
+        maxTokens: 3500,
       });
 
       const parsed = this.parseJSON(response, {
@@ -184,7 +187,7 @@ JOB: ${JSON.stringify(jobRequirements)}`, {
         work_experience: [],
         education: [],
         seniority: 'Mid-level',
-      });
+      }, true);
 
       // Validate critical fields
       if (!parsed.name || parsed.name === '' || parsed.name === 'Unknown Candidate') {
