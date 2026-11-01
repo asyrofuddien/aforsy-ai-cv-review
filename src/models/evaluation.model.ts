@@ -61,6 +61,8 @@ const EvaluationSchema = new Schema(
       },
       missingInformation: [String],
       criteria: [{ name: String, score: Number, evidence: String, suggestion: String }],
+      suggestedRoles: [String],
+      jobMatches: [Schema.Types.Mixed],
       detailedScores: {
         technicalSkillsMatch: Number,
         experienceLevel: Number,

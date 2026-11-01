@@ -114,6 +114,8 @@ export class EvaluationController {
             missing_information: evaluation.result.missingInformation || [],
             detailed_scores: evaluation.result.detailedScores,
             criteria: evaluation.result.criteria || [],
+            suggested_roles: evaluation.result.suggestedRoles || [],
+            job_matches: evaluation.result.jobMatches || [],
           },
         });
       } else {

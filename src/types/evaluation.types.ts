@@ -230,6 +230,8 @@ export interface CVMatcherRequest {
 
 export interface EvaluationResult {
   criteria?: { name: string; score: number; evidence: string; suggestion: string }[];
+  suggestedRoles?: string[];
+  jobMatches?: JobListing[];
   mode?: 'general' | 'job_specific';
   jobDescription?: { id: string; title: string; company: string; text?: string };
   missingInformation?: string[];
