@@ -155,8 +155,11 @@ class EvaluationService {
       // Update evaluation with result
       await Evaluation.findByIdAndUpdate(evaluationId, {
         status: 'completed',
+        candidateName: cvResult.extractedInfo?.name && cvResult.extractedInfo.name !== 'Unknown' && cvResult.extractedInfo.name !== 'Unknown Candidate'
+          ? cvResult.extractedInfo.name
+          : undefined,
         result: finalResult,
-      });
+      }, { omitUndefined: true });
 
       logger.info(`✅ Evaluation ${evaluationId} completed successfully`);
       return finalResult;
