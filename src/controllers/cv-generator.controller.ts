@@ -85,6 +85,7 @@ export class CVGeneratorController {
     }
 
     let browser;
+    let temporaryFiles: string[] = [];
     try {
       // Get current date and sanitized name
       const dateStr = getFormattedDate();
@@ -106,6 +107,7 @@ export class CVGeneratorController {
 
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
+      temporaryFiles.push(htmlPath);
       fs.writeFileSync(htmlPath, html);
 
       // Generate PDF with optimized settings
@@ -154,6 +156,7 @@ export class CVGeneratorController {
       await page.evaluateHandle('document.fonts.ready');
 
       const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
+      temporaryFiles.push(pdfPath);
       await page.pdf({
         path: pdfPath,
         format: 'A4',
@@ -211,6 +214,11 @@ export class CVGeneratorController {
           console.error('Error closing browser:', e);
         }
       }
+      for (const filePath of temporaryFiles) {
+        try { fs.unlinkSync(filePath); } catch (error: any) {
+          if (error.code !== 'ENOENT') console.error('Error removing temporary CV file:', error);
+        }
+      }
     }
   });
 
@@ -233,6 +241,7 @@ export class CVGeneratorController {
       },
     );
     let browser;
+    let temporaryFiles: string[] = [];
     try {
       // Get current date and sanitized name
       const dateStr = getFormattedDate();
@@ -255,6 +264,7 @@ export class CVGeneratorController {
 
       // Save HTML file
       const htmlPath = path.join(resultsDir, `${fileName}.html`);
+      temporaryFiles.push(htmlPath);
       fs.writeFileSync(htmlPath, html);
 
       // Generate PDF with optimized settings
@@ -303,6 +313,7 @@ export class CVGeneratorController {
       await page.evaluateHandle('document.fonts.ready');
 
       const pdfPath = path.join(resultsDir, `${fileName}.pdf`);
+      temporaryFiles.push(pdfPath);
       await page.pdf({
         path: pdfPath,
         format: 'A4',
@@ -358,6 +369,11 @@ export class CVGeneratorController {
           await browser.close();
         } catch (e) {
           console.error('Error closing browser:', e);
+        }
+      }
+      for (const filePath of temporaryFiles) {
+        try { fs.unlinkSync(filePath); } catch (error: any) {
+          if (error.code !== 'ENOENT') console.error('Error removing temporary CV file:', error);
         }
       }
     }
