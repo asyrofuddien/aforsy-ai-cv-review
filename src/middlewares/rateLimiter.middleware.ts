@@ -4,7 +4,9 @@ import config from '../config/config';
 export const rateLimiterMiddleware = rateLimit({
   windowMs: config.rateLimit.windowMs,
   max: config.rateLimit.maxRequests,
-  skip: (req) => req.path === '/health',
+  // Auth endpoints have their own per-operation limits. Excluding them here
+  // avoids normal API traffic consuming a user's login budget.
+  skip: (req) => req.path === '/health' || req.path.startsWith('/auth/'),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
