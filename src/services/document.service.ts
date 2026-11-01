@@ -5,7 +5,7 @@ import logger from '../utils/logger';
 import path from 'path';
 
 export class DocumentService {
-  async saveDocument(fileData: Express.Multer.File, type: 'cv' | 'project', codeId: string, content?: string): Promise<IDocument> {
+  async saveDocument(fileData: Express.Multer.File, type: 'cv' | 'project', userId: string, content?: string): Promise<IDocument> {
     try {
       // Ensure we save absolute path for reliable access later
       const absolutePath = path.isAbsolute(fileData.path) 
@@ -18,7 +18,7 @@ export class DocumentService {
         mimeType: fileData.mimetype,
         path: absolutePath,
         size: fileData.size,
-        code_id: codeId,
+        userId,
         type,
         content,
       });

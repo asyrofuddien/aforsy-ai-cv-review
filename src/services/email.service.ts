@@ -1,0 +1,62 @@
+import nodemailer from 'nodemailer';
+import config from '../config/config';
+import logger from '../utils/logger';
+import { EmailTokenPurpose } from '../models/emailToken.model';
+
+interface AuthEmail {
+  email: string;
+  displayName: string;
+  purpose: EmailTokenPurpose;
+  url: string;
+}
+
+const escapeHtml = (value: string): string =>
+  value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!);
+
+export const sendAuthEmail = async ({ email, displayName, purpose, url }: AuthEmail): Promise<void> => {
+  const isVerification = purpose === 'verify-email';
+  const subject = isVerification ? 'Verify your Landly email' : 'Reset your Landly password';
+  const action = isVerification ? 'Verify email' : 'Reset password';
+  const safeName = escapeHtml(displayName);
+  const safeUrl = escapeHtml(url);
+  const intro = isVerification
+    ? 'Confirm your email address to finish setting up your account.'
+    : 'We received a request to reset the password for your Landly account.';
+  const text = `Hi ${displayName},\n\n${intro}\n\n${action}: ${url}\n\nThis link expires in one hour. If you did not request this, you can ignore this email.`;
+  const html = `<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
+  <body style="margin:0;padding:32px 16px;background-color:#eff6ff;color:#303c4b;font-family:Arial,'Helvetica Neue',sans-serif">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto">
+      <tr><td style="padding:8px 0 20px;text-align:center"><span style="color:#3989db;font-size:26px;font-weight:700;letter-spacing:-.5px">Landly</span></td></tr>
+      <tr><td style="padding:36px 40px;background:#fff;border:1px solid #dbeafe;border-radius:20px">
+        <p style="margin:0 0 8px;color:#64748b;font-size:14px">Account security</p>
+        <h1 style="margin:0 0 20px;color:#243244;font-size:24px;line-height:1.3">${action}</h1>
+        <p style="margin:0 0 12px;font-size:15px;line-height:1.7">Hi ${safeName},</p>
+        <p style="margin:0 0 26px;color:#526174;font-size:15px;line-height:1.7">${intro}</p>
+        <table role="presentation" cellspacing="0" cellpadding="0"><tr><td style="border-radius:10px;background:#3989db">
+          <a href="${safeUrl}" style="display:inline-block;padding:13px 22px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px">${action}</a>
+        </td></tr></table>
+        <p style="margin:26px 0 8px;color:#64748b;font-size:13px;line-height:1.6">This link expires in one hour. If you did not request this, you can safely ignore this email.</p>
+        <p style="margin:0;color:#64748b;font-size:13px;line-height:1.6">If the button does not work, copy and paste this link into your browser:</p>
+        <p style="margin:8px 0 0;word-break:break-all;font-size:12px;line-height:1.6"><a href="${safeUrl}" style="color:#2878c7">${safeUrl}</a></p>
+      </td></tr>
+      <tr><td style="padding:20px 12px;text-align:center;color:#64748b;font-size:12px;line-height:1.6">Landly · CV tools for your next opportunity</td></tr>
+    </table>
+  </body>
+</html>`;
+
+  if (!config.auth.smtpHost) {
+    if (config.nodeEnv === 'production') throw new Error('Email delivery is not configured');
+    logger.info(`Development auth email (${purpose}) for ${email}: ${url}`);
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: config.auth.smtpHost,
+    port: config.auth.smtpPort,
+    secure: config.auth.smtpSecure,
+    auth: config.auth.smtpUser ? { user: config.auth.smtpUser, pass: config.auth.smtpPassword } : undefined,
+  });
+  await transporter.sendMail({ from: config.auth.emailFrom, to: email, subject, text, html });
+};

@@ -4,8 +4,12 @@ import { validateEvaluation } from '../middlewares/validation.middleware';
 
 const router = Router();
 
+router.get('/draft', generateCv.GetDraft);
+router.put('/draft', generateCv.SaveDraft);
+router.delete('/draft', generateCv.DeleteDraft);
 router.post('/', generateCv.GenerateCv);
 router.post('/new', generateCv.GenerateCvNew);
-router.post('/get-all', generateCv.FindAllCv);
+router.get('/get-all', generateCv.FindAllCv);
+router.get('/:id/html', generateCv.GetGeneratedHtml);
 
 export default router;

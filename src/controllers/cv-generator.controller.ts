@@ -3,12 +3,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 import puppeteer from 'puppeteer';
+import { randomUUID } from 'crypto';
 import { asyncHandler } from '../middlewares/error.middleware';
 import { Resume, ResumeNew } from '../types/evaluation.types';
-import codeModel from '../models/code.model';
 import AtsPdf from '../models/atsPDF.model';
 import TemplateModel from '../models/Template.model';
-import config from '../config/config';
+import CvDraft from '../models/cvDraft.model';
 
 // Register Handlebars helper (register once, outside the class)
 Handlebars.registerHelper('lookup', function (obj: Record<string, any>, field: string): any {
@@ -32,13 +32,36 @@ const sanitizeFilename = (name: string): string => {
 };
 
 export class CVGeneratorController {
+  GetDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const draft = await CvDraft.findOne({ userId: req.authUser!.userId }).lean();
+    res.json({ success: true, data: draft?.data || null, updatedAt: draft?.updatedAt || null });
+  });
+
+  SaveDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
+      res.status(400).json({ success: false, message: 'Draft data must be an object' });
+      return;
+    }
+    if (JSON.stringify(req.body).length > 250_000) {
+      res.status(413).json({ success: false, message: 'Draft is too large' });
+      return;
+    }
+    const draft = await CvDraft.findOneAndUpdate(
+      { userId: req.authUser!.userId },
+      { $set: { data: req.body }, $setOnInsert: { userId: req.authUser!.userId } },
+      { upsert: true, new: true, runValidators: true },
+    );
+    res.json({ success: true, data: draft.data, updatedAt: draft.updatedAt });
+  });
+
+  DeleteDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    await CvDraft.deleteOne({ userId: req.authUser!.userId });
+    res.json({ success: true, message: 'Draft deleted' });
+  });
+
   // Generate CV as PDF
   GenerateCv = asyncHandler(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const resumeData: Resume = req.body;
-    const baseUrl = config.backendApi;
-
-    const codeData = await codeModel.findOne({ code: resumeData.code });
-    const codeId = codeData?._id;
 
     // Validate required fields
     if (!resumeData.name || !resumeData.email) {
@@ -54,7 +77,7 @@ export class CVGeneratorController {
       // Get current date and sanitized name
       const dateStr = getFormattedDate();
       const sanitizedName = sanitizeFilename(resumeData.name);
-      const fileName = `ATS_${sanitizedName}_${dateStr}_${resumeData.code}`;
+      const fileName = `ATS_${sanitizedName}_${dateStr}_${randomUUID().slice(0, 8)}`;
 
       // Ensure results directory exists
       const resultsDir = path.join(process.cwd(), 'results');
@@ -139,13 +162,15 @@ export class CVGeneratorController {
       const pdfBuffer = fs.readFileSync(pdfPath);
       const pdfBase64 = pdfBuffer.toString('base64');
 
-      await AtsPdf.create({
+      const generatedRecord = await AtsPdf.create({
         file_name: `${fileName}.pdf`,
         pdf_file: pdfBase64,
-        html_file: `${baseUrl}/results/${fileName}.html`,
-        code_id: codeId,
+        html_file: '',
+        userId: req.authUser!.userId,
         html_text: html,
       });
+      generatedRecord.html_file = `/api/cv-generator/${generatedRecord.id}/html`;
+      await generatedRecord.save();
 
       // Send success response
       res.status(201).json({
@@ -153,7 +178,7 @@ export class CVGeneratorController {
         message: 'CV generated successfully',
         data: {
           fileName: `${fileName}.pdf`,
-          htmlPath: `/results/${fileName}.html`,
+          htmlPath: generatedRecord.html_file,
           pdfPath: `/results/${fileName}.pdf`,
           generatedAt: dateStr,
         },
@@ -179,10 +204,6 @@ export class CVGeneratorController {
 
   GenerateCvNew = asyncHandler(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
     const resumeData: ResumeNew = req.body;
-    const baseUrl = config.backendApi;
-
-    const codeData = await codeModel.findOne({ code: resumeData.code });
-    const codeId = codeData?._id;
 
     Handlebars.registerHelper('eq', function (a, b) {
       return a === b;
@@ -204,7 +225,7 @@ export class CVGeneratorController {
       // Get current date and sanitized name
       const dateStr = getFormattedDate();
       const sanitizedName = sanitizeFilename(resumeData.personalInfo.name);
-      const fileName = `ATS_${sanitizedName}_${dateStr}_${resumeData.code}`;
+      const fileName = `ATS_${sanitizedName}_${dateStr}_${randomUUID().slice(0, 8)}`;
 
       // Ensure results directory exists
       const resultsDir = path.join(process.cwd(), 'results');
@@ -290,13 +311,15 @@ export class CVGeneratorController {
       const pdfBuffer = fs.readFileSync(pdfPath);
       const pdfBase64 = pdfBuffer.toString('base64');
 
-      await AtsPdf.create({
+      const generatedRecord = await AtsPdf.create({
         file_name: `${fileName}.pdf`,
         pdf_file: pdfBase64,
-        html_file: `${baseUrl}/results/${fileName}.html`,
-        code_id: codeId,
+        html_file: '',
+        userId: req.authUser!.userId,
         html_text: html,
       });
+      generatedRecord.html_file = `/api/cv-generator/${generatedRecord.id}/html`;
+      await generatedRecord.save();
 
       // Send success response
       res.status(201).json({
@@ -304,7 +327,7 @@ export class CVGeneratorController {
         message: 'CV generated successfully',
         data: {
           fileName: `${fileName}.pdf`,
-          htmlPath: `/results/${fileName}.html`,
+          htmlPath: generatedRecord.html_file,
           pdfPath: `/results/${fileName}.pdf`,
           generatedAt: dateStr,
         },
@@ -329,15 +352,22 @@ export class CVGeneratorController {
   });
 
   FindAllCv = asyncHandler(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const code = req.body.code;
-    const codeData = await codeModel.findOne({ code: code });
-    const codeId = codeData?._id;
-    const atsDatas = await AtsPdf.find({ code_id: codeId }).sort('-createdAt').select('-__v -code_id');
+    const atsDatas = await AtsPdf.find({ userId: req.authUser!.userId }).sort('-createdAt').select('-__v -code_id');
     res.status(201).json({
       success: true,
       message: 'CV generated successfully',
       data: atsDatas,
     });
+  });
+
+  GetGeneratedHtml = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const document = await AtsPdf.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('html_text');
+    if (!document) {
+      res.status(404).json({ success: false, message: 'Generated CV not found' });
+      return;
+    }
+    res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:");
+    res.type('html').send(document.html_text || '');
   });
 }
 

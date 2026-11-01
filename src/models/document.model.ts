@@ -8,6 +8,8 @@ export interface IDocument extends Document {
   size: number;
   content?: string;
   type: 'cv' | 'project';
+  userId?: mongoose.Types.ObjectId;
+  legacyUnclaimed: boolean;
   uploadedAt: Date;
 }
 
@@ -21,8 +23,11 @@ const DocumentSchema = new Schema({
   code_id: {
     type: Schema.Types.ObjectId,
     ref: 'Document',
-    required: true,
+    required: false,
+    index: true,
   },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  legacyUnclaimed: { type: Boolean, default: false, index: true },
   type: {
     type: String,
     enum: ['cv', 'project'],

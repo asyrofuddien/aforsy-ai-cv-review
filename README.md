@@ -363,6 +363,12 @@ src/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+# Local email and CV template setup
+
+Development email is captured by Mailpit. Run `docker compose up -d mailpit`; open the inbox at `http://localhost:8025`. The SMTP listener is available at `localhost:1025` for a backend running directly on the host. The Compose app is configured to use the `mailpit` service automatically.
+
+Seed or refresh the ATS CV template used by the backend generator with `npm run seed:cv-template`. This safely upserts only the `new_template` record from `public/templates/template.html` and does not clear other database collections.
+
 ## 📞 Support
 
 For issues and questions:

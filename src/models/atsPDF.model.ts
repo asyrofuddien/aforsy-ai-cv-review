@@ -1,7 +1,13 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ICvAts extends Document {
-  code_id: mongoose.Types.ObjectId;
+  code_id?: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
+  legacyUnclaimed: boolean;
+  html_file?: string;
+  pdf_file?: string;
+  html_text?: string;
+  file_name?: string;
 }
 
 const CvAtsSchema = new Schema(
@@ -9,8 +15,11 @@ const CvAtsSchema = new Schema(
     code_id: {
       type: Schema.Types.ObjectId,
       ref: 'Document',
-      required: true,
+      required: false,
+      index: true,
     },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+    legacyUnclaimed: { type: Boolean, default: false, index: true },
     html_file: {
       type: String,
     },

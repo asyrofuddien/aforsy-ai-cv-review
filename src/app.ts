@@ -1,9 +1,12 @@
+/// <reference path="./types/auth.d.ts" />
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import routes from './routes';
 import { errorMiddleware } from './middlewares/error.middleware';
 import { rateLimiterMiddleware } from './middlewares/rateLimiter.middleware';
+import { authenticate } from './middlewares/auth.middleware';
+import Document from './models/document.model';
 import config from './config/config';
 const path = require('path');
 
@@ -63,12 +66,15 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
-app.use('/results', express.static(path.join(__dirname, '../results')));
-
-app.get('/api/pdf/:filename', (req, res) => {
+app.get('/api/pdf/:filename', authenticate, async (req, res, next) => {
   const { filename } = req.params;
-  const filePath = path.join(__dirname, 'uploads/temp', filename);
-  res.sendFile(filePath);
+  try {
+    const document = await Document.findOne({ filename, userId: req.authUser!.userId }).select('path');
+    if (!document) return res.status(404).json({ success: false, message: 'Document not found' });
+    res.sendFile(path.resolve(document.path), (error) => error && next(error));
+  } catch (error) {
+    next(error);
+  }
 });
 
 // Error handling

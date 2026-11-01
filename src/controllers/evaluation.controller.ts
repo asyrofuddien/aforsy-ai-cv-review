@@ -6,12 +6,15 @@ import Evaluation from '../models/evaluation.model';
 import { ERROR_MESSAGES } from '../utils/constants';
 import logger from '../utils/logger';
 import cvMatcherModel from '../models/cvMatcher.model';
-import codeModel from '../models/code.model';
+import Document from '../models/document.model';
 
 export class EvaluationController {
   startEvaluation = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-      const { cvDocumentId, jobDescriptionId, candidateName, code } = req.body;
+      const { cvDocumentId, jobDescriptionId, candidateName } = req.body;
+      if (!cvDocumentId) throw new AppError('cvDocumentId is required', 400);
+      const cvDocument = await Document.findOne({ _id: cvDocumentId, userId: req.authUser!.userId });
+      if (!cvDocument) throw new AppError('CV document not found', 404);
       let actualJobDescriptionId = jobDescriptionId;
 
       // If no jobDescriptionId provided, use default
@@ -33,7 +36,7 @@ export class EvaluationController {
           jobDescriptionId: actualJobDescriptionId,
           candidateName,
         },
-        code,
+        req.authUser!.userId,
       );
 
       logger.info(`Evaluation job created: ${job.id}`);
@@ -47,19 +50,16 @@ export class EvaluationController {
 
   startCVMatcher = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-      const { cvDocumentId, code } = req.body;
-
-      if (!cvDocumentId || !code)
-        throw new AppError('cvDocumentId and code files are required', 400);
-
-      const codeData = await codeModel.findOne({ code });
-      const codeId = codeData?._id;
+      const { cvDocumentId } = req.body;
+      if (!cvDocumentId) throw new AppError('cvDocumentId is required', 400);
+      const cvDocument = await Document.findOne({ _id: cvDocumentId, userId: req.authUser!.userId });
+      if (!cvDocument) throw new AppError('CV document not found', 404);
       // Add to queue
       const job = await queueService.addCVMatcher(
         {
           cvDocumentId,
         },
-        codeId,
+        req.authUser!.userId,
       );
 
       logger.info(`CvMatcher job created: ${job.id}`);
@@ -126,7 +126,7 @@ export class EvaluationController {
     async (req: Request, res: Response, next: NextFunction) => {
       const { id } = req.params;
 
-      const evaluation = await Evaluation.findById(id);
+      const evaluation = await Evaluation.findOne({ _id: id, userId: req.authUser!.userId });
 
       if (!evaluation) {
         return res.status(404).json({
@@ -159,19 +159,12 @@ export class EvaluationController {
   );
   CVMakerById = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-      const { id, code } = req.params;
-
-      if (!code) {
-        throw new Error('code required!');
-      }
-
-      const codeData = await codeModel.findOne({ code });
-      const codeId = codeData?._id;
+      const { id } = req.params;
 
       const cvMatcher = await cvMatcherModel
         .findOne({
           _id: id,
-          code_id: codeId,
+          userId: req.authUser!.userId,
         })
         .populate({
           path: 'cvDocumentId',
@@ -206,19 +199,8 @@ export class EvaluationController {
   );
   getAllCvMatcher = asyncHandler(
     async (req: Request, res: Response, next: NextFunction) => {
-      const { code } = req.params;
-      const codeData = await codeModel.findOne({ code });
-      const codeId = codeData?._id;
-
-      if (!codeId) {
-        return res.status(200).json({
-          success: true,
-          message: 'Retrieved',
-          data: [],
-        });
-      }
       const cvMatcher = await cvMatcherModel
-        .find({ code_id: codeId })
+        .find({ userId: req.authUser!.userId })
         .select('status result.user_profile.name createdAt updatedAt')
         .lean();
 

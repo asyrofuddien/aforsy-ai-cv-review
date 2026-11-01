@@ -12,19 +12,13 @@ import AtsPDF from '../models/atsPDF.model';
 import Template from '../models/Template.model';
 import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
-import CodeGeneratorController from '../controllers/code.controller';
 import CVGeneratorRoutes from '../routes/cvGenerator.routes';
+import authRoutes from './auth.routes';
+import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// Mount routes
-router.use('/upload', uploadRoutes);
-router.use('/evaluate', evaluationRoutes);
-router.use('/job-descriptions', jobDescriptionRoutes);
-router.use('/cv-generator', CVGeneratorRoutes);
-
-router.get('/get-code', CodeGeneratorController.GenerateCode);
-router.get('/redeem-code/:id', CodeGeneratorController.RedeemCode);
+router.use('/auth', authRoutes);
 
 // Test route
 router.get('/test', (req, res) => {
@@ -61,7 +55,7 @@ router.get('/test', (req, res) => {
       upload: 'Accepts PDF, DOCX, and TXT files (max 10MB)',
       evaluate: 'Returns evaluation ID for async processing',
       result: 'Poll this endpoint until status is "completed"',
-      authentication: 'No authentication required (add for production)',
+      authentication: 'Account required for product routes',
       devOnly: isDev ? 'Development endpoints are enabled' : 'Development endpoints are disabled',
     },
   });
@@ -81,6 +75,16 @@ router.get('/', (req, res) => {
     },
   });
 });
+
+// All product and account data routes below this point require an active session.
+router.use(authenticate);
+router.use('/test', requireAdmin);
+
+// Product routes use the authenticated user as the owner of all created data.
+router.use('/upload', uploadRoutes);
+router.use('/evaluate', evaluationRoutes);
+router.use('/job-descriptions', jobDescriptionRoutes);
+router.use('/cv-generator', CVGeneratorRoutes);
 
 // Get recent uploads
 router.get('/test/recent-uploads', async (req: Request, res: Response) => {

@@ -160,7 +160,6 @@ export interface ResumeNew {
   education?: EducationSection[];
   organisational?: OrganisationalSection[];
   others?: OthersSection;
-  code: string;
 }
 
 // ==========================================
@@ -215,7 +214,6 @@ export interface Resume {
   project_and_certification: ProjectOrCertification[];
   skills: Skills;
   languages: string;
-  code: string;
 }
 
 export interface EvaluationRequest {

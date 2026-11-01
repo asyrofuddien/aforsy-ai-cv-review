@@ -55,5 +55,19 @@ export default {
     allowedOrigins: (String(process.env.CORS_ORIGINS) || '').split(','),
   },
 
+  auth: {
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
+    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
+    adminEmails: process.env.ADMIN_EMAILS || '',
+    emailFrom: process.env.EMAIL_FROM || 'Landly <noreply@localhost>',
+    smtpHost: process.env.SMTP_HOST || (process.env.NODE_ENV === 'development' ? 'localhost' : ''),
+    smtpPort: parseInt(process.env.SMTP_PORT || (process.env.NODE_ENV === 'development' ? '1025' : '587')),
+    smtpSecure: process.env.SMTP_SECURE === 'true',
+    smtpUser: process.env.SMTP_USER || '',
+    smtpPassword: process.env.SMTP_PASSWORD || '',
+  },
+
   backendApi: process.env.BACKEND_API,
 };
