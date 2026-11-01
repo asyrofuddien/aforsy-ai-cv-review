@@ -57,8 +57,9 @@ services:
       PORT: ${PORT:-3001}
       MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-localdev}@mongodb:27017/cv-evaluation?authSource=admin
       REDIS_URL: redis://redis:6379
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4-turbo-preview}
+      SUMOPOD_API_KEY: ${SUMOPOD_API_KEY:-}
+      SUMOPOD_BASE_URL: ${SUMOPOD_BASE_URL:-https://ai.sumopod.com/v1}
+      SUMOPOD_MODEL: ${SUMOPOD_MODEL:-glm-5.3-flash}
       LLM_TEMPERATURE: ${LLM_TEMPERATURE:-0.3}
       LLM_MAX_RETRIES: ${LLM_MAX_RETRIES:-3}
       LLM_RETRY_DELAY: ${LLM_RETRY_DELAY:-1000}

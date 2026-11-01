@@ -20,12 +20,13 @@ export default {
     retryDelay: parseInt(process.env.LLM_RETRY_DELAY || '1000'),
   },
 
-  groq: {
-    apiKey: process.env.GROQ_API_KEY || '',
-    model: process.env.GROQ_MODEL || 'groq-1',
-    temperature: parseFloat(process.env.GROQ_TEMPERATURE || '0.3'),
-    maxRetries: parseInt(process.env.GROQ_MAX_RETRIES || '3'),
-    retryDelay: parseInt(process.env.GROQ_RETRY_DELAY || '1000'),
+  ai: {
+    apiKey: process.env.SUMOPOD_API_KEY || '',
+    baseUrl: process.env.SUMOPOD_BASE_URL || 'https://ai.sumopod.com/v1',
+    model: process.env.SUMOPOD_MODEL || 'glm-5.3-flash',
+    temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
+    maxRetries: parseInt(process.env.LLM_MAX_RETRIES || '3'),
+    retryDelay: parseInt(process.env.LLM_RETRY_DELAY || '1000'),
   },
 
   pinecone: {

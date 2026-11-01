@@ -28,7 +28,7 @@ This service provides automated evaluation of job candidates by:
 ## ✨ Features
 
 - **Multi-format Document Support**: PDF, DOCX, and TXT file parsing
-- **AI-Powered Evaluation**: Uses OpenAI GPT-4 for intelligent analysis
+- **AI-Powered Evaluation**: Uses Sumopod's OpenAI-compatible API
 - **Vector Search (RAG)**: Context-aware evaluation using Pinecone vector database
 - **Asynchronous Processing**: Non-blocking evaluation with job queue
 - **Detailed Scoring**: 5-point scale across multiple parameters
@@ -51,7 +51,7 @@ This service provides automated evaluation of job candidates by:
                              ┌───────────────────┼───────────────────┐
                              ▼                   ▼                   ▼
                       ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-                      │   OpenAI    │     │  Pinecone   │     │   Parser    │
+                      │   Sumopod   │     │  Pinecone   │     │   Parser    │
                       └─────────────┘     └─────────────┘     └─────────────┘
 ```
 
@@ -60,7 +60,7 @@ This service provides automated evaluation of job candidates by:
 1. **API Layer**: Express.js handles HTTP requests
 2. **Queue System**: BullMQ manages async job processing
 3. **Storage**: MongoDB for documents and evaluations
-4. **AI Services**: OpenAI for LLM, Pinecone for vector search
+4. **AI Services**: Sumopod for LLM, Pinecone for vector search
 5. **Workers**: Background processors for evaluations
 
 ## 🛠 Tech Stack
@@ -69,7 +69,7 @@ This service provides automated evaluation of job candidates by:
 - **Framework**: Express.js
 - **Database**: MongoDB (Atlas)
 - **Queue**: BullMQ with Redis
-- **LLM**: OpenAI GPT-4 (with mock fallback)
+- **LLM**: Sumopod OpenAI-compatible API (with mock fallback)
 - **Vector DB**: Pinecone (with in-memory fallback)
 - **File Parsing**: pdf-parse, mammoth
 - **Deployment**: Docker, Railway-ready
@@ -79,7 +79,7 @@ This service provides automated evaluation of job candidates by:
 - Node.js 18 or higher
 - MongoDB (local or Atlas)
 - Redis (local or cloud)
-- OpenAI API key (optional - mock mode available)
+- Sumopod API key (optional - mock mode available)
 - Pinecone API key (optional - in-memory mode available)
 
 ## 🚀 Installation
@@ -105,7 +105,7 @@ docker compose up -d mongodb redis
 npm run dev
 ```
 
-The API listens at `http://localhost:3001`; health check: `http://localhost:3001/api/health`. MongoDB and Redis are required. OpenAI and Pinecone keys are optional for local development.
+The API listens at `http://localhost:3001`; health check: `http://localhost:3001/api/health`. MongoDB and Redis are required. Sumopod and Pinecone keys are optional for local development.
 
 4. **Start the frontend** in `../cv-evaluation-frontend` with `NEXT_PUBLIC_API_URL=http://localhost:3001/api` (see its README). It listens at `http://localhost:3000`.
 
@@ -124,12 +124,13 @@ NODE_ENV=development
 MONGODB_URI=mongo-db-url
 REDIS_URL=redis://localhost:6379
 
-# OpenAI (optional - will use mock if not provided)
-OPENAI_API_KEY=sk-your-api-key
-OPENAI_MODEL=gpt-4-turbo-preview
+# Sumopod (optional - uses mock mode if no key is provided)
+SUMOPOD_API_KEY=your-sumopod-api-key
+SUMOPOD_BASE_URL=https://ai.sumopod.com/v1
+SUMOPOD_MODEL=glm-5.3-flash
 LLM_TEMPERATURE=0.3
 
-# Pinecone (optional - will use in-memory if not provided)
+# Pinecone (optional - uses in-memory if not provided)
 PINECONE_API_KEY=your-api-key
 PINECONE_ENVIRONMENT=us-east-1-aws
 PINECONE_INDEX_NAME=cv-evaluation

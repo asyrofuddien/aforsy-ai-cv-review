@@ -1,23 +1,24 @@
-import Groq from 'groq-sdk';
+import OpenAI from 'openai';
 import config from '../../config/config';
 import logger from '../../utils/logger';
 import { retryWithBackoff } from '../../utils/retry';
 import { AppError } from '../../middlewares/error.middleware';
 
 class OpenAIService {
-  private client!: Groq;
+  private client!: OpenAI;
   private isEnabled: boolean;
 
   constructor() {
-    this.isEnabled = !!config.groq.apiKey;
+    this.isEnabled = !!config.ai.apiKey;
 
     if (this.isEnabled) {
-      this.client = new Groq({
-        apiKey: config.groq.apiKey,
+      this.client = new OpenAI({
+        apiKey: config.ai.apiKey,
+        baseURL: config.ai.baseUrl,
       });
-      logger.info('✅ GroqAI service initialized');
+      logger.info(`✅ AI service initialized (${config.ai.model})`);
     } else {
-      logger.warn('⚠️ GroqAI service disabled - using mock mode');
+      logger.warn('⚠️ AI service disabled - using mock mode');
     }
   }
 
@@ -29,9 +30,9 @@ class OpenAIService {
       systemPrompt?: string;
     } = {},
   ): Promise<string> {
-    const temperature = options.temperature ?? config.groq.temperature;
+    const temperature = options.temperature ?? config.ai.temperature;
     const maxTokens = options.maxTokens ?? 2000;
-    const model = config.groq.model;
+    const model = config.ai.model;
 
     // Mock mode if no API key
     if (!this.isEnabled) {
@@ -53,21 +54,21 @@ class OpenAIService {
             model,
             messages,
             temperature,
-            max_completion_tokens: maxTokens,
+            max_tokens: maxTokens,
           });
         },
         {
-          maxRetries: config.groq.maxRetries,
-          delay: config.groq.retryDelay,
+          maxRetries: config.ai.maxRetries,
+          delay: config.ai.retryDelay,
           onRetry: (attempt, error) => {
-            logger.warn(`Groq retry attempt ${attempt}:`, error.message);
+            logger.warn(`AI retry attempt ${attempt}:`, error.message);
           },
         },
       );
 
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      logger.error('Groq completion error:', error);
+      logger.error('AI completion error:', error);
 
       if (
         typeof error === 'object' &&
@@ -83,34 +84,8 @@ class OpenAIService {
   }
 
   async generateEmbedding(text: string): Promise<number[]> {
-    if (!this.isEnabled) {
-      return this.mockEmbedding(text);
-    }
-
-    try {
-      const response = await retryWithBackoff(
-        async () => {
-          return await this.client.embeddings.create({
-            model: 'text-embedding-3-small',
-            input: text,
-          });
-        },
-        {
-          maxRetries: 2,
-          delay: 1000,
-        },
-      );
-
-      const embedding = response.data[0].embedding;
-      if (typeof embedding === 'string') {
-        logger.error('Embedding returned as string, expected number[]');
-        throw new AppError('Embedding format error', 500);
-      }
-      return embedding;
-    } catch (error) {
-      logger.error('Groq embedding error:', error);
-      throw new AppError('Failed to generate embedding', 500);
-    }
+    // Sumopod's documented API provides text chat completions, not embeddings.
+    return this.mockEmbedding(text);
   }
 
   // Mock functions for testing without API key
