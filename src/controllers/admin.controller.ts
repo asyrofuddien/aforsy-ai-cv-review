@@ -14,6 +14,20 @@ import appLogger from '../utils/logger';
 
 const logger = appLogger.child({ scope: 'admin' });
 
+type AdminActivityEvent = {
+  id: string;
+  type: 'document' | 'evaluation' | 'cv_matcher' | 'ats_cv';
+  at: Date;
+  status: string;
+  label: string;
+  fileName?: string;
+  mimeType?: string;
+  size?: number;
+  error?: string;
+  retryable?: boolean;
+  queueJobId?: string;
+};
+
 const audit = (req: Request, action: string, targetType: 'user' | 'ats_template', targetId: string, details: Record<string, unknown> = {}) =>
   AdminAuditLog.create({ actorUserId: req.authUser!.userId, action, targetType, targetId, details });
 
@@ -110,45 +124,28 @@ export class AdminController {
     if (!Types.ObjectId.isValid(req.params.id)) throw new AppError('Invalid user ID', 400);
     const userId = new Types.ObjectId(req.params.id);
     if (!(await User.exists({ _id: userId }))) throw new AppError('User not found', 404);
-    const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
+    const requestedPage = Math.max(1, Math.floor(Number(req.query.page) || 1));
+    const limit = Math.min(50, Math.max(1, Math.floor(Number(req.query.limit) || 20)));
+
+    const [documentCount, evaluationCount, cvMatchCount, atsCvCount] = await Promise.all([
+      Document.countDocuments({ userId }),
+      Evaluation.countDocuments({ userId }),
+      CvMatcher.countDocuments({ userId }),
+      AtsPdf.countDocuments({ userId }),
+    ]);
+    const total = documentCount + evaluationCount + cvMatchCount + atsCvCount;
+    const pages = Math.max(1, Math.ceil(total / limit));
+    const page = Math.min(requestedPage, pages);
+    const candidateLimit = (page - 1) * limit + limit;
 
     const [documents, evaluations, cvMatches, atsCvs] = await Promise.all([
-      Document.find({ userId }).select('originalName mimeType size type uploadedAt').sort({ uploadedAt: -1 }).limit(limit).lean(),
-      Evaluation.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1 }).limit(limit).lean(),
-      CvMatcher.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1 }).limit(limit).lean(),
-      AtsPdf.find({ userId }).select('file_name createdAt').sort({ createdAt: -1 }).limit(limit).lean(),
+      Document.find({ userId }).select('originalName mimeType size type uploadedAt').sort({ uploadedAt: -1, _id: -1 }).limit(candidateLimit).lean(),
+      Evaluation.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
+      CvMatcher.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
+      AtsPdf.find({ userId }).select('file_name createdAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
     ]);
 
-    const evaluationEvents = await Promise.all(evaluations.map(async (evaluation) => {
-      const queueState = evaluation.status === 'failed' && evaluation.queueJobId
-        ? await queueService.getJobState('evaluation', evaluation.queueJobId)
-        : null;
-      return {
-        id: String(evaluation._id),
-        type: 'evaluation' as const,
-        at: evaluation.createdAt,
-        status: queueState === 'active' ? 'processing' : ['waiting', 'delayed', 'waiting-children'].includes(queueState || '') ? 'queued' : evaluation.status,
-        label: 'CV review',
-        error: evaluation.error ? this.safeProcessError(evaluation.error) : undefined,
-        retryable: evaluation.status === 'failed' && queueState === 'failed',
-      };
-    }));
-    const cvMatchEvents = await Promise.all(cvMatches.map(async (cvMatch) => {
-      const queueState = cvMatch.status === 'failed' && cvMatch.queueJobId
-        ? await queueService.getJobState('cv-matcher', cvMatch.queueJobId)
-        : null;
-      return {
-        id: String(cvMatch._id),
-        type: 'cv_matcher' as const,
-        at: cvMatch.createdAt,
-        status: queueState === 'active' ? 'processing' : ['waiting', 'delayed', 'waiting-children'].includes(queueState || '') ? 'queued' : cvMatch.status,
-        label: 'CV matcher',
-        error: cvMatch.error ? this.safeProcessError(cvMatch.error) : undefined,
-        retryable: cvMatch.status === 'failed' && queueState === 'failed',
-      };
-    }));
-
-    const events = [
+    const events: AdminActivityEvent[] = [
       ...documents.map((document) => ({
         id: String(document._id),
         type: 'document' as const,
@@ -159,8 +156,24 @@ export class AdminController {
         mimeType: document.mimeType,
         size: document.size,
       })),
-      ...evaluationEvents,
-      ...cvMatchEvents,
+      ...evaluations.map((evaluation) => ({
+        id: String(evaluation._id),
+        type: 'evaluation' as const,
+        at: evaluation.createdAt,
+        status: evaluation.status,
+        label: 'CV review',
+        error: evaluation.error ? this.safeProcessError(evaluation.error) : undefined,
+        queueJobId: evaluation.queueJobId,
+      })),
+      ...cvMatches.map((cvMatch) => ({
+        id: String(cvMatch._id),
+        type: 'cv_matcher' as const,
+        at: cvMatch.createdAt,
+        status: cvMatch.status,
+        label: 'CV matcher',
+        error: cvMatch.error ? this.safeProcessError(cvMatch.error) : undefined,
+        queueJobId: cvMatch.queueJobId,
+      })),
       ...atsCvs.map((atsCv) => ({
         id: String(atsCv._id),
         type: 'ats_cv' as const,
@@ -170,10 +183,23 @@ export class AdminController {
         fileName: atsCv.file_name || 'Generated CV',
       })),
     ]
-      .sort((left, right) => new Date(right.at).getTime() - new Date(left.at).getTime())
-      .slice(0, limit);
+      .sort((left, right) => right.at.getTime() - left.at.getTime() || right.id.localeCompare(left.id))
+      .slice((page - 1) * limit, page * limit);
 
-    res.json({ success: true, data: events });
+    const pageEvents = await Promise.all(events.map(async ({ queueJobId, ...event }) => {
+      if (event.type !== 'evaluation' && event.type !== 'cv_matcher') return event;
+      const queueType = event.type === 'evaluation' ? 'evaluation' : 'cv-matcher';
+      const queueState = event.status === 'failed' && queueJobId
+        ? await queueService.getJobState(queueType, queueJobId)
+        : null;
+      return {
+        ...event,
+        status: queueState === 'active' ? 'processing' : ['waiting', 'delayed', 'waiting-children'].includes(queueState || '') ? 'queued' : event.status,
+        retryable: event.status === 'failed' && queueState === 'failed',
+      };
+    }));
+
+    res.json({ success: true, data: pageEvents, pagination: { page, limit, total, pages } });
   });
 
   retryUserProcess = asyncHandler(async (req: Request, res: Response) => {
