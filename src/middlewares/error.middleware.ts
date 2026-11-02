@@ -20,7 +20,7 @@ export const errorMiddleware = (
   err: Error | AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   let error = { ...err };
   error.message = err.message;

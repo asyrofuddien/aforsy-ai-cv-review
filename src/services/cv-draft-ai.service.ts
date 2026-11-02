@@ -10,11 +10,11 @@ interface DraftIssue {
   receivedType: string;
 }
 export class AiDraftFormatError extends AppError {
-  constructor(
-    message: string,
-    public issues: DraftIssue[],
-  ) {
+  readonly issues: DraftIssue[];
+
+  constructor(message: string, issues: DraftIssue[]) {
     super(message, 502);
+    this.issues = issues;
   }
 }
 const isRecord = (value: unknown): value is Record<string, any> =>

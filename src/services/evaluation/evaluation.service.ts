@@ -1,5 +1,4 @@
 // services/evaluation/evaluation.service.ts
-import { Job } from 'bullmq';
 import Evaluation from '../../models/evaluation.model';
 import cvMatcherModel from '../../models/cvMatcher.model';
 import JobDescription from '../../models/jobDescription.model';

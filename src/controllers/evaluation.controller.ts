@@ -1,5 +1,5 @@
 import { requestLocale } from '../utils/locale';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { AppError, asyncHandler } from '../middlewares/error.middleware';
 import queueService from '../services/queue.service';
 import JobDescription from '../models/jobDescription.model';
@@ -13,7 +13,7 @@ const logger = appLogger.child({ scope: 'review-api' });
 
 export class EvaluationController {
   startEvaluation = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { cvDocumentId, jobDescriptionId, candidateName } = req.body;
       const jobDescriptionText = req.body.jobDescriptionText?.trim() || undefined;
       if (jobDescriptionText && jobDescriptionId) throw new AppError('Use either pasted job description or a saved job, not both', 400);
@@ -46,7 +46,7 @@ export class EvaluationController {
   );
 
   startCVMatcher = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { cvDocumentId } = req.body;
       if (!cvDocumentId) throw new AppError('cvDocumentId is required', 400);
       const cvDocument = await Document.findOne({ _id: cvDocumentId, userId: req.authUser!.userId });
@@ -70,7 +70,7 @@ export class EvaluationController {
 
   // Optional: Add method to get queue status
   getQueueStatus = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const counts = await queueService.getJobCounts();
 
       res.status(200).json({
@@ -88,7 +88,7 @@ export class EvaluationController {
   );
 
   getResult = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
 
       const evaluation = await Evaluation.findOne({ _id: id, userId: req.authUser!.userId });
@@ -133,7 +133,7 @@ export class EvaluationController {
     },
   );
   CVMakerById = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
 
       const cvMatcher = await cvMatcherModel
@@ -173,7 +173,7 @@ export class EvaluationController {
     },
   );
   getAllCvMatcher = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const cvMatcher = await cvMatcherModel
         .find({ userId: req.authUser!.userId })
         .select('status result.user_profile.name createdAt updatedAt')

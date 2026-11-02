@@ -1,4 +1,4 @@
-import { Pinecone, RecordMetadata } from '@pinecone-database/pinecone';
+import { RecordMetadata } from '@pinecone-database/pinecone';
 import openaiService from '../llm/openai.service';
 import { getPineconeClient } from '../../config/vectordb';
 import config from '../../config/config';

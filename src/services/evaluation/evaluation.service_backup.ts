@@ -1,5 +1,4 @@
 // services/evaluation/evaluation.service.ts
-import { Job } from 'bullmq';
 import Evaluation from '../../models/evaluation.model';
 import cvMatcherModel from '../../models/cvMatcher.model';
 import JobDescription from '../../models/jobDescription.model';
@@ -12,7 +11,7 @@ import scrapingService from '../scraping.service';
 
 class EvaluationService {
   async processEvaluation(data: any): Promise<any> {
-    const { evaluationId, cvDocumentId, projectDocumentId, jobDescriptionId } = data;
+    const { evaluationId, cvDocumentId, jobDescriptionId } = data;
 
     try {
       logger.info(`🚀 Starting evaluation ${evaluationId}`);

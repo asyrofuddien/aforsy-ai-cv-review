@@ -6,9 +6,9 @@ declare module 'bull' {
   }
 
   export default class Queue<T = any> {
-    constructor(name: string, url?: string);
-    add(name: string, data: T, opts?: any): Promise<Job<T>>;
-    process(name: string, callback: (job: Job<T>) => Promise<any>): void;
-    on(event: string, callback: (...args: any[]) => void): void;
+    constructor(_name: string, _url?: string);
+    add(_name: string, _data: T, _opts?: any): Promise<Job<T>>;
+    process(_name: string, _callback: (_job: Job<T>) => Promise<any>): void;
+    on(_event: string, _callback: (..._args: any[]) => void): void;
   }
 }

@@ -1,5 +1,4 @@
 import Document, { IDocument } from '../models/document.model';
-import { DOCUMENT_TYPES } from '../utils/constants';
 import { AppError } from '../middlewares/error.middleware';
 import appLogger from '../utils/logger';
 import path from 'path';

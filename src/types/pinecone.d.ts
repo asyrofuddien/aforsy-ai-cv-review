@@ -1,12 +1,12 @@
 declare module '@pinecone-database/pinecone' {
   export class Pinecone {
-    describeIndex(indexName: string) {
+    describeIndex(_indexName: string) {
       throw new Error('Method not implemented.');
     }
     listIndexes() {
       throw new Error('Method not implemented.');
     }
-    createIndex(arg0: {
+    createIndex(_arg0: {
       name: string;
       dimension: number;
       metric: string;
@@ -14,8 +14,8 @@ declare module '@pinecone-database/pinecone' {
     }) {
       throw new Error('Method not implemented.');
     }
-    constructor(config: { apiKey: string });
-    index(name: string): any;
+    constructor(_config: { apiKey: string });
+    index(_name: string): any;
   }
 
   export type RecordMetadata = Record<string, any>;

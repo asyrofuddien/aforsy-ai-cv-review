@@ -5,7 +5,6 @@ import JSZip from 'jszip';
 import { DOMParser } from '@xmldom/xmldom';
 import { AppError } from '../middlewares/error.middleware';
 import appLogger from '../utils/logger';
-import path from 'path';
 
 const logger = appLogger.child({ scope: 'parser' });
 const WORD_NS = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main';

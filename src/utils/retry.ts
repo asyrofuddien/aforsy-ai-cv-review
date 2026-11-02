@@ -4,7 +4,7 @@ interface RetryOptions {
   maxRetries: number;
   delay: number;
   backoffMultiplier?: number;
-  onRetry?: (attempt: number, error: any) => void;
+  onRetry?: (_attempt: number, _error: any) => void;
 }
 
 export async function retryWithBackoff<T>(

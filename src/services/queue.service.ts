@@ -79,11 +79,11 @@ class QueueService {
   }
 
   private setupQueueEvents() {
-    this.queueEvents.on('completed', ({ jobId, returnvalue }) => {
+    this.queueEvents.on('completed', ({ jobId }) => {
       logger.debug('Queue completion event', { jobId, queue: 'review' });
     });
 
-    this.queueEvents.on('failed', ({ jobId, failedReason }) => {
+    this.queueEvents.on('failed', ({ jobId }) => {
       logger.debug('Queue failure event', { jobId, queue: 'review' });
     });
 
@@ -92,11 +92,11 @@ class QueueService {
     });
 
     // Tambah event handlers untuk cvMatcherQueue
-    this.cvMatcherQueueEvents.on('completed', ({ jobId, returnvalue }) => {
+    this.cvMatcherQueueEvents.on('completed', ({ jobId }) => {
       logger.debug('Queue completion event', { jobId, queue: 'cv-matcher' });
     });
 
-    this.cvMatcherQueueEvents.on('failed', ({ jobId, failedReason }) => {
+    this.cvMatcherQueueEvents.on('failed', ({ jobId }) => {
       logger.debug('Queue failure event', { jobId, queue: 'cv-matcher' });
     });
 
@@ -145,7 +145,7 @@ class QueueService {
     }
   }
 
-  initializeEvaluationWorker(processor: (job: Job) => Promise<any>) {
+  initializeEvaluationWorker(processor: (_job: Job) => Promise<any>) {
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.worker = new Worker('evaluation-queue', processor, {
@@ -163,7 +163,7 @@ class QueueService {
   }
 
   // Tambah worker untuk CV Matcher
-  initializeCVMatcherWorker(processor: (job: Job) => Promise<any>) {
+  initializeCVMatcherWorker(processor: (_job: Job) => Promise<any>) {
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.cvMatcherWorker = new Worker('cv-matcher-queue', processor, {

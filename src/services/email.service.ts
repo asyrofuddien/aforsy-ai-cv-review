@@ -17,7 +17,7 @@ interface AuthEmail {
 const escapeHtml = (value: string): string =>
   value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!);
 
-export const buildAuthEmailContent = ({ email, displayName, purpose, url, locale = 'en' }: AuthEmail) => {
+export const buildAuthEmailContent = ({ displayName, purpose, url, locale = 'en' }: AuthEmail) => {
   const id = locale === 'id';
   const isVerification = purpose === 'verify-email';
   const subject = isVerification ? (id ? 'Verifikasi email Landly Anda' : 'Verify your Landly email') : (id ? 'Atur ulang kata sandi Landly Anda' : 'Reset your Landly password');

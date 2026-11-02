@@ -15,5 +15,9 @@ module.exports = {
       // TypeScript resolves type names and Node globals in `npm run typecheck`.
       'no-undef': 'off',
     },
+  }, {
+    // Ambient declarations describe global/module APIs and contain no runtime variables.
+    files: ['**/*.d.ts'],
+    rules: { 'no-unused-vars': 'off' },
   }],
 };

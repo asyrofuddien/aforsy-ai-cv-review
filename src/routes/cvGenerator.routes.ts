@@ -4,7 +4,6 @@ import rateLimit from "express-rate-limit";
 import { importAiDraft } from "../controllers/cv-draft-ai.controller";
 import { AppError } from "../middlewares/error.middleware";
 import generateCv from "../controllers/cv-generator.controller";
-import { validateEvaluation } from "../middlewares/validation.middleware";
 
 const router = Router();
 
@@ -58,6 +57,7 @@ router.post(
 router.get("/draft", generateCv.GetDraft);
 router.put("/draft", generateCv.SaveDraft);
 router.delete("/draft", generateCv.DeleteDraft);
+router.get("/templates/content", generateCv.GetNewTemplateContent);
 router.get("/templates", generateCv.ListAtsTemplates);
 router.post("/", generateCv.GenerateCv);
 router.post("/new", generateCv.GenerateCvNew);

@@ -26,45 +26,6 @@ interface RoleSuggestion {
   seniority: string; // e.g., "Mid-level", "Senior", etc.
 }
 
-interface LinkedInJobSearchResponse {
-  data: Array<{
-    id: string;
-    title: string;
-    companyName: string;
-    linkedinCompanyName: string;
-    location: string;
-    postedTimeAgo: string;
-    datePosted: string;
-  }>;
-  meta: {
-    position: number;
-    count: number;
-    nextToken?: string;
-  };
-  _links: {
-    self: string;
-    next?: string;
-  };
-}
-
-interface LinkedInJobDetailResponse {
-  id: string;
-  title: string;
-  acceptingApplications: boolean;
-  applicants: number;
-  companyName: string;
-  linkedinCompanyName: string;
-  location: string;
-  postedTimeAgo: string;
-  seniorityLevel: string;
-  employmentType: string;
-  jobFunction: string;
-  industries: string;
-  description: string;
-  linkedinUrl: string;
-  datePosted?: string;
-}
-
 class ScrapingService {
   private config: RapidAPIConfig = {
     apiKey: process.env.RAPIDAPI_KEY || 'fb4397004emsh469e668a1e1a18fp1aee54jsn9553247670c2',

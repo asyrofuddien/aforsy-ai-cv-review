@@ -16,42 +16,64 @@ function fixture(failAt) {
   };
   const browser = { newPage: async () => page, close: async () => { calls.closed++; } };
   const template = '<html><head><style>body{font-family:Arial;margin:0}</style></head><body><h1>{{name}}{{personalInfo.name}}</h1><h2>Experience</h2></body></html>';
-  const drafts = new Map([['owner-a', { data: { personalInfo: { name: 'Owner A' } }, updatedAt: 'synthetic-date' }], ['owner-b', { data: { personalInfo: { name: 'Owner B' } } }]]);
-  const draftModel = {
-    findOne: ({ userId }) => ({ lean: async () => drafts.get(userId) || null }),
-    findOneAndUpdate: async ({ userId }, update) => {
-      calls.draftWrites++;
-      const value = { data: update.$set.data, updatedAt: 'saved-date' };
-      drafts.set(userId, value); return value;
-    },
-    deleteOne: async ({ userId }) => { drafts.delete(userId); },
+  const fileSystem = {
+    existsSync: () => true, mkdirSync() {},
+    writeFileSync: (name, value) => files.set(name, value),
+    readFileSync: name => { assert.ok(files.has(name)); return files.get(name); },
+    unlinkSync: name => files.delete(name),
   };
+  const drafts = new Map([['owner-a', { data: { personalInfo: { name: 'Owner A' } }, updatedAt: 'synthetic-date' }], ['owner-b', { data: { personalInfo: { name: 'Owner B' } } }]]);
+  const draftRepository = {
+    findByOwner: async ownerId => drafts.get(ownerId) || null,
+    upsertForOwner: async (ownerId, data) => {
+      calls.draftWrites++;
+      const value = { data, updatedAt: 'saved-date' };
+      drafts.set(ownerId, value); return value;
+    },
+    deleteByOwner: async ownerId => { drafts.delete(ownerId); },
+  };
+  const { createCvDraftService } = loadTs('src/features/cv-generator/drafts/cv-draft.service.ts', {
+    '../../../middlewares/error.middleware': { AppError },
+    './cv-draft.repository': { mongoCvDraftRepository: draftRepository },
+  });
+  const cvDraftService = createCvDraftService(draftRepository);
+  const cvTemplateService = loadTs('src/features/cv-generator/rendering/cv-template.service.ts', { fs: fileSystem });
+  const pdfRenderer = loadTs('src/features/cv-generator/rendering/puppeteer-pdf.renderer.ts', {
+    fs: fileSystem,
+    puppeteer: { launch: async () => { fail('launch'); return browser; } },
+    '../../../utils/logger': logger,
+  });
+  const atsTemplateStyle = loadTs('src/features/cv-generator/rendering/ats-template-style.ts');
+  const generatedRecords = [];
+  const generationRepository = {
+    findLegacyTemplate: async () => ({ content: template }), findNewTemplate: async () => ({ content: template }),
+    findNewTemplateContent: async () => template,
+    findActiveTemplate: async id => { calls.templateId = id; return id === 'unavailable' ? null : { layout: {
+      variant: id, pageMargin: id === 'compact' ? '0.3in' : '0.4in',
+      headingColor: id === 'modern' ? '#1e3a8a' : '#000000', accentColor: id === 'modern' ? '#2563eb' : id === 'compact' ? '#555555' : '#000000',
+    } }; },
+    createGeneratedCv: async record => { fail('create'); generatedRecords.push(record); return { ...record, id: 'synthetic-result', save: async () => { fail('save'); } }; },
+    findAllForOwner: async () => [], findHtmlForOwner: async (_id, userId) => userId === 'owner-a' ? { html_text: '<h1>Owner A</h1>' } : null,
+    findActiveTemplates: async () => [],
+  };
+  const generationRenderer = loadTs('src/features/cv-generator/generation/cv-generation.service.ts', {
+    '../../../middlewares/error.middleware': { AppError },
+    '../../../types/evaluation.types': {},
+    'pdf-parse': async () => { fail('parse'); return { numpages: 1, text: 'Synthetic Candidate' }; },
+    './cv-generation.repository': { cvGenerationRepository: generationRepository },
+    '../rendering/ats-template-style': atsTemplateStyle,
+    '../rendering/cv-template.service': cvTemplateService,
+    '../rendering/puppeteer-pdf.renderer': pdfRenderer,
+  });
+  const cvGenerationService = generationRenderer.createCvGenerationService(generationRepository);
   const controller = loadTs('src/controllers/cv-generator.controller.ts', {
     '../utils/logger': logger,
     '../middlewares/error.middleware': { AppError, asyncHandler },
-    fs: {
-      existsSync: () => true, mkdirSync() {},
-      writeFileSync: (name, value) => files.set(name, value),
-      readFileSync: name => { assert.ok(files.has(name)); return files.get(name); },
-      unlinkSync: name => files.delete(name),
-    },
-    puppeteer: { launch: async () => { fail('launch'); return browser; } },
-    'pdf-parse': async () => { fail('parse'); return { numpages: 1, text: 'Synthetic Candidate' }; },
-    '../models/Template.model': { findOne: () => ({ lean: async () => ({ content: template }) }) },
-    '../models/cvDraft.model': draftModel,
-    '../models/atsTemplate.model': {},
-    '../services/atsTemplate.service': { getActiveAtsTemplate: async id => {
-      calls.templateId = id;
-      return id === 'unavailable' ? null : { layout: { variant: 'classic', pageMargin: '0.4in', headingColor: '#000000', accentColor: '#000000' } };
-    } },
-    '../models/atsPDF.model': {
-      create: async record => {
-        fail('create'); calls.created.push(record);
-        return { ...record, id: 'synthetic-result', save: async () => { fail('save'); } };
-      },
-      findOne: ({ userId }) => ({ select: async () => userId === 'owner-a' ? { html_text: '<h1>Owner A</h1>' } : null }),
-    },
+    '../features/cv-generator/drafts/cv-draft.service': { cvDraftService },
+    '../features/cv-generator/generation/cv-generation.service': { cvGenerationService },
+    '../features/cv-generator/generation/cv-generation.response': { generatedCvResponse: result => ({ success: true, message: 'CV generated successfully', data: result }) },
   }).default;
+  calls.created = generatedRecords;
   return { controller, calls, files, drafts };
 }
 const request = (body = {}, owner = 'owner-a') => ({ body, query: {}, params: { id: 'synthetic-result' }, authUser: { userId: owner } });
@@ -113,6 +135,19 @@ test('generated HTML is not returned for a different owner', async () => {
   const { controller } = fixture();
   assert.equal((await invoke(controller.GetGeneratedHtml, request({}, 'owner-b'))).status, 404);
   assert.equal((await invoke(controller.GetGeneratedHtml, request())).body, '<h1>Owner A</h1>');
+});
+
+test('preview template endpoint returns the same new-template source used by generation', async () => {
+  const { controller } = fixture();
+  for (const variant of ['classic', 'modern', 'compact']) {
+    const req = request();
+    req.query.templateId = variant;
+    const res = await invoke(controller.GetNewTemplateContent, req);
+    assert.equal(res.status, 200);
+    assert.match(res.body, /<html/i);
+    assert.match(res.body, /personalInfo\.name/);
+    assert.match(res.body, new RegExp(`body class="ats-template--${variant}"`));
+  }
 });
 
 test('unavailable ATS template never launches rendering or persists output', async () => {

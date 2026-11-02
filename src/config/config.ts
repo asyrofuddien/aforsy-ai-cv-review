@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import { model } from 'mongoose';
 import path from 'path';
 // Resolve from the process working directory so PM2 can load the same backend .env
 // from both ts-node development (`src/`) and compiled runtime (`dist/`).

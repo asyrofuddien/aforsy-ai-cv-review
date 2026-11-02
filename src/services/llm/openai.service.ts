@@ -91,7 +91,7 @@ class OpenAIService {
   }
 
   // Mock functions for testing without API key
-  private mockCompletion(prompt: string, options: any): string {
+  private mockCompletion(prompt: string, _options: any): string {
     logger.info('🤖 Mock: Generating mock completion');
 
     if (prompt.includes('extract') && prompt.includes('CV')) {

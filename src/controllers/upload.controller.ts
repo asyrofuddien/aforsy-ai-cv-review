@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { asyncHandler } from '../middlewares/error.middleware';
 import documentService from '../services/document.service';
 import parserService from '../services/parser.service';
@@ -8,7 +8,7 @@ import appLogger from '../utils/logger';
 const logger = appLogger.child({ scope: 'upload' });
 
 export class UploadController {
-  uploadDocuments = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+  uploadDocuments = asyncHandler(async (req: Request, res: Response) => {
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
     if (!files?.cv) {
       return res.status(400).json({

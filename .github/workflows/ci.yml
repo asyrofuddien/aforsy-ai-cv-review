@@ -40,5 +40,5 @@ jobs:
         run: npm test
       - name: Build production entry and assets
         run: npm run build
-      - name: Verify runtime entry and locale asset
-        run: node -e "for (const file of ['dist/server.js', 'dist/app.js', 'dist/locales/messages.json', 'dist/results/resume_template.html']) require('node:fs').accessSync(file)"
+      - name: Verify runtime entry and locale/template assets
+        run: node -e "for (const file of ['dist/server.js', 'dist/app.js', 'dist/locales/messages.json', 'dist/results/resume_template.html', 'public/templates/template.html']) require('node:fs').accessSync(file)"

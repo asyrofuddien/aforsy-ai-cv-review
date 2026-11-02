@@ -1,6 +1,5 @@
 // services/scoring/scoring.service.ts
 import { DetailedScores } from '../../types/evaluation.types';
-import { IJobDescription } from '../../models/jobDescription.model';
 import appLogger from '../../utils/logger';
 
 const logger = appLogger.child({ scope: 'scoring' });

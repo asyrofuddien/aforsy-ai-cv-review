@@ -2,7 +2,6 @@
 
 import mongoose, { Document, Schema } from 'mongoose';
 import { EvaluationResult, EvaluationStatus } from '../types/evaluation.types';
-import { required } from 'joi';
 
 export interface IEvaluation extends Document {
   candidateName?: string;

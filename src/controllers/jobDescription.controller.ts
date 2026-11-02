@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 import { asyncHandler } from '../middlewares/error.middleware';
 import JobDescription from '../models/jobDescription.model';
 import parserService from '../services/parser.service';
@@ -11,7 +11,7 @@ const logger = appLogger.child({ scope: 'jobDescription' });
 export class JobDescriptionController {
   // Create job description (manual input)
   create = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const {
         slug,
         title,
@@ -64,7 +64,7 @@ export class JobDescriptionController {
 
   // Upload job description from file
   uploadJobDescription = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const file = req.file;
 
       if (!file) {
@@ -124,7 +124,7 @@ export class JobDescriptionController {
 
   // Get all job descriptions
   getAll = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { page = 1, limit = 10, search } = req.query;
 
       const query: any = {};
@@ -162,7 +162,7 @@ export class JobDescriptionController {
 
   // Get single job description
   getOne = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
 
       const jobDescription = await JobDescription.findById(id);
@@ -180,7 +180,7 @@ export class JobDescriptionController {
 
   // Get by slug
   getBySlug = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { slug } = req.params;
 
       const jobDescription = await JobDescription.findOne({ slug });
@@ -198,7 +198,7 @@ export class JobDescriptionController {
 
   // Update job description
   update = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
       const updates = req.body;
 
@@ -249,7 +249,7 @@ export class JobDescriptionController {
 
   // Delete job description
   delete = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
 
       const jobDescription = await JobDescription.findById(id);
@@ -279,7 +279,7 @@ export class JobDescriptionController {
 
   // Set default job description
   setDefault = asyncHandler(
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
       const { id } = req.params;
 
       // Unset all defaults
