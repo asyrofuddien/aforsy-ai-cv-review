@@ -1,9 +1,10 @@
 import { Queue, Worker, Job, QueueEvents, ConnectionOptions } from 'bullmq';
 import config from '../config/config';
-import Evaluation from '../models/evaluation.model';
-import cvMatcherModel from '../models/cvMatcher.model';
 import { CVMatcherRequest, EvaluationRequest } from '../types/evaluation.types';
 import appLogger from '../utils/logger';
+import { MatcherQueuePayload, ReviewQueuePayload } from '../features/queue/queue.types';
+import { queueRepository } from '../features/queue/queue.repository';
+import { enqueueWithCompensation } from '../features/queue/enqueue';
 
 const logger = appLogger.child({ scope: 'queue' });
 
@@ -112,24 +113,19 @@ class QueueService {
     id: string;
     jobId: string;
   }> {
+    let evaluation: Awaited<ReturnType<typeof queueRepository.createReview>> | undefined;
     try {
-      const evaluation = new Evaluation({
-        cvDocumentId: data.cvDocumentId,
-        jobDescriptionId: data.jobDescriptionId,
-        candidateName: data.candidateName,
-        locale: data.locale || 'en',
-        evaluationMode: data.jobDescriptionId || data.jobDescriptionText ? 'job_specific' : 'general',
-        userId,
-        status: 'queued',
-      });
-      evaluation.queueJobId = evaluation.id;
+      evaluation = await queueRepository.createReview(data, userId);
 
-      await evaluation.save();
-
-      const job = await this.evaluationQueue.add('evaluate', {
+      const payload: ReviewQueuePayload = {
         evaluationId: evaluation.id,
         ...data,
-      }, { jobId: evaluation.id });
+      };
+      const job = await enqueueWithCompensation({
+        record: evaluation,
+        enqueue: () => this.evaluationQueue.add('evaluate', payload, { jobId: evaluation!.id }),
+        compensate: (record, error) => queueRepository.markReviewEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue review job'),
+      });
 
       if (!job.id) {
         throw new Error('Failed to create job - no job ID returned');
@@ -145,7 +141,7 @@ class QueueService {
     }
   }
 
-  initializeEvaluationWorker(processor: (_job: Job) => Promise<any>) {
+  initializeEvaluationWorker(processor: (_job: Job<ReviewQueuePayload>) => Promise<unknown>) {
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.worker = new Worker('evaluation-queue', processor, {
@@ -163,7 +159,7 @@ class QueueService {
   }
 
   // Tambah worker untuk CV Matcher
-  initializeCVMatcherWorker(processor: (_job: Job) => Promise<any>) {
+  initializeCVMatcherWorker(processor: (_job: Job<MatcherQueuePayload>) => Promise<unknown>) {
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.cvMatcherWorker = new Worker('cv-matcher-queue', processor, {
@@ -242,20 +238,19 @@ class QueueService {
     id: string;
     jobId: string;
   }> {
+    let cvMatcher: Awaited<ReturnType<typeof queueRepository.createMatcher>> | undefined;
     try {
-      const cvMatcher = new cvMatcherModel({
-        cvDocumentId: data.cvDocumentId,
-        userId,
-        status: 'queued',
-      });
-      cvMatcher.queueJobId = cvMatcher.id;
+      cvMatcher = await queueRepository.createMatcher(data, userId);
 
-      await cvMatcher.save();
-
-      const job = await this.cvMatcherQueue.add('cv-matcher', {
+      const payload: MatcherQueuePayload = {
         cvMatcherId: cvMatcher.id,
         ...data,
-      }, { jobId: cvMatcher.id });
+      };
+      const job = await enqueueWithCompensation({
+        record: cvMatcher,
+        enqueue: () => this.cvMatcherQueue.add('cv-matcher', payload, { jobId: cvMatcher!.id }),
+        compensate: (record, error) => queueRepository.markMatcherEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue CV matcher job'),
+      });
 
       if (!job.id) {
         throw new Error('Failed to create job - no job ID returned');

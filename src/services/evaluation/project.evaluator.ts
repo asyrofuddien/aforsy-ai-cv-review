@@ -1,9 +1,10 @@
 import Document from '../../models/document.model';
-import chainService from '../llm/chains';
+import { ProjectAIService } from '../../features/project-evaluation/project.ai';
 import vectordbService from '../vectordb/vectordb.service';
 import appLogger from '../../utils/logger';
 
 const logger = appLogger.child({ scope: 'project-review' });
+const projectAI = new ProjectAIService();
 
 export class ProjectEvaluator {
   async evaluate(projectDocumentId: string) {
@@ -28,7 +29,7 @@ export class ProjectEvaluator {
           : this.getDefaultRubric();
 
       // Evaluate project
-      const evaluation = await chainService.evaluateProject(
+      const evaluation = await projectAI.evaluateProject(
         projectDoc.content || '',
         rubric
       );

@@ -7,12 +7,15 @@ function fixture({ output = criteria(), content = 'Original synthetic CV', job =
   const calls = [];
   const evaluator = loadTs('src/services/evaluation/cv.evaluator.ts', {
     '../../utils/logger': logger,
-    '../../models/document.model': { findById: async () => ({ content }) },
-    '../../models/jobDescription.model': { findById: async () => job },
-    '../llm/chains': {
-      extractCVInfo: async () => ({ name: 'Synthetic Candidate', skills: [] }),
-      evaluateCV: async (info, requirements) => { calls.push({ info, requirements }); return { criteria: output, feedback: 'Synthetic feedback' }; },
-    },
+    '../../features/review/review.scoring': loadTs('src/features/review/review.scoring.ts'),
+    '../../features/review/review.repository': { reviewRepository: {
+      findCvDocument: async () => ({ content }),
+      findJobDescription: async () => job,
+    } },
+    '../../features/review/review.ai': { ReviewAIService: class {
+      extractCVInfo = async () => ({ name: 'Synthetic Candidate', skills: [] });
+      evaluateCV = async (info, requirements) => { calls.push({ info, requirements }); return { criteria: output, feedback: 'Synthetic feedback' }; };
+    } },
   }).default;
   return { evaluator, calls };
 }
@@ -51,4 +54,46 @@ test('unreadable document and missing saved job fail before evaluation', async (
   const missing = fixture();
   await assert.rejects(missing.evaluator.evaluate('cv', 'missing-job'), /Job description not found/);
   assert.equal(missing.calls.length, 0);
+});
+
+test('review workflow is dependency-injected, selects mode and persists mapped result', async () => {
+  const { createReviewWorkflow } = loadTs('src/features/review/review.workflow.ts', {
+    './review.response': loadTs('src/features/review/review.response.ts'),
+  });
+  const calls = [];
+  const workflow = createReviewWorkflow({
+    repository: {
+      markProcessing: async id => calls.push(['processing', id]),
+      findJobDescription: async id => id ? { id, title: 'Engineer', company: 'Example', description: 'Build services', requirements: { technical: ['Node'] }, scoringWeights: { skills: 1 } } : null,
+      complete: async (...args) => calls.push(['complete', ...args]),
+      fail: async (...args) => calls.push(['fail', ...args]),
+    },
+    evaluator: { evaluate: async (...args) => ({ extractedInfo: { name: 'Synthetic Person' }, matchRate: 80, evaluation: { criteria: criteria(), feedback: 'Evidence based' } }) },
+    summary: { generateFinalSummary: async (_result, mode, locale) => { calls.push(['summary', mode, locale]); return { overall_summary: 'Review summary', recommendation: 'YES' }; } },
+  });
+  const result = await workflow.process({ evaluationId: 'evaluation-1', cvDocumentId: 'cv-1', locale: 'id' });
+  assert.equal(result.mode, 'general');
+  assert.equal(result.recommendation, '');
+  assert.equal(result.locale, 'id');
+  assert.deepEqual(calls[0], ['processing', 'evaluation-1']);
+  assert.deepEqual(calls[1], ['summary', 'general', 'id']);
+  assert.equal(calls[2][1], 'evaluation-1');
+  assert.equal(calls[2][2], 'Synthetic Person');
+});
+
+test('review workflow records terminal failure and rethrows for queue retry', async () => {
+  const { createReviewWorkflow } = loadTs('src/features/review/review.workflow.ts', {
+    './review.response': loadTs('src/features/review/review.response.ts'),
+  });
+  const calls = [];
+  const workflow = createReviewWorkflow({
+    repository: {
+      markProcessing: async () => {}, findJobDescription: async () => null,
+      complete: async () => {}, fail: async (...args) => calls.push(args),
+    },
+    evaluator: { evaluate: async () => { throw new Error('AI output invalid'); } },
+    summary: { generateFinalSummary: async () => ({}) },
+  });
+  await assert.rejects(workflow.process({ evaluationId: 'evaluation-2', cvDocumentId: 'cv-2' }), /AI output invalid/);
+  assert.deepEqual(calls, [['evaluation-2', 'AI output invalid']]);
 });

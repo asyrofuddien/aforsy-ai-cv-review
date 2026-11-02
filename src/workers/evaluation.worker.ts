@@ -1,15 +1,17 @@
 import { Job } from "bullmq";
 import queueService from "../services/queue.service";
-import evaluationService from "../services/evaluation/evaluation.service";
+import { reviewWorkflow } from "../features/review";
+import { matcherWorkflow } from "../features/cv-matcher";
 import appLogger from "../utils/logger";
 import { logContext } from "../utils/log-context";
+import { MatcherQueuePayload, ReviewQueuePayload } from "../features/queue/queue.types";
 
 const logger = appLogger.child({ scope: "worker" });
-function processJob(job: Job, type: "review" | "cv-matcher") {
+function processJob(job: Job<ReviewQueuePayload | MatcherQueuePayload>, type: "review" | "cv-matcher") {
   return logContext.run(
     {
       jobId: String(job.id),
-      ...(job.data.evaluationId
+      ...("evaluationId" in job.data
         ? { evaluationId: String(job.data.evaluationId) }
         : {}),
     },
@@ -19,8 +21,8 @@ function processJob(job: Job, type: "review" | "cv-matcher") {
       // Queue's failed event owns failure logging; lower layers rethrow for retry.
       const result =
         type === "review"
-          ? await evaluationService.processEvaluation(job.data)
-          : await evaluationService.processCvMatcher(job.data);
+          ? await reviewWorkflow.process({ ...job.data as ReviewQueuePayload, attempt: job.attemptsMade + 1, maxAttempts: Number(job.opts.attempts) || 1 })
+          : await matcherWorkflow.process({ ...job.data as MatcherQueuePayload, attempt: job.attemptsMade + 1, maxAttempts: Number(job.opts.attempts) || 1 });
       logger.info("Job completed", {
         type,
         durationMs: Math.round(performance.now() - started),

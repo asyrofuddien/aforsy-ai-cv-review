@@ -1,65 +1,56 @@
-// services/evaluation/cv.evaluator.ts
-import Document from '../../models/document.model';
-import JobDescription from '../../models/jobDescription.model';
-import chainService from '../llm/chains';
+import { ReviewAIService } from '../../features/review/review.ai';
 import appLogger from '../../utils/logger';
+import { reviewRepository } from '../../features/review/review.repository';
+import { ReviewDescription } from '../../features/review/review.types';
+import { validateAndAggregateReview } from '../../features/review/review.scoring';
 
 const logger = appLogger.child({ scope: 'cv-review' });
+const reviewAI = new ReviewAIService();
+
+interface ReviewDocument { content?: string; }
+interface ReviewDataRepository {
+  findCvDocument(id: string): Promise<ReviewDocument | null>;
+  findJobDescription(id: string): Promise<ReviewDescription | null>;
+}
+interface ReviewAI {
+  extractCVInfo(content: string): Promise<unknown>;
+  evaluateCV(cv: unknown, requirements: Record<string, unknown>): Promise<{ criteria?: unknown; strengths?: string[]; gaps?: string[]; feedback: string; missing_information?: string[]; scores?: Record<string, number> }>;
+}
 
 export class CVEvaluator {
+  constructor(
+    private readonly repository: ReviewDataRepository = reviewRepository,
+    private readonly ai: ReviewAI = reviewAI,
+  ) {}
+
   async evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string, locale: 'id' | 'en' = 'en') {
     try {
-      logger.debug('📄 CV Evaluator: Starting evaluation');
-
-      // Get CV document
-      const cvDoc = await Document.findById(cvDocumentId);
+      logger.debug('CV evaluator started');
+      const cvDoc = await this.repository.findCvDocument(cvDocumentId);
       if (!cvDoc) throw new Error('CV document not found');
-
-      // Get job description
-      const jobDesc = jobDescriptionId ? await JobDescription.findById(jobDescriptionId) : null;
+      const jobDesc = jobDescriptionId ? await this.repository.findJobDescription(jobDescriptionId) : null;
       if (jobDescriptionId && !jobDesc) throw new Error('Job description not found');
-
-      // Extract CV information
       if (!cvDoc.content?.trim()) throw new Error('CV contains no readable text. Upload a text-based PDF, DOCX or TXT.');
-      const cvInfo = await chainService.extractCVInfo(cvDoc.content);
 
-      // Get relevant context from vector DB
-      const relevantContext: unknown[] = [];
-
-      // Evaluate CV
-      const evaluation = await chainService.evaluateCV({ ...cvInfo, sourceText: cvDoc.content }, {
+      const cvInfo = await this.ai.extractCVInfo(cvDoc.content);
+      const evaluation = await this.ai.evaluateCV({ ...(cvInfo as object), sourceText: cvDoc.content }, {
         locale,
         mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general',
         title: jobDesc?.title,
         company: jobDesc?.company,
         description: jobDescriptionText || jobDesc?.description,
         requirements: jobDesc?.requirements,
-        context: relevantContext,
+        context: [],
         scoringWeigths: jobDesc?.scoringWeights,
       });
-
-      // Calculate weighted score using real weights from job description
-      if (!Array.isArray(evaluation.criteria) || evaluation.criteria.length < 6 ||
-          evaluation.criteria.some((item: any) => !item || typeof item.name !== 'string' ||
-            typeof item.score !== 'number' || !Number.isFinite(item.score) || item.score < 0 || item.score > 5 ||
-            typeof item.evidence !== 'string' || typeof item.suggestion !== 'string')) {
-        throw new Error('AI returned an incomplete review. Please retry.');
-      }
-      const weightedScore = Math.round(evaluation.criteria.reduce((sum: number, item: any) => sum + item.score, 0) / evaluation.criteria.length * 20);
-
-      // Generate detailed feedback
-      const detailedFeedback = { strengths: evaluation.strengths || [], improvements: evaluation.gaps || [], recommendations: [] };
-
+      const matchRate = validateAndAggregateReview(evaluation.criteria);
       return {
-        extractedInfo: cvInfo,
-        evaluation: {
-          ...evaluation,
-          ...detailedFeedback,
-        },
-        matchRate: weightedScore,
+        extractedInfo: cvInfo as { name?: string },
+        evaluation: { ...evaluation, strengths: evaluation.strengths || [], improvements: evaluation.gaps || [], recommendations: [] },
+        matchRate,
       };
     } catch (error) {
-      logger.debug('CV evaluation error:', error);
+      logger.debug('CV evaluation failed', { error });
       throw error;
     }
   }
