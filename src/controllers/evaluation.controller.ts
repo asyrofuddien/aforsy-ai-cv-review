@@ -191,8 +191,12 @@ export class EvaluationController {
         });
       } else {
         res.status(200).json({
-          id: cvMatcher.id,
-          status: cvMatcher.status,
+          success: true,
+          data: {
+            id: cvMatcher.id,
+            status: cvMatcher.status,
+            error: cvMatcher.status === 'failed' ? cvMatcher.error : undefined,
+          },
         });
       }
     },

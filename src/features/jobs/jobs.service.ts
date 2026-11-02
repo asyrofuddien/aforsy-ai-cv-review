@@ -1,10 +1,9 @@
 import appLogger from '../../utils/logger';
 import { JobsAIService } from './jobs.ai';
-import { rapidApiJobProvider, RapidApiJobProvider } from './providers/rapidapi.adapter';
+import { configuredJobProvider } from './providers/ats.adapter';
 import { JobParser } from './model/job.parser';
 import { calculateSkillMatch, matchJobs, SkillMatcher } from './model/job.scoring';
-import { getDummyJobs } from './data/dummy-jobs';
-import { CandidateForMatching, JobListing, RoleSuggestion } from './model/job.types';
+import { CandidateForMatching, JobListing, JobProvider, RoleSuggestion } from './model/job.types';
 
 const logger = appLogger.child({ scope: 'jobs' });
 const jobsAI = new JobsAIService();
@@ -15,7 +14,7 @@ export interface JobDescriptionEnhancer {
 
 export class JobsService {
   constructor(
-    private readonly provider: Pick<RapidApiJobProvider, 'search' | 'getDetails'> = rapidApiJobProvider,
+    private readonly provider: JobProvider = configuredJobProvider,
     private readonly parser = new JobParser(),
     private readonly enhance: JobDescriptionEnhancer = jobsAI,
     private readonly skillMatch: SkillMatcher = async (skills, requirements) => {
@@ -25,29 +24,31 @@ export class JobsService {
   ) {}
 
   async findJobs(roleSuggestion: RoleSuggestion): Promise<JobListing[]> {
-    try {
-      if (!roleSuggestion.suggested_roles?.length) return getDummyJobs();
-      const jobs: JobListing[] = [];
-      for (const role of roleSuggestion.suggested_roles.slice(0, 3)) {
-        try {
-          const search = await this.provider.search(this.buildSearchParams(role, roleSuggestion.seniority));
-          const jobId = search.data?.[0]?.id;
-          if (!jobId) continue;
-          const details = await this.provider.getDetails(jobId);
-          if (!details?.data) continue;
-          const job = this.parser.parseProviderDetails(details);
-          const enhanced = await this.enhance.beautifyDescription(details.data.description || '');
-          job.job_description = enhanced.description || job.job_description;
-          jobs.push(job);
-        } catch (error) {
-          logger.warn('Job provider lookup failed; continuing with other role suggestions', { role, error });
-        }
+    if (!roleSuggestion.suggested_roles?.length) return [];
+    const jobs: JobListing[] = [];
+    const errors: unknown[] = [];
+    let completedSearches = 0;
+    for (const role of roleSuggestion.suggested_roles.slice(0, 3)) {
+      try {
+        const search = await this.provider.search(this.buildSearchParams(role, roleSuggestion.seniority));
+        completedSearches += 1;
+        const jobId = search.data?.[0]?.id;
+        if (!jobId) continue;
+        const details = await this.provider.getDetails(jobId);
+        if (!details?.data) continue;
+        const job = this.parser.parseProviderDetails(details);
+        const enhanced = await this.enhance.beautifyDescription(details.data.description || '');
+        job.job_description = enhanced.description || job.job_description;
+        jobs.push(job);
+      } catch (error) {
+        errors.push(error);
+        logger.warn('Job provider lookup failed; continuing with other role suggestions', { role, error });
       }
-      return jobs.length ? jobs : getDummyJobs();
-    } catch (error) {
-      logger.warn('Job provider unavailable; using fallback fixture', { error });
-      return getDummyJobs();
     }
+    if (!jobs.length && completedSearches === 0 && errors.length) {
+      throw new Error(`Job matching could not run: ${errors.map(error => error instanceof Error ? error.message : 'provider error').join('; ')}`);
+    }
+    return jobs;
   }
 
   async matchWithJobs(cv: CandidateForMatching, jobs: JobListing[]) {

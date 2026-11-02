@@ -3,7 +3,7 @@ import { JobListing, RapidApiJobDetailsResponse } from './job.types';
 export class JobParser {
   parseProviderDetails(response: RapidApiJobDetailsResponse): JobListing {
     const detail = response.data;
-    if (!detail) throw new Error('RapidAPI job details are missing');
+    if (!detail) throw new Error('Job provider details are missing');
     const { requirements, responsibilities } = this.extractSkillsAndResponsibilities(detail.description || '');
     return {
       title: detail.title || 'Untitled role',

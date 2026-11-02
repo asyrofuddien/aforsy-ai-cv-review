@@ -35,6 +35,11 @@ export interface RapidApiJobDetailsResponse {
   };
 }
 
+export interface JobProvider {
+  search(params: JobSearchParams): Promise<RapidApiSearchResponse>;
+  getDetails(id: string): Promise<RapidApiJobDetailsResponse | null>;
+}
+
 export interface CandidateForMatching {
   skills?: string[];
   seniority?: string;
