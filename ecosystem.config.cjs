@@ -22,6 +22,7 @@ module.exports = {
       error_file: path.join(backendDir, 'logs/pm2-api-error.log'),
       merge_logs: true,
       time: false,
+      log_date_format: '',
     },
     {
       name: 'landly-web',
