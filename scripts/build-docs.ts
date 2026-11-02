@@ -153,6 +153,7 @@ function convertPostmanToPaths(
             paths[url][method] = {
               summary: request.name,
               description: request.request.description || request.name,
+              // eslint-disable-next-line no-misleading-character-class -- Preserve legacy symbol stripping in generated labels during this tooling change.
               tags: [folder.name.replace(/[📋💼📤🔄📊🛠️🚀❌]/g, '').trim()],
               responses: {
                 '200': {

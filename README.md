@@ -223,15 +223,23 @@ Response (Completed):
 ### Run Tests
 
 ```bash
-# Unit tests
-npm test
+# Install locked dependencies without downloading Chromium for fake-renderer tests
+PUPPETEER_SKIP_DOWNLOAD=true PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm ci
 
-# Integration tests
-npm run test:integration
+npm run typecheck
+npm run lint
+npm test
+npm run build
 
 # API tests with provided script
 ./test-api.sh
 ```
+
+Foundation checks run on Node.js 24, matching `.github/workflows/ci.yml`. `npm test` uses the Node test runner; `npm run test:watch` reruns it while editing. The suite uses synthetic persistence/queue/AI/PDF dependencies and an ephemeral loopback HTTP server for route guards. It does not connect to MongoDB/Redis or send real email/AI requests. `test-api.sh` is a separate live-service check and is not run by CI.
+
+Lint reports existing unused-declaration warnings while feature modules migrate. TypeScript handles type-name/global resolution for TS files; lint remains active for other recommended checks. Two local regex exceptions preserve intentional ANSI stripping and legacy documentation-label handling. ESLint 8 is retained for compatibility with the current two-repo toolchain; a major upgrade is separate work.
+
+The build disables incremental output so a tracked cache cannot skip emission on a fresh checkout. Production Chromium/DB/Redis and Docker Node 18 compatibility are separate runtime checks; passing the Node 24 foundation suite does not verify those services. Cross-repo planning is authored in workspace `docs/codex/`, with a versioned snapshot in the frontend repository via its `npm run docs:sync` command.
 
 ### Using Postman
 

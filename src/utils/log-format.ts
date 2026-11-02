@@ -3,6 +3,7 @@ const hiddenKey =
 
 export function cleanLogText(value: string): string {
   return value
+    // eslint-disable-next-line no-control-regex -- Strip intentional ANSI escape prefixes from untrusted log text.
     .replace(/\u001b\[[0-9;]*m/g, "")
     .replace(/[\p{Extended_Pictographic}\uFE0F\u200D]/gu, "")
     .replace(/(["']?(?:password|secret|token|api[_-]?key|authorization|cookie)["']?\s*[:=]\s*)(["'])([\s\S]*?)\2/gi, '$1"[REDACTED]"')

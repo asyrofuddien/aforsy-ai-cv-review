@@ -1,0 +1,127 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const express = require('express');
+const { loadTs, logger } = require('./helpers/load-ts.cjs');
+const { AppError, asyncHandler, errorMiddleware } = loadTs('src/middlewares/error.middleware.ts', { '../utils/logger': { ...logger, log() {} } });
+const cvId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
+const resultId = 'bbbbbbbbbbbbbbbbbbbbbbbb';
+
+function fixture() {
+  const calls = { enqueued: [], revoked: [] };
+  const authService = loadTs('src/services/auth.service.ts', {
+    '../models/authSession.model': {}, '../models/emailToken.model': {}, '../models/user.model': {},
+    '../config/config': { auth: {} }, './email.service': { sendAuthEmail: async () => {} },
+  });
+  const users = [
+    { id: 'owner-a', role: 'user', isActive: true },
+    { id: 'owner-b', role: 'user', isActive: true },
+    { id: 'admin', role: 'admin', isActive: true },
+    { id: 'inactive', role: 'user', isActive: false },
+  ];
+  const sessions = [...users.map(user => ({ id: `session-${user.id}`, userId: user.id, tokenHash: authService.hashOpaqueToken(user.id), csrfHash: authService.hashOpaqueToken('synthetic-csrf'), expiresAt: new Date(Date.now() + 60000), createdAt: new Date() })),
+    { id: 'expired', userId: 'owner-a', tokenHash: authService.hashOpaqueToken('expired'), expiresAt: new Date(0) }];
+  const { authenticate, requireAdmin } = loadTs('src/middlewares/auth.middleware.ts', {
+    '../services/auth.service': authService,
+    './error.middleware': { AppError },
+    '../models/authSession.model': {
+      findOne: query => ({ select: async () => sessions.find(s => s.tokenHash === query.tokenHash && (!query.expiresAt || s.expiresAt > query.expiresAt.$gt)) || null }),
+      deleteMany: async query => { calls.revoked.push(query.userId); },
+    },
+    '../models/user.model': { findById: async id => users.find(u => u.id === id) },
+  });
+  const result = { id: resultId, _id: resultId, userId: 'owner-a', candidateName: 'Synthetic A', status: 'completed', result: { cvMatchRate: 65, mode: 'general', cvFeedback: 'Synthetic feedback' } };
+  const model = {
+    findOne: async query => Object.entries(query).every(([key, value]) => result[key] === value) ? result : null,
+    find: () => ({ sort: () => ({ limit: () => ({ select: async () => [result] }) }) }),
+  };
+  const queue = { addEvaluationJob: async (data, userId) => { calls.enqueued.push({ data, userId }); return { id: 'synthetic-job', jobId: 'synthetic-job' }; } };
+  const validation = loadTs('src/middlewares/validation.middleware.ts', { './error.middleware': { AppError } });
+  const controller = loadTs('src/controllers/evaluation.controller.ts', {
+    '../utils/logger': logger, '../utils/locale': { requestLocale: () => 'id' },
+    '../utils/constants': { ERROR_MESSAGES: { EVALUATION_NOT_FOUND: 'Not found' } },
+    '../middlewares/error.middleware': { AppError, asyncHandler },
+    '../services/queue.service': queue,
+    '../models/jobDescription.model': { exists: async () => true },
+    '../models/evaluation.model': model, '../models/cvMatcher.model': {},
+    '../models/document.model': { findOne: async query => query._id === cvId && query.userId === 'owner-a' ? { id: cvId } : null },
+  }).default;
+  const evaluationRoutes = loadTs('src/routes/evaluation.routes.ts', {
+    '../controllers/evaluation.controller': controller,
+    '../middlewares/validation.middleware': validation,
+  }).default;
+  const adminController = new Proxy({}, { get: (_target, key) => key === '__esModule' ? false : (_req, res) => res.json({ success: true }) });
+  const adminRoutes = loadTs('src/routes/admin.routes.ts', {
+    '../controllers/admin.controller': adminController,
+    '../middlewares/auth.middleware': { requireAdmin },
+  }).default;
+  const routes = loadTs('src/routes/index.ts', {
+    './auth.routes': express.Router(), './upload.routes': express.Router(),
+    './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
+    '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
+    '../middlewares/auth.middleware': { authenticate, requireAdmin },
+    '../models/document.model': {}, '../models/evaluation.model': model,
+    '../models/jobDescription.model': {}, '../models/code.model': {}, '../models/cvMatcher.model': {},
+    '../models/atsPDF.model': {}, '../models/Template.model': {}, '../services/queue.service': queue,
+  }).default;
+  const app = express();
+  app.use(express.json()); app.use('/api', routes); app.use(errorMiddleware);
+  return { app, calls };
+}
+
+async function withServer(t, run) {
+  const setup = fixture();
+  const server = setup.app.listen(0, '127.0.0.1');
+  await new Promise(resolve => server.once('listening', resolve));
+  t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
+  const request = async (path, { owner, method = 'GET', body, csrf } = {}) => {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/api${path}`, {
+      method, headers: { ...(owner ? { cookie: `landly_session=${owner}` } : {}), ...(csrf ? { 'x-csrf-token': csrf } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    return { status: res.status, body: await res.json() };
+  };
+  await run(request, setup.calls);
+}
+
+test('public API info stays public; product data requires an active unexpired account', async t => {
+  await withServer(t, async (request, calls) => {
+    assert.equal((await request('/test')).status, 200);
+    assert.equal((await request(`/evaluate/${resultId}`)).status, 401);
+    assert.equal((await request(`/evaluate/${resultId}`, { owner: 'expired' })).status, 401);
+    assert.equal((await request(`/evaluate/${resultId}`, { owner: 'inactive' })).status, 403);
+    assert.deepEqual(calls.revoked, ['inactive']);
+  });
+});
+
+test('owner data is isolated and admin/statistics guards remain in the mounted routes', async t => {
+  await withServer(t, async request => {
+    const own = await request(`/evaluate/${resultId}`, { owner: 'owner-a' });
+    assert.equal(own.status, 200); assert.equal(own.body.result.cv_match_rate, 65);
+    assert.equal((await request(`/evaluate/${resultId}`, { owner: 'owner-b' })).status, 404);
+    assert.equal((await request('/test/recent-evaluations', { owner: 'owner-a' })).status, 403);
+    assert.equal((await request('/test/recent-evaluations', { owner: 'admin' })).status, 200);
+    assert.equal((await request('/admin/summary', { owner: 'owner-a' })).status, 403);
+    assert.equal((await request('/admin/summary', { owner: 'admin' })).status, 200);
+  });
+});
+
+test('review mutation validates CSRF, document owner and conflicting JD before enqueue', async t => {
+  await withServer(t, async (request, calls) => {
+    const body = { cvDocumentId: cvId };
+    const options = { method: 'POST', owner: 'owner-a', body };
+    assert.equal((await request('/evaluate', options)).status, 403);
+    assert.equal((await request('/evaluate', { ...options, csrf: 'wrong' })).status, 403);
+    assert.equal((await request('/evaluate', { ...options, owner: 'owner-b', csrf: 'synthetic-csrf' })).status, 404);
+    assert.equal((await request('/evaluate', { ...options, csrf: 'synthetic-csrf', body: { ...body, jobDescriptionId: resultId, jobDescriptionText: 'Conflicting job' } })).status, 400);
+    for (const jobDescriptionText of [{ invalid: true }, 'x'.repeat(20001)]) {
+      assert.equal((await request('/evaluate', { ...options, csrf: 'synthetic-csrf', body: { ...body, jobDescriptionText } })).status, 400);
+    }
+    assert.equal(calls.enqueued.length, 0);
+    const accepted = await request('/evaluate', { ...options, csrf: 'synthetic-csrf', body: { ...body, jobDescriptionText: '   ' } });
+    assert.equal(accepted.status, 202);
+    assert.deepEqual(accepted.body, { id: 'synthetic-job', status: 'queued' });
+    assert.equal(calls.enqueued[0].userId, 'owner-a');
+    assert.equal(calls.enqueued[0].data.jobDescriptionText, undefined);
+    assert.equal(calls.enqueued[0].data.locale, 'id');
+  });
+});

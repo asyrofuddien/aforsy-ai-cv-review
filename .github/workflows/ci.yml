@@ -1,0 +1,44 @@
+name: Backend checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: 'true'
+      NODE_ENV: test
+      SUMOPOD_API_KEY: ''
+      OPENAI_API_KEY: ''
+      PINECONE_API_KEY: ''
+      PUPPETEER_SKIP_DOWNLOAD: 'true'
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies without downloading a browser
+        run: npm ci --no-audit --no-fund
+      - name: Type-check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Test with synthetic provider, queue and persistence boundaries
+        run: npm test
+      - name: Build production entry and assets
+        run: npm run build
+      - name: Verify runtime entry and locale asset
+        run: node -e "for (const file of ['dist/server.js', 'dist/app.js', 'dist/locales/messages.json', 'dist/results/resume_template.html']) require('node:fs').accessSync(file)"
