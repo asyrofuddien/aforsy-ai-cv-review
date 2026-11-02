@@ -1,3 +1,4 @@
+import type { ReviewCriterion, ReviewStrength, RequirementMatch } from './review.scoring';
 
 export interface ReviewJobPayload {
   evaluationId: string;
@@ -23,7 +24,11 @@ export interface ReviewEvaluation {
   extractedInfo?: { name?: string };
   matchRate: number;
   evaluation: {
-    criteria: Array<{ name: string; score: number; evidence: string; suggestion: string }>;
+    criteria: ReviewCriterion[];
+    schemaVersion?: number;
+    strengths?: ReviewStrength[];
+    gaps?: string[];
+    requirementMatches?: RequirementMatch[];
     feedback: string;
     scores?: Record<string, number>;
     missing_information?: string[];
@@ -33,11 +38,15 @@ export interface ReviewEvaluation {
 export interface ReviewResult {
   locale: 'id' | 'en';
   cvMatchRate: number;
-  criteria: Array<{ name: string; score: number; evidence: string; suggestion: string }>;
+  criteria: ReviewCriterion[];
   jobMatches: unknown[];
   suggestedRoles: string[];
   jobMatchingStatus: 'completed' | 'failed' | 'not_run';
   jobMatchingError?: string;
+  schemaVersion?: number;
+  strengths?: ReviewStrength[];
+  gaps?: string[];
+  requirementMatches?: RequirementMatch[];
   cvFeedback: string;
   overallSummary: string;
   recommendation?: string;

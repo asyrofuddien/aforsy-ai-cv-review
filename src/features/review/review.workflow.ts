@@ -66,7 +66,9 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
         if (payload.jobDescriptionId && !description) throw new Error('Job description not found');
         const result = await runStage(logger, 'analyze CV', () => evaluator.evaluate(payload.cvDocumentId, payload.jobDescriptionId, payload.jobDescriptionText, locale));
         const mode = description || payload.jobDescriptionText ? 'job_specific' : 'general';
-        const summaryResult = await runStage(logger, 'generate review summary', () => summary.generateFinalSummary(result.evaluation, mode, locale));
+        const summaryResult = result.evaluation.schemaVersion === 2
+          ? { overall_summary: result.evaluation.feedback }
+          : await runStage(logger, 'generate review summary', () => summary.generateFinalSummary(result.evaluation, mode, locale));
         const response = mapReviewResult(result, description, payload.jobDescriptionText, locale, summaryResult);
         if (jobMatcher) {
           try {

@@ -36,10 +36,10 @@ test('auth email content follows locale and escapes names without changing token
 });
 test('CV review and summary request the chosen language while preserving JSON keys and quotes',async()=>{
  const original=ai.completion;const calls=[];
- try{ai.completion=async(prompt,options)=>{calls.push(options.systemPrompt);return JSON.stringify({criteria:[],feedback:'Review',overall_summary:'Summary',missing_information:[]});};
- await chain.evaluateCV({sourceText:'An original English CV quote.'},{mode:'general',locale:'id'});
+ try{ai.completion=async(prompt,options)=>{calls.push(options.systemPrompt);return JSON.stringify({schemaVersion:2,criteria:['structure','clarity','experience','impact','completeness','language'].map(id=>({id,name:id,score:3,evidenceStatus:'quoted',evidence:'Original CV quote.',section:'Profile',rationale:'Clear text.',suggestion:'Clarify scope.',priority:'medium',exampleRevision:''})),strengths:[],requirementMatches:prompt.includes('MODE=job_specific')?[{requirement:'Relevant experience',status:'not_visible',evidence:'',explanation:'Not stated.'}]:[],feedback:'Review',overall_summary:'Summary',missing_information:[]});};
+ await chain.evaluateCV({sourceText:'Original CV quote.'},{mode:'general',locale:'id'});
  await chain.generateFinalSummary({feedback:'Review'},'general','id');
  assert.match(calls[0],/Bahasa Indonesia/);assert.match(calls[0],/exact source quotes/);assert.match(calls[1],/Bahasa Indonesia/);
- await chain.evaluateCV({sourceText:'Teks CV asli.'},{mode:'job_specific',locale:'en'});assert.match(calls[2],/in English/);
+ await chain.evaluateCV({sourceText:'Original CV quote.'},{mode:'job_specific',locale:'en',description:'Relevant experience'});assert.match(calls[2],/in English/);
  }finally{ai.completion=original;}
 });

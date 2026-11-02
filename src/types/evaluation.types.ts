@@ -1,3 +1,4 @@
+import type { ReviewCriterion, ReviewStrength, RequirementMatch } from '../features/review/review.scoring';
 // ==========================================
 // PERSONAL INFORMATION
 // ==========================================
@@ -232,7 +233,11 @@ export interface CVMatcherRequest {
 
 export interface EvaluationResult {
   locale?: 'id' | 'en';
-  criteria?: { name: string; score: number; evidence: string; suggestion: string }[];
+  schemaVersion?: number;
+  criteria?: ReviewCriterion[];
+  strengths?: ReviewStrength[];
+  gaps?: string[];
+  requirementMatches?: RequirementMatch[];
   suggestedRoles?: string[];
   jobMatches?: JobListing[];
   jobMatchingStatus?: 'completed' | 'failed' | 'not_run';

@@ -8,6 +8,7 @@ test('review retry can reclaim a processing record when retry-state recovery did
   const updates = [];
   const { reviewRepository } = loadTs('src/features/review/review.repository.ts', {
     '../../models/document.model': {},
+    '../../models/user.model': {},
     '../../models/evaluation.model': { findOneAndUpdate: async (...args) => updates.push(args) },
     '../../models/jobDescription.model': {},
   });

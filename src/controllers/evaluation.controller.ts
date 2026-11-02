@@ -139,6 +139,10 @@ export class EvaluationController {
           candidateName: evaluation.candidateName,
           status: evaluation.status,
           result: {
+            schema_version: evaluation.result.schemaVersion,
+            strengths: evaluation.result.strengths || [],
+            gaps: evaluation.result.gaps || [],
+            requirement_matches: evaluation.result.mode === 'job_specific' ? evaluation.result.requirementMatches || [] : [],
             cv_match_rate: evaluation.result.cvMatchRate,
             cv_feedback: evaluation.result.cvFeedback,
             project_score: evaluation.result.projectScore,

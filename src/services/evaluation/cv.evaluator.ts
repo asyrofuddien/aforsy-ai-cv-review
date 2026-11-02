@@ -1,3 +1,4 @@
+import type { ReviewAnalysis } from '../../features/review/review.validation';
 import { ReviewAIService } from '../../features/review/review.ai';
 import appLogger from '../../utils/logger';
 import { reviewRepository } from '../../features/review/review.repository';
@@ -14,7 +15,7 @@ interface ReviewDataRepository {
 }
 interface ReviewAI {
   extractCVInfo(content: string): Promise<unknown>;
-  evaluateCV(cv: unknown, requirements: Record<string, unknown>): Promise<{ criteria?: unknown; strengths?: string[]; gaps?: string[]; feedback: string; missing_information?: string[]; scores?: Record<string, number> }>;
+  evaluateCV(cv: unknown, requirements: Record<string, unknown>): Promise<ReviewAnalysis>;
 }
 
 export class CVEvaluator {

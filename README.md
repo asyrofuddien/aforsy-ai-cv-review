@@ -13,6 +13,18 @@ This service provides automated evaluation of job candidates by:
 - Providing detailed scoring and feedback
 - Processing evaluations asynchronously for scalability
 
+## Evidence-based CV review (version 2)
+
+New reviews retain the existing endpoints and `cv_match_rate` field, but that number now means **document quality in both modes**, never job-fit probability. General mode has no job requirements. Job-specific mode adds `requirement_matches` separately, with `supported`, `partial` or `not_visible` evidence statuses and no hiring recommendation.
+
+- Six stable criteria (`structure`, `clarity`, `experience`, `impact`, `completeness`, `language`) use explicit 0–5 rubrics. `score: null` with `evidenceStatus: not_assessable` is excluded from the average; an entirely unassessable response is rejected.
+- Each criterion stores source evidence/section, rationale, priority, suggestion and an optional example revision. Examples may contain `[placeholders]` for user confirmation. Optional sections and lack of paid experience are not automatically penalized.
+- `strengths`, `gaps`, `requirement_matches` and `schema_version: 2` are returned by the result API. New MongoDB fields are optional so historical reviews need no migration and remain readable. Existing results are not regenerated automatically.
+- CV/JD quotes are checked against normalized source text, criteria IDs must be unique and complete, and malformed output gets one correction attempt before existing queue retry handling. This verifies quote presence and structure, not the truth of every AI inference. Full source text remains the review input; expanded extraction includes certifications, languages, training, organizations and achievements.
+- New reviews reuse the evaluated feedback as the summary rather than asking a second model call to reinterpret findings. Visual PDF layout and ATS acceptance are not verified from text extraction.
+
+Validation: `npm test` covers evidence rejection, missing/duplicate criteria, nullable scores, mode isolation, bounded correction, persistence and legacy response compatibility. Tests use synthetic inputs; prompt quality still requires representative CV/JD evaluation against the configured provider.
+
 ## 📋 Table of Contents
 
 - [Features](#features)
