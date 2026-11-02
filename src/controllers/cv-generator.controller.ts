@@ -84,6 +84,10 @@ export class CVGeneratorController {
   });
 
   SaveDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    // A queued browser save must never write into an account signed in later.
+    if (req.query.ownerId && req.query.ownerId !== req.authUser!.userId.toString()) {
+      throw new AppError('Draft owner no longer matches the active account.', 403);
+    }
     if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
       res.status(400).json({ success: false, message: 'Draft data must be an object' });
       return;
