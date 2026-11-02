@@ -7,16 +7,16 @@ export class JobParser {
     const { requirements, responsibilities } = this.extractSkillsAndResponsibilities(detail.description || '');
     return {
       title: detail.title || 'Untitled role',
-      company: detail.companyName || 'Unknown company',
+      company: detail.companyName || detail.company || detail.employer || 'Unknown company',
       location: detail.location || 'Indonesia',
-      salary_range: 'Not specified',
-      job_type: detail.employmentType || 'Full-time',
+      salary_range: detail.salaryRange || 'Not specified',
+      job_type: detail.employmentType || detail.jobType || 'Full-time',
       seniority: this.normalizeSeniority(detail.seniorityLevel || ''),
       requirements,
       responsibilities,
       job_description: detail.description || '',
-      posted_at: detail.datePosted || this.convertPostedTimeAgo(detail.postedTimeAgo || ''),
-      link: detail.linkedinUrl || '',
+      posted_at: detail.datePosted || detail.postedAt || this.convertPostedTimeAgo(detail.postedTimeAgo || ''),
+      link: detail.linkedinUrl || detail.applyUrl || detail.url || '',
     };
   }
 

@@ -24,13 +24,60 @@ test('RapidAPI adapter maps query parameters, headers, detail lookup and retries
   const result = await provider.search({ query: 'Backend Engineer', experienceLevels: 'associate;midSenior', location: 'Indonesia' });
   assert.equal(result.data[0].id, 'job-1');
   assert.deepEqual(delays, [2000]);
-  assert.match(calls[1].url, /query=Backend\+Engineer/);
+  assert.match(calls[1].url, /\/v2\/linkedin\/search\?query=Backend\+Engineer/);
+  assert.match(calls[1].url, /location=Indonesia/);
   assert.equal(calls[1].init.headers['x-rapidapi-key'], 'fixture-key');
 });
 
 test('provider detail failures preserve the existing null detail fallback', async () => {
   const provider = new RapidApiJobProvider({ apiKey: 'fixture' }, async () => response(503, {}));
   assert.equal(await provider.getDetails('job-1'), null);
+});
+
+test('Indeed uses its country code and filters, with search and detail endpoints under the selected platform', async () => {
+  const calls = [];
+  const provider = new RapidApiJobProvider({ apiKey: 'fixture', platform: 'indeed', baseUrl: 'https://fixture.test/v2/linkedin', countryCode: 'id' }, async url => {
+    calls.push(url);
+    return response(200, calls.length === 1 ? { data: [{ id: 'indeed-job' }], meta: { nextToken: 'next-page' } } : { data: { title: 'Developer', url: 'https://jobs.test/1' } });
+  });
+  const search = await provider.search({ query: 'Developer', location: 'Jakarta', radius: 25, sortType: 'date' });
+  await provider.getDetails(search.data[0].id);
+  assert.match(calls[0], /^https:\/\/fixture\.test\/v2\/indeed\/search\?/);
+  assert.match(calls[0], /countryCode=id/);
+  assert.match(calls[0], /radius=25/);
+  assert.match(calls[0], /sortType=date/);
+  assert.match(calls[1], /\/v2\/indeed\/get\?id=indeed-job/);
+  assert.equal(search.meta.nextToken, 'next-page');
+});
+
+test('Bing requires location and maps remoteOnly; Xing receives location and pagination token', async () => {
+  const calls = [];
+  const bing = new RapidApiJobProvider({ apiKey: 'fixture', platform: 'bing', baseUrl: 'https://fixture.test' }, async url => { calls.push(url); return response(200, { data: [] }); });
+  await assert.rejects(bing.search({ query: 'Engineer' }), /requires a location/);
+  await bing.search({ query: 'Engineer', location: 'Jakarta', remoteOnly: true });
+  assert.match(calls[0], /\/v2\/bing\/search\?/);
+  assert.match(calls[0], /remoteOnly=true/);
+
+  const xing = new RapidApiJobProvider({ apiKey: 'fixture', platform: 'xing', baseUrl: 'https://fixture.test' }, async url => { calls.push(url); return response(200, { data: [] }); });
+  await xing.search({ query: 'Engineer', location: 'Schweiz', token: 'next-token' });
+  assert.match(calls[1], /\/v2\/xing\/search\?/);
+  assert.match(calls[1], /location=Schweiz/);
+  assert.match(calls[1], /token=next-token/);
+});
+
+test('RapidAPI follows nextToken up to the configured page cap and deduplicates listings', async () => {
+  const urls = [];
+  const provider = new RapidApiJobProvider({ apiKey: 'fixture', platform: 'linkedin', baseUrl: 'https://fixture.test', maxPages: 2 }, async url => {
+    urls.push(url);
+    return response(200, urls.length === 1
+      ? { data: [{ id: 'job-1' }], meta: { nextToken: 'page 2' } }
+      : { data: [{ id: 'job-1' }, { id: 'job-2' }], meta: { nextToken: 'page 3' } });
+  });
+  const result = await provider.search({ query: 'Engineer', location: 'Jakarta' });
+  assert.equal(urls.length, 2);
+  assert.match(urls[1], /token=page\+2/);
+  assert.deepEqual(result.data, [{ id: 'job-1' }, { id: 'job-2' }]);
+  assert.equal(result.meta.nextToken, 'page 3');
 });
 
 test('job parser preserves requirements extraction, defaults, seniority normalization and posting date handling', () => {
@@ -43,6 +90,12 @@ test('job parser preserves requirements extraction, defaults, seniority normaliz
   assert.deepEqual(parsed.responsibilities, ['Build reliable services for customers']);
   assert.equal(parsed.seniority, 'Senior');
   assert.equal(parsed.posted_at, '2026-10-01');
+  const indeed = parser.parseProviderDetails({ data: { title: 'Analyst', employer: 'Example Ltd', jobType: 'Contract', postedAt: '2026-10-02', salaryRange: '$80K-$100K', applyUrl: 'https://indeed.test/apply' } });
+  assert.equal(indeed.company, 'Example Ltd');
+  assert.equal(indeed.job_type, 'Contract');
+  assert.equal(indeed.posted_at, '2026-10-02');
+  assert.equal(indeed.salary_range, '$80K-$100K');
+  assert.equal(indeed.link, 'https://indeed.test/apply');
   assert.equal(parser.parseProviderDetails({ data: { title: 'Role' } }).company, 'Unknown company');
 });
 

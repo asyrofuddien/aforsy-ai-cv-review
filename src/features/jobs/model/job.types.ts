@@ -10,15 +10,22 @@ export interface RoleSuggestion {
 export interface JobSearchParams {
   query?: string;
   location?: string;
+  countryCode?: string;
   experienceLevels?: string;
   workplaceTypes?: string;
   datePosted?: string;
   geoId?: string;
   employmentTypes?: string;
+  organizationIds?: string;
+  radius?: number;
+  sortType?: string;
+  remoteOnly?: boolean;
+  token?: string;
 }
 
 export interface RapidApiSearchResponse {
   data?: Array<{ id: string }>;
+  meta?: { nextToken?: string };
 }
 
 export interface RapidApiJobDetailsResponse {
@@ -26,12 +33,19 @@ export interface RapidApiJobDetailsResponse {
     description?: string;
     title?: string;
     companyName?: string;
+    company?: string;
+    employer?: string;
     location?: string;
     employmentType?: string;
+    jobType?: string;
     seniorityLevel?: string;
     datePosted?: string;
+    postedAt?: string;
     postedTimeAgo?: string;
     linkedinUrl?: string;
+    url?: string;
+    applyUrl?: string;
+    salaryRange?: string;
   };
 }
 

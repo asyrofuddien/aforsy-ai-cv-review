@@ -45,3 +45,9 @@ export const initializeVectorDB = async (): Promise<void> => {
 };
 
 export const getPineconeClient = (): Pinecone | null => pineconeClient;
+
+export const closeVectorDB = async (): Promise<void> => {
+  // The Pinecone SDK uses request-scoped HTTP connections; clearing the client
+  // drops the application's reference and keeps reinitialization predictable.
+  pineconeClient = null;
+};

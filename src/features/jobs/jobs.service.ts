@@ -26,20 +26,24 @@ export class JobsService {
   async findJobs(roleSuggestion: RoleSuggestion): Promise<JobListing[]> {
     if (!roleSuggestion.suggested_roles?.length) return [];
     const jobs: JobListing[] = [];
+    const seenJobs = new Set<string>();
     const errors: unknown[] = [];
     let completedSearches = 0;
     for (const role of roleSuggestion.suggested_roles.slice(0, 3)) {
       try {
         const search = await this.provider.search(this.buildSearchParams(role, roleSuggestion.seniority));
         completedSearches += 1;
-        const jobId = search.data?.[0]?.id;
-        if (!jobId) continue;
-        const details = await this.provider.getDetails(jobId);
-        if (!details?.data) continue;
-        const job = this.parser.parseProviderDetails(details);
-        const enhanced = await this.enhance.beautifyDescription(details.data.description || '');
-        job.job_description = enhanced.description || job.job_description;
-        jobs.push(job);
+        for (const { id: jobId } of search.data?.slice(0, 3) || []) {
+          const details = await this.provider.getDetails(jobId);
+          if (!details?.data) continue;
+          const job = this.parser.parseProviderDetails(details);
+          const dedupeKey = job.link || `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${job.location.toLowerCase()}`;
+          if (seenJobs.has(dedupeKey)) continue;
+          seenJobs.add(dedupeKey);
+          const enhanced = await this.enhance.beautifyDescription(details.data.description || '');
+          job.job_description = enhanced.description || job.job_description;
+          jobs.push(job);
+        }
       } catch (error) {
         errors.push(error);
         logger.warn('Job provider lookup failed; continuing with other role suggestions', { role, error });

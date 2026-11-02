@@ -9,60 +9,28 @@ import { enqueueWithCompensation } from '../features/queue/enqueue';
 const logger = appLogger.child({ scope: 'queue' });
 
 class QueueService {
-  private evaluationQueue: Queue;
-  private queueEvents: QueueEvents;
-  private cvMatcherQueue: Queue;
-  private cvMatcherQueueEvents: QueueEvents;
+  private evaluationQueue: Queue | null = null;
+  private queueEvents: QueueEvents | null = null;
+  private cvMatcherQueue: Queue | null = null;
+  private cvMatcherQueueEvents: QueueEvents | null = null;
   private worker: Worker | null = null;
-  private cvMatcherWorker: Worker | null = null; // Tambah worker untuk cv-matcher
+  private cvMatcherWorker: Worker | null = null;
+  private closed = false;
 
-  constructor() {
+  private ensureQueues(): void {
+    if (this.closed) throw new Error('Queue service is closed');
+    if (this.evaluationQueue) return;
     const connection = this.parseRedisUrl(config.database.redisUrl);
-
-    this.evaluationQueue = new Queue('evaluation-queue', {
-      connection,
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-        removeOnComplete: {
-          age: 3600,
-          count: 100,
-        },
-        removeOnFail: {
-          age: 24 * 3600,
-        },
-      },
-    });
-
-    this.queueEvents = new QueueEvents('evaluation-queue', {
-      connection,
-    });
-
-    this.cvMatcherQueue = new Queue('cv-matcher-queue', {
-      connection,
-      defaultJobOptions: {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000,
-        },
-        removeOnComplete: {
-          age: 3600,
-          count: 100,
-        },
-        removeOnFail: {
-          age: 24 * 3600,
-        },
-      },
-    });
-
-    this.cvMatcherQueueEvents = new QueueEvents('cv-matcher-queue', {
-      connection,
-    });
-
+    const defaultJobOptions = {
+      attempts: 3,
+      backoff: { type: 'exponential' as const, delay: 5000 },
+      removeOnComplete: { age: 3600, count: 100 },
+      removeOnFail: { age: 24 * 3600 },
+    };
+    this.evaluationQueue = new Queue('evaluation-queue', { connection, defaultJobOptions });
+    this.queueEvents = new QueueEvents('evaluation-queue', { connection });
+    this.cvMatcherQueue = new Queue('cv-matcher-queue', { connection, defaultJobOptions });
+    this.cvMatcherQueueEvents = new QueueEvents('cv-matcher-queue', { connection });
     this.setupQueueEvents();
   }
 
@@ -80,28 +48,30 @@ class QueueService {
   }
 
   private setupQueueEvents() {
-    this.queueEvents.on('completed', ({ jobId }) => {
+    const queueEvents = this.queueEvents!;
+    const cvMatcherQueueEvents = this.cvMatcherQueueEvents!;
+    queueEvents.on('completed', ({ jobId }) => {
       logger.debug('Queue completion event', { jobId, queue: 'review' });
     });
 
-    this.queueEvents.on('failed', ({ jobId }) => {
+    queueEvents.on('failed', ({ jobId }) => {
       logger.debug('Queue failure event', { jobId, queue: 'review' });
     });
 
-    this.queueEvents.on('progress', ({ jobId, data }) => {
+    queueEvents.on('progress', ({ jobId, data }) => {
       logger.debug(`Job ${jobId} progress:`, data);
     });
 
     // Tambah event handlers untuk cvMatcherQueue
-    this.cvMatcherQueueEvents.on('completed', ({ jobId }) => {
+    cvMatcherQueueEvents.on('completed', ({ jobId }) => {
       logger.debug('Queue completion event', { jobId, queue: 'cv-matcher' });
     });
 
-    this.cvMatcherQueueEvents.on('failed', ({ jobId }) => {
+    cvMatcherQueueEvents.on('failed', ({ jobId }) => {
       logger.debug('Queue failure event', { jobId, queue: 'cv-matcher' });
     });
 
-    this.cvMatcherQueueEvents.on('progress', ({ jobId, data }) => {
+    cvMatcherQueueEvents.on('progress', ({ jobId, data }) => {
       logger.debug(`CV Matcher job ${jobId} progress:`, data);
     });
   }
@@ -113,6 +83,7 @@ class QueueService {
     id: string;
     jobId: string;
   }> {
+    this.ensureQueues();
     let evaluation: Awaited<ReturnType<typeof queueRepository.createReview>> | undefined;
     try {
       evaluation = await queueRepository.createReview(data, userId);
@@ -123,7 +94,7 @@ class QueueService {
       };
       const job = await enqueueWithCompensation({
         record: evaluation,
-        enqueue: () => this.evaluationQueue.add('evaluate', payload, { jobId: evaluation!.id }),
+        enqueue: () => this.evaluationQueue!.add('evaluate', payload, { jobId: evaluation!.id }),
         compensate: (record, error) => queueRepository.markReviewEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue review job'),
       });
 
@@ -142,6 +113,8 @@ class QueueService {
   }
 
   initializeEvaluationWorker(processor: (_job: Job<ReviewQueuePayload>) => Promise<unknown>) {
+    this.ensureQueues();
+    if (this.worker) throw new Error('Evaluation worker is already initialized');
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.worker = new Worker('evaluation-queue', processor, {
@@ -158,8 +131,9 @@ class QueueService {
     });
   }
 
-  // Tambah worker untuk CV Matcher
   initializeCVMatcherWorker(processor: (_job: Job<MatcherQueuePayload>) => Promise<unknown>) {
+    this.ensureQueues();
+    if (this.cvMatcherWorker) throw new Error('CV matcher worker is already initialized');
     const connection = this.parseRedisUrl(config.database.redisUrl);
 
     this.cvMatcherWorker = new Worker('cv-matcher-queue', processor, {
@@ -177,16 +151,19 @@ class QueueService {
   }
 
   async getJob(jobId: string) {
-    return await this.evaluationQueue.getJob(jobId);
+    this.ensureQueues();
+    return await this.evaluationQueue!.getJob(jobId);
   }
 
   // Tambah method untuk get CV Matcher job
   async getCVMatcherJob(jobId: string) {
-    return await this.cvMatcherQueue.getJob(jobId);
+    this.ensureQueues();
+    return await this.cvMatcherQueue!.getJob(jobId);
   }
 
   async retryFailedJob(queueType: 'evaluation' | 'cv-matcher', jobId: string): Promise<boolean> {
-    const queue = queueType === 'evaluation' ? this.evaluationQueue : this.cvMatcherQueue;
+    this.ensureQueues();
+    const queue = queueType === 'evaluation' ? this.evaluationQueue! : this.cvMatcherQueue!;
     const job = await queue.getJob(jobId);
     if (!job || (await job.getState()) !== 'failed') return false;
     await job.retry('failed');
@@ -194,41 +171,51 @@ class QueueService {
   }
 
   async getJobState(queueType: 'evaluation' | 'cv-matcher', jobId: string): Promise<string | null> {
-    const queue = queueType === 'evaluation' ? this.evaluationQueue : this.cvMatcherQueue;
+    this.ensureQueues();
+    const queue = queueType === 'evaluation' ? this.evaluationQueue! : this.cvMatcherQueue!;
     const job = await queue.getJob(jobId);
     return job ? job.getState() : null;
   }
 
   async getJobCounts() {
-    return await this.evaluationQueue.getJobCounts();
+    this.ensureQueues();
+    return await this.evaluationQueue!.getJobCounts();
   }
 
   // Tambah method untuk get CV Matcher job counts
   async getCVMatcherJobCounts() {
-    return await this.cvMatcherQueue.getJobCounts();
+    this.ensureQueues();
+    return await this.cvMatcherQueue!.getJobCounts();
   }
 
-  async close() {
-    await this.queueEvents.close();
-    await this.evaluationQueue.close();
-    await this.cvMatcherQueueEvents.close();
-    await this.cvMatcherQueue.close();
-    if (this.worker) {
-      await this.worker.close();
+  async close(force = false) {
+    const workers = [this.worker, this.cvMatcherWorker].filter((worker): worker is Worker => worker !== null);
+    const workerResults = await Promise.allSettled(workers.map(worker => worker.close(force)));
+    const resources = [this.queueEvents, this.cvMatcherQueueEvents, this.evaluationQueue, this.cvMatcherQueue].filter((resource): resource is Queue | QueueEvents => resource !== null);
+    const resourceResults = await Promise.allSettled(resources.map(resource => resource.close()));
+    const failures = [...workerResults, ...resourceResults].filter(result => result.status === 'rejected');
+    if (failures.length) {
+      const error = new Error('Failed to close queue resources') as Error & { causes?: unknown[] };
+      error.causes = failures.map(result => result.status === 'rejected' ? result.reason : undefined);
+      throw error;
     }
-    if (this.cvMatcherWorker) {
-      // Tambah close untuk cv matcher worker
-      await this.cvMatcherWorker.close();
-    }
+    this.closed = true;
+    this.worker = null;
+    this.cvMatcherWorker = null;
+    this.queueEvents = null;
+    this.cvMatcherQueueEvents = null;
+    this.evaluationQueue = null;
+    this.cvMatcherQueue = null;
   }
 
   getQueue() {
-    return this.evaluationQueue;
+    this.ensureQueues();
+    return this.evaluationQueue!;
   }
 
-  // Tambah method untuk get CV Matcher queue
   getCVMatcherQueue() {
-    return this.cvMatcherQueue;
+    this.ensureQueues();
+    return this.cvMatcherQueue!;
   }
 
   async addCVMatcher(
@@ -238,6 +225,7 @@ class QueueService {
     id: string;
     jobId: string;
   }> {
+    this.ensureQueues();
     let cvMatcher: Awaited<ReturnType<typeof queueRepository.createMatcher>> | undefined;
     try {
       cvMatcher = await queueRepository.createMatcher(data, userId);
@@ -248,7 +236,7 @@ class QueueService {
       };
       const job = await enqueueWithCompensation({
         record: cvMatcher,
-        enqueue: () => this.cvMatcherQueue.add('cv-matcher', payload, { jobId: cvMatcher!.id }),
+        enqueue: () => this.cvMatcherQueue!.add('cv-matcher', payload, { jobId: cvMatcher!.id }),
         compensate: (record, error) => queueRepository.markMatcherEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue CV matcher job'),
       });
 
