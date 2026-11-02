@@ -112,6 +112,13 @@ The API listens at `http://localhost:3001`; health check: `http://localhost:3001
 
 To run the full backend stack in Docker, use `docker compose up --build`.
 
+## Project documentation
+
+- [API reference](docs/API.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Scoring behavior](docs/SCORING.md)
+- [Application logging](docs/operations/logging.md)
+
 ## ⚙️ Configuration
 
 ### Environment Variables
