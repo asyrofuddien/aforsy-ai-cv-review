@@ -77,10 +77,10 @@ test('importing queue service creates no BullMQ resources before bootstrap initi
     async close() { constructions.push('close'); }
     async add() { return { id: 'queued' }; }
   }
-  class FakeWorker extends FakeResource { constructor(name) { super(name); } }
+  class FakeWorker extends FakeResource { constructor(name, _processor, options) { super(name); this.options = options; } }
   const { default: queueService } = loadTs('src/services/queue.service.ts', {
     bullmq: { Queue: FakeResource, QueueEvents: FakeResource, Worker: FakeWorker },
-    '../config/config': { database: { redisUrl: 'redis://localhost:6379' } },
+    '../config/config': { database: { redisUrl: 'redis://localhost:6379' }, queue: { concurrency: 3, cvMatcherConcurrency: 7 } },
     '../types/evaluation.types': {},
     '../utils/logger': { child() { return { debug() {}, error() {} }; } },
     '../features/queue/queue.types': {},
@@ -90,5 +90,6 @@ test('importing queue service creates no BullMQ resources before bootstrap initi
   assert.deepEqual(constructions, []);
   queueService.initializeEvaluationWorker(async () => undefined);
   assert.ok(constructions.some(value => value === 'new:evaluation-queue'));
+  assert.equal(queueService.worker?.options.concurrency, 3);
   await queueService.close();
 });

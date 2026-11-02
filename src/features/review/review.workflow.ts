@@ -11,11 +11,12 @@ export interface ReviewWorkflowDependencies {
   };
   evaluator: { evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string, locale?: 'id' | 'en'): Promise<any> };
   summary: { generateFinalSummary(evaluation: unknown, mode: 'general' | 'job_specific', locale: 'id' | 'en'): Promise<{ overall_summary?: string; recommendation?: string; missing_information?: string[] }> };
-  logger?: { debug(message: string, metadata?: unknown): void };
+  jobMatcher?: { findMatches(profile: unknown): Promise<{ suggestedRoles: string[]; jobs: unknown[] }> };
+  logger?: { debug(message: string, metadata?: unknown): void; warn?(message: string, metadata?: unknown): void };
 }
 
 export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
-  const { repository, evaluator, summary, logger } = dependencies;
+  const { repository, evaluator, summary, jobMatcher, logger } = dependencies;
   return {
     async process(payload: ReviewJobPayload): Promise<ReviewResult | null> {
       const locale = payload.locale === 'id' ? 'id' : 'en';
@@ -29,6 +30,21 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
         const mode = description || payload.jobDescriptionText ? 'job_specific' : 'general';
         const summaryResult = await summary.generateFinalSummary(result.evaluation, mode, locale);
         const response = mapReviewResult(result, description, payload.jobDescriptionText, locale, summaryResult);
+        if (jobMatcher) {
+          try {
+            const matches = await jobMatcher.findMatches(result.extractedInfo);
+            response.suggestedRoles = matches.suggestedRoles;
+            response.jobMatches = matches.jobs;
+            response.jobMatchingStatus = 'completed';
+          } catch (error) {
+            response.jobMatchingStatus = 'failed';
+            response.jobMatchingError = 'Job matching could not run. Your CV review is ready.';
+            logger?.warn?.('Job matching failed after a successful CV review', {
+              evaluationId: payload.evaluationId,
+              error: error instanceof Error ? error.message : 'Unknown job matching error',
+            });
+          }
+        }
         const candidateName = result.extractedInfo?.name && !['Unknown', 'Unknown Candidate'].includes(result.extractedInfo.name)
           ? result.extractedInfo.name : undefined;
         await repository.complete(payload.evaluationId, candidateName, response);

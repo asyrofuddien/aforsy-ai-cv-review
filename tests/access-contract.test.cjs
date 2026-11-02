@@ -11,6 +11,18 @@ function fixture() {
   const authService = loadTs('src/services/auth.service.ts', {
     '../models/authSession.model': {}, '../models/emailToken.model': {}, '../models/user.model': {},
     '../config/config': { auth: {} }, './email.service': { sendAuthEmail: async () => {} },
+    '../features/auth/credentials.crypto': {
+      hashOpaqueToken: value => require('node:crypto').createHash('sha256').update(value).digest('hex'),
+      hashPassword: async value => value,
+      verifyPassword: async () => false,
+    },
+    '../features/auth/email-actions.service': { createEmailAction: async () => {}, consumeEmailAction: async () => null },
+    '../features/auth/auth.service': {
+      hashOpaqueToken: value => require('node:crypto').createHash('sha256').update(value).digest('hex'),
+      sessionCookieName: 'landly_session', csrfHeaderName: 'x-csrf-token',
+      getCookie: (header, name) => header?.split(';').map(part => part.trim()).find(part => part.startsWith(`${name}=`))?.slice(name.length + 1),
+      verifyCsrf: (provided, expected) => !!provided && require('node:crypto').createHash('sha256').update(provided).digest('hex') === expected,
+    },
   });
   const users = [
     { id: 'owner-a', role: 'user', isActive: true },
@@ -58,6 +70,7 @@ function fixture() {
   }).default;
   const routes = loadTs('src/routes/index.ts', {
     './auth.routes': express.Router(), './upload.routes': express.Router(),
+    './document.routes': express.Router(),
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../middlewares/auth.middleware': { authenticate, requireAdmin },

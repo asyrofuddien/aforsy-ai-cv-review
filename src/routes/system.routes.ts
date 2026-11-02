@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import config from '../config/config';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.get('/health', (_req, res) => {
 
 // Test route
 router.get('/test', (req, res) => {
-  const isDev = process.env.NODE_ENV === 'development';
+  const isDev = config.nodeEnv === 'development';
 
   const endpoints = [
     '===== HEALTH & INFO =====',
@@ -39,7 +40,7 @@ router.get('/test', (req, res) => {
 
   res.json({
     message: 'Landly API - All Endpoints',
-    environment: process.env.NODE_ENV || 'development',
+    environment: config.nodeEnv,
     version: '1.0.0',
     endpoints,
     notes: {

@@ -14,6 +14,7 @@ export function mapReviewResult(
     criteria: evaluation.evaluation.criteria,
     jobMatches: [],
     suggestedRoles: [],
+    jobMatchingStatus: 'not_run',
     cvFeedback: evaluation.evaluation.feedback,
     overallSummary: summary?.overall_summary || evaluation.evaluation.feedback,
     recommendation: mode === 'general' ? '' : summary?.recommendation,

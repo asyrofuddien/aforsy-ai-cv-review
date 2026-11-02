@@ -4,6 +4,7 @@ const { loadTs } = require('./helpers/load-ts.cjs');
 
 const providers = loadTs('src/features/jobs/providers/ats.adapter.ts', {
   './rapidapi.adapter': { rapidApiJobProvider: { search: async () => ({ data: [] }), getDetails: async () => null } },
+  '../../../config/config': { jobs: { provider: 'rapidapi', fallback: 'aggregate', greenhouseBoards: [], leverSites: [] } },
 });
 const { JobsService } = loadTs('src/features/jobs/jobs.service.ts', {
   '../../utils/logger': { child() { return { warn() {}, debug() {} }; } },

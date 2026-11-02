@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '../middlewares/error.middleware';
-import documentService from '../services/document.service';
-import parserService from '../services/parser.service';
+import { uploadCv } from '../features/documents/document-upload.workflow';
 import { SUCCESS_MESSAGES } from '../utils/constants';
 import appLogger from '../utils/logger';
 
@@ -20,10 +19,7 @@ export class UploadController {
     const cvFile = files.cv[0];
 
     // Parse files
-    const cvContent = await parserService.parseFile(cvFile.path, cvFile.mimetype);
-
-    // Save to database
-    const cvDocument = await documentService.saveDocument(cvFile, 'cv', req.authUser!.userId, cvContent);
+    const cvDocument = await uploadCv(cvFile, req.authUser!.userId);
 
     logger.info(`Documents uploaded - CV: ${cvDocument.id}`);
 

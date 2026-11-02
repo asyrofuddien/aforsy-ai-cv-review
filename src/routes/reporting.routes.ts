@@ -3,6 +3,7 @@ import Document from '../models/document.model';
 import Evaluation from '../models/evaluation.model';
 import JobDescription from '../models/jobDescription.model';
 import { loadSystemStats } from '../services/reporting.repository';
+import config from '../config/config';
 
 const router = Router();
 
@@ -65,7 +66,7 @@ router.get('/job-descriptions', async (req: Request, res: Response) => {
 // Clear test data (development only)
 router.delete('/clear-test-data', async (req: Request, res: Response) => {
   try {
-    if (process.env.NODE_ENV !== 'development') {
+    if (config.nodeEnv !== 'development') {
       return res.status(403).json({
         success: false,
         message: 'This endpoint is only available in development',

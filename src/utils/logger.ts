@@ -1,16 +1,17 @@
 import winston from "winston";
 import path from "path";
+import config from "../config/config";
 import fs from "fs";
 import moment from "moment-timezone";
 import { cleanLogText, sanitizeLogValue, terminalLine } from "./log-format";
 import { logContext } from "./log-context";
 
-const logDir = path.resolve(process.env.LOG_DIR || "logs");
+const logDir = path.resolve(config.logging.directory);
 fs.mkdirSync(logDir, { recursive: true });
 const levels = { error: 0, warn: 1, info: 2, http: 3, debug: 4 };
 const requestedLevel =
-  process.env.LOG_LEVEL ||
-  (process.env.NODE_ENV === "development" ? "debug" : "info");
+  config.logging.level ||
+  (config.nodeEnv === "development" ? "debug" : "info");
 const level = Object.hasOwnProperty.call(levels, requestedLevel)
   ? requestedLevel
   : "info";

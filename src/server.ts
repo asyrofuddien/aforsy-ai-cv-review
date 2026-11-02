@@ -27,8 +27,8 @@ const runtime = createBootstrap<Server>({
   closeVectorDB,
   disconnectDatabase: disconnectDB,
   logger,
-  gracefulTimeoutMs: Number(process.env.SHUTDOWN_GRACE_PERIOD_MS) || 30_000,
-  forceTimeoutMs: Number(process.env.SHUTDOWN_FORCE_PERIOD_MS) || 3_000,
+  gracefulTimeoutMs: config.shutdown.gracePeriodMs,
+  forceTimeoutMs: config.shutdown.forcePeriodMs,
   listen: () => new Promise<Server>((resolve, reject) => {
     const server = app.listen(Number(config.port), config.host);
     const onError = (error: Error) => {

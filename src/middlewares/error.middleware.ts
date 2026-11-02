@@ -55,7 +55,6 @@ export const errorMiddleware = (
     success: false,
     error: {
       message: error.message || 'Server Error',
-      // ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     },
   });
 };

@@ -119,7 +119,7 @@ class QueueService {
 
     this.worker = new Worker('evaluation-queue', processor, {
       connection,
-      concurrency: 5,
+      concurrency: config.queue.concurrency,
     });
 
     this.worker.on('completed', (job) => {
@@ -138,7 +138,7 @@ class QueueService {
 
     this.cvMatcherWorker = new Worker('cv-matcher-queue', processor, {
       connection,
-      concurrency: 10,
+      concurrency: config.queue.cvMatcherConcurrency,
     });
 
     this.cvMatcherWorker.on('completed', (job) => {

@@ -8,7 +8,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 
 # Install all dependencies (including dev)
-RUN npm install
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -32,11 +32,7 @@ RUN apk update && apk add --no-cache \
   harfbuzz \
   ca-certificates \
   ttf-freefont \
-  udev \
-  atk \
-  at-spi2-atk \
-  gconf \
-  libxss
+  udev
 
 # Puppeteer config
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -52,8 +48,11 @@ RUN npm ci --only=production
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Copy src/data if needed at runtime
+# Runtime fallbacks for database-backed templates and rubric lookups.
 COPY --from=builder /app/src/data ./src/data
+COPY --from=builder /app/src/template-cv ./src/template-cv
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/results ./results
 
 # Directories your app expects
 RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs cached

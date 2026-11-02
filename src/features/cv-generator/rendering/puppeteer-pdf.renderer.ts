@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
 import puppeteer from 'puppeteer';
+import config from '../../../config/config';
 import appLogger from '../../../utils/logger';
 
 const logger = appLogger.child({ scope: 'cv-generator/pdf-renderer' });
@@ -26,7 +27,7 @@ export async function renderCvPdf(html: string, fileName: string, options: PdfRe
     fs.writeFileSync(htmlPath, html);
 
     browser = await puppeteer.launch({
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      executablePath: config.puppeteer.executablePath,
       headless: true,
       protocolTimeout: options.protocolTimeoutMs,
       args: [

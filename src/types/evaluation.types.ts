@@ -235,6 +235,8 @@ export interface EvaluationResult {
   criteria?: { name: string; score: number; evidence: string; suggestion: string }[];
   suggestedRoles?: string[];
   jobMatches?: JobListing[];
+  jobMatchingStatus?: 'completed' | 'failed' | 'not_run';
+  jobMatchingError?: string;
   mode?: 'general' | 'job_specific';
   jobDescription?: { id: string; title: string; company: string; text?: string };
   missingInformation?: string[];

@@ -1,80 +1,88 @@
 import dotenv from 'dotenv';
 import path from 'path';
-// Resolve from the process working directory so PM2 can load the same backend .env
-// from both ts-node development (`src/`) and compiled runtime (`dist/`).
+import { parseEnvironment } from './environment';
+
+// Load the same project-root .env in ts-node, compiled Node and PM2 modes.
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
-const nodeEnv = process.env.NODE_ENV || 'development';
-const emailProvider = process.env.EMAIL_PROVIDER || (nodeEnv === 'production' ? 'resend' : 'smtp');
+const env = parseEnvironment(process.env);
 
 export default {
-  port: process.env.PORT || 3000,
-  host: process.env.HOST || '0.0.0.0',
-  nodeEnv,
-
-  database: {
-    mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/cv-evaluation',
-    redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
-  },
-
+  port: env.PORT as number,
+  host: env.HOST as string,
+  nodeEnv: env.NODE_ENV as string,
+  database: { mongoUri: env.MONGODB_URI as string, redisUrl: env.REDIS_URL as string },
   openai: {
-    apiKey: process.env.OPENAI_API_KEY || '',
-    model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
-    temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
-    maxRetries: parseInt(process.env.LLM_MAX_RETRIES || '3'),
-    retryDelay: parseInt(process.env.LLM_RETRY_DELAY || '1000'),
+    apiKey: env.OPENAI_API_KEY as string,
+    model: env.OPENAI_MODEL as string,
+    temperature: env.LLM_TEMPERATURE as number,
+    maxRetries: env.LLM_MAX_RETRIES as number,
+    retryDelay: env.LLM_RETRY_DELAY as number,
   },
-
   ai: {
-    apiKey: process.env.SUMOPOD_API_KEY || '',
-    baseUrl: process.env.SUMOPOD_BASE_URL || 'https://ai.sumopod.com/v1',
-    model: process.env.SUMOPOD_MODEL || 'glm-5.3-flash',
-    temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
-    maxRetries: parseInt(process.env.LLM_MAX_RETRIES || '3'),
-    retryDelay: parseInt(process.env.LLM_RETRY_DELAY || '1000'),
+    apiKey: env.SUMOPOD_API_KEY as string,
+    baseUrl: (env.SUMOPOD_BASE_URL as string).replace(/\/$/, ''),
+    model: env.SUMOPOD_MODEL as string,
+    temperature: env.LLM_TEMPERATURE as number,
+    maxRetries: env.LLM_MAX_RETRIES as number,
+    retryDelay: env.LLM_RETRY_DELAY as number,
   },
-
   pinecone: {
-    apiKey: process.env.PINECONE_API_KEY || '',
-    environment: process.env.PINECONE_ENVIRONMENT || '',
-    indexName: process.env.PINECONE_INDEX_NAME || 'cv-evaluation',
+    apiKey: env.PINECONE_API_KEY as string,
+    environment: env.PINECONE_ENVIRONMENT as string,
+    indexName: env.PINECONE_INDEX_NAME as string,
   },
-
   upload: {
-    maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '10485760'),
-    allowedTypes: (process.env.ALLOWED_FILE_TYPES || '').split(','),
-    uploadDir: process.env.UPLOAD_DIR || 'uploads',
+    maxFileSize: env.MAX_FILE_SIZE as number,
+    allowedTypes: (env.ALLOWED_FILE_TYPES as string).split(',').map((type) => type.trim()).filter(Boolean),
+    uploadDir: env.UPLOAD_DIR as string,
   },
-
   queue: {
-    concurrency: parseInt(process.env.QUEUE_CONCURRENCY || '2'),
-    evaluationTimeout: parseInt(process.env.EVALUATION_TIMEOUT || '300000'),
+    concurrency: env.QUEUE_CONCURRENCY as number,
+    cvMatcherConcurrency: env.CV_MATCHER_QUEUE_CONCURRENCY as number,
   },
-
   rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'),
-    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '120'),
+    windowMs: env.RATE_LIMIT_WINDOW_MS as number,
+    maxRequests: env.RATE_LIMIT_MAX_REQUESTS as number,
   },
-
   cors: {
-    allowedOrigins: (String(process.env.CORS_ORIGINS) || '').split(','),
+    allowedOrigins: (env.CORS_ORIGINS as string).split(',').map((origin) => origin.trim()).filter(Boolean),
   },
-
   auth: {
-    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
-    googleClientId: process.env.GOOGLE_CLIENT_ID || '',
-    googleClientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-    googleCallbackUrl: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3001/api/auth/google/callback',
-    adminEmails: process.env.ADMIN_EMAILS || '',
-    emailFrom: process.env.EMAIL_FROM || 'Landly <noreply@localhost>',
-    emailProvider: emailProvider.toLowerCase(),
-    resendApiKey: process.env.RESEND_API_KEY || '',
-    resendApiUrl: (process.env.RESEND_API_URL || 'https://api.resend.com').replace(/\/$/, ''),
-    smtpHost: process.env.SMTP_HOST || (nodeEnv === 'development' ? 'localhost' : ''),
-    smtpPort: parseInt(process.env.SMTP_PORT || (nodeEnv === 'development' ? '1025' : '587')),
-    smtpSecure: process.env.SMTP_SECURE === 'true',
-    smtpUser: process.env.SMTP_USER || '',
-    smtpPassword: process.env.SMTP_PASSWORD || '',
+    frontendUrl: env.FRONTEND_URL as string,
+    googleClientId: env.GOOGLE_CLIENT_ID as string,
+    googleClientSecret: env.GOOGLE_CLIENT_SECRET as string,
+    googleCallbackUrl: env.GOOGLE_CALLBACK_URL as string,
+    adminEmails: env.ADMIN_EMAILS as string,
+    emailFrom: env.EMAIL_FROM as string,
+    emailProvider: env.EMAIL_PROVIDER as string,
+    resendApiKey: env.RESEND_API_KEY as string,
+    resendApiUrl: (env.RESEND_API_URL as string).replace(/\/$/, ''),
+    smtpHost: env.SMTP_HOST as string,
+    smtpPort: env.SMTP_PORT as number,
+    smtpSecure: env.SMTP_SECURE as boolean,
+    smtpUser: env.SMTP_USER as string,
+    smtpPassword: env.SMTP_PASSWORD as string,
   },
-
-  backendApi: process.env.BACKEND_API,
+  jobs: {
+    provider: env.JOB_PROVIDER as string,
+    fallback: env.JOB_PROVIDER_FALLBACK as string,
+    rapidApiKey: env.RAPIDAPI_KEY as string,
+    rapidApiHost: env.RAPIDAPI_HOST as string,
+    rapidApiBaseUrl: (env.RAPIDAPI_BASE_URL as string).replace(/\/$/, ''),
+    rapidApiPlatform: env.RAPIDAPI_PLATFORM as 'linkedin' | 'indeed' | 'bing' | 'xing',
+    rapidApiCountryCode: env.RAPIDAPI_COUNTRY_CODE as string,
+    rapidApiMaxPages: env.RAPIDAPI_MAX_PAGES as number,
+    greenhouseBoards: (env.GREENHOUSE_BOARDS as string).split(',').map((item) => item.trim()).filter(Boolean),
+    leverSites: (env.LEVER_SITES as string).split(',').map((item) => item.trim()).filter(Boolean),
+  },
+  shutdown: {
+    gracePeriodMs: env.SHUTDOWN_GRACE_PERIOD_MS as number,
+    forcePeriodMs: env.SHUTDOWN_FORCE_PERIOD_MS as number,
+  },
+  logging: {
+    level: env.LOG_LEVEL as string | undefined,
+    directory: env.LOG_DIR as string,
+  },
+  puppeteer: { executablePath: env.PUPPETEER_EXECUTABLE_PATH as string | undefined },
+  backendApi: env.BACKEND_API as string | undefined,
 };

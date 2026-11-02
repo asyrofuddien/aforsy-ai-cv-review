@@ -67,6 +67,8 @@ const EvaluationSchema = new Schema(
       criteria: [{ name: String, score: Number, evidence: String, suggestion: String }],
       suggestedRoles: [String],
       jobMatches: [Schema.Types.Mixed],
+      jobMatchingStatus: { type: String, enum: ['completed', 'failed', 'not_run'] },
+      jobMatchingError: String,
       detailedScores: {
         technicalSkillsMatch: Number,
         experienceLevel: Number,

@@ -1,4 +1,5 @@
 import { JobSearchParams, RapidApiJobDetailsResponse, RapidApiSearchResponse } from '../model/job.types';
+import appConfig from '../../../config/config';
 
 interface HttpResponse { ok: boolean; status: number; json(): Promise<unknown>; }
 type Fetcher = (url: string, init: { method: string; headers: Record<string, string> }) => Promise<HttpResponse>;
@@ -22,17 +23,17 @@ export class RapidApiJobProvider {
     private readonly fetcher: Fetcher = fetch as unknown as Fetcher,
     private readonly delay: Delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
   ) {
-    const platform = config.platform ?? (process.env.RAPIDAPI_PLATFORM as RapidApiPlatform | undefined) ?? 'linkedin';
+    const platform = config.platform ?? appConfig.jobs.rapidApiPlatform;
     if (!['linkedin', 'indeed', 'bing', 'xing'].includes(platform)) {
       throw new Error(`Unsupported RAPIDAPI_PLATFORM: ${platform}`);
     }
     this.config = {
-      apiKey: config.apiKey ?? process.env.RAPIDAPI_KEY ?? '',
-      apiHost: config.apiHost ?? process.env.RAPIDAPI_HOST ?? 'jobs-api14.p.rapidapi.com',
-      baseUrl: config.baseUrl ?? process.env.RAPIDAPI_BASE_URL ?? 'https://jobs-api14.p.rapidapi.com',
+      apiKey: config.apiKey ?? appConfig.jobs.rapidApiKey,
+      apiHost: config.apiHost ?? appConfig.jobs.rapidApiHost,
+      baseUrl: config.baseUrl ?? appConfig.jobs.rapidApiBaseUrl,
       platform,
-      countryCode: config.countryCode ?? process.env.RAPIDAPI_COUNTRY_CODE ?? 'id',
-      maxPages: Math.floor(Math.max(1, Math.min(5, config.maxPages ?? (Number(process.env.RAPIDAPI_MAX_PAGES) || 1)))),
+      countryCode: config.countryCode ?? appConfig.jobs.rapidApiCountryCode,
+      maxPages: Math.floor(Math.max(1, Math.min(5, config.maxPages ?? appConfig.jobs.rapidApiMaxPages))),
     };
   }
 

@@ -106,10 +106,17 @@ export class EvaluationController {
     const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit || '20'), 10) || 20));
     const filter = { userId: req.authUser!.userId };
     const [evaluations, total] = await Promise.all([
-      Evaluation.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).select('candidateName status createdAt'),
+      Evaluation.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).select('candidateName status createdAt result.jobMatchingStatus'),
       Evaluation.countDocuments(filter),
     ]);
-    res.json({ success: true, data: evaluations, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    const data = evaluations.map((evaluation: any) => ({
+      _id: String(evaluation._id || evaluation.id),
+      candidateName: evaluation.candidateName,
+      status: evaluation.status,
+      createdAt: evaluation.createdAt,
+      jobMatchingStatus: evaluation.result?.jobMatchingStatus,
+    }));
+    res.json({ success: true, data, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   });
 
   getResult = asyncHandler(
@@ -146,6 +153,8 @@ export class EvaluationController {
             criteria: evaluation.result.criteria || [],
             suggested_roles: evaluation.result.suggestedRoles || [],
             job_matches: evaluation.result.jobMatches || [],
+            job_matching_status: evaluation.result.jobMatchingStatus || 'not_run',
+            job_matching_error: evaluation.result.jobMatchingError,
           },
         });
       } else {

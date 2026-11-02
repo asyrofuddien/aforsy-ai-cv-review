@@ -1,4 +1,5 @@
 import { JobProvider, JobSearchParams, RapidApiJobDetailsResponse, RapidApiSearchResponse } from '../model/job.types';
+import config from '../../../config/config';
 
 type Fetcher = typeof fetch;
 type NormalizedDetail = NonNullable<RapidApiJobDetailsResponse['data']>;
@@ -151,9 +152,9 @@ export class RapidApiFallbackProvider implements JobProvider {
 
 import { rapidApiJobProvider } from './rapidapi.adapter';
 
-export function createJobProvider(providerName = process.env.JOB_PROVIDER || 'rapidapi', fallbackName = process.env.JOB_PROVIDER_FALLBACK || 'aggregate'): JobProvider {
-  const greenhouse = new GreenhouseJobProvider((process.env.GREENHOUSE_BOARDS || '').split(',').map(value => value.trim()).filter(Boolean));
-  const lever = new LeverJobProvider((process.env.LEVER_SITES || '').split(',').map(value => value.trim()).filter(Boolean));
+export function createJobProvider(providerName = config.jobs.provider, fallbackName = config.jobs.fallback): JobProvider {
+  const greenhouse = new GreenhouseJobProvider(config.jobs.greenhouseBoards);
+  const lever = new LeverJobProvider(config.jobs.leverSites);
   switch (providerName.toLowerCase()) {
     case 'greenhouse': return greenhouse;
     case 'lever': return lever;

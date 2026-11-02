@@ -97,3 +97,48 @@ test('review workflow records terminal failure and rethrows for queue retry', as
   await assert.rejects(workflow.process({ evaluationId: 'evaluation-2', cvDocumentId: 'cv-2' }), /AI output invalid/);
   assert.deepEqual(calls, [['evaluation-2', 'AI output invalid']]);
 });
+
+test('job matching runs inside the review workflow and persists results into review history', async () => {
+  const { createReviewWorkflow } = loadTs('src/features/review/review.workflow.ts', {
+    './review.response': loadTs('src/features/review/review.response.ts'),
+  });
+  const calls = [];
+  const workflow = createReviewWorkflow({
+    repository: {
+      markProcessing: async () => {}, findJobDescription: async () => null,
+      complete: async (...args) => calls.push(['complete', ...args]), fail: async (...args) => calls.push(['fail', ...args]),
+    },
+    evaluator: { evaluate: async () => ({ extractedInfo: { name: 'Synthetic Person', skills: ['TypeScript'] }, matchRate: 80, evaluation: { criteria: criteria(), feedback: 'Review is ready' } }) },
+    summary: { generateFinalSummary: async () => ({}) },
+    jobMatcher: { findMatches: async profile => { calls.push(['match', profile]); return { suggestedRoles: ['Backend Developer'], jobs: [{ title: 'Engineer', score: 82 }] }; } },
+  });
+  const result = await workflow.process({ evaluationId: 'evaluation-match', cvDocumentId: 'cv-1' });
+  assert.equal(result.jobMatchingStatus, 'completed');
+  assert.deepEqual(result.suggestedRoles, ['Backend Developer']);
+  assert.deepEqual(result.jobMatches, [{ title: 'Engineer', score: 82 }]);
+  assert.equal(calls[0][0], 'match');
+  assert.equal(calls[1][0], 'complete');
+});
+
+test('job matching failure leaves a successful CV review completed and reports the matching error', async () => {
+  const { createReviewWorkflow } = loadTs('src/features/review/review.workflow.ts', {
+    './review.response': loadTs('src/features/review/review.response.ts'),
+  });
+  const calls = [];
+  const workflow = createReviewWorkflow({
+    repository: {
+      markProcessing: async () => {}, findJobDescription: async () => null,
+      complete: async (...args) => calls.push(['complete', ...args]), fail: async (...args) => calls.push(['fail', ...args]),
+    },
+    evaluator: { evaluate: async () => ({ extractedInfo: { name: 'Synthetic Person' }, matchRate: 80, evaluation: { criteria: criteria(), feedback: 'Review is ready' } }) },
+    summary: { generateFinalSummary: async () => ({}) },
+    jobMatcher: { findMatches: async () => { throw new Error('All configured providers failed'); } },
+    logger,
+  });
+  const result = await workflow.process({ evaluationId: 'evaluation-partial-failure', cvDocumentId: 'cv-1' });
+  assert.equal(result.jobMatchingStatus, 'failed');
+  assert.deepEqual(result.jobMatches, []);
+  assert.match(result.jobMatchingError, /Your CV review is ready/);
+  assert.equal(calls[0][0], 'complete');
+  assert.equal(calls.some(([type]) => type === 'fail'), false);
+});

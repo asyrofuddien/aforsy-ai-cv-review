@@ -36,6 +36,8 @@ export interface ReviewResult {
   criteria: Array<{ name: string; score: number; evidence: string; suggestion: string }>;
   jobMatches: unknown[];
   suggestedRoles: string[];
+  jobMatchingStatus: 'completed' | 'failed' | 'not_run';
+  jobMatchingError?: string;
   cvFeedback: string;
   overallSummary: string;
   recommendation?: string;
