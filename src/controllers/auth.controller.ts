@@ -18,6 +18,7 @@ import {
   promoteConfiguredAdmin,
   refreshSession,
   rotateCsrfToken,
+  syncSessionCookieForAppRoutes,
   verifyPassword,
 } from '../services/auth.service';
 
@@ -77,6 +78,7 @@ export class AuthController {
   me = asyncHandler(async (req: Request, res: Response) => {
     const user = await User.findById(req.authUser!.userId);
     if (!user) throw new AppError('Account not found', 404);
+    syncSessionCookieForAppRoutes(req, res, req.authSession!.expiresAt);
     res.json({ success: true, data: { user: asPublicUser(user), csrfToken: await rotateCsrfToken(req.authSession!.id), expiresAt: req.authSession?.expiresAt } });
   });
 

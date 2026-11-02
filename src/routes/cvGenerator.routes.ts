@@ -7,6 +7,7 @@ const router = Router();
 router.get('/draft', generateCv.GetDraft);
 router.put('/draft', generateCv.SaveDraft);
 router.delete('/draft', generateCv.DeleteDraft);
+router.get('/templates', generateCv.ListAtsTemplates);
 router.post('/', generateCv.GenerateCv);
 router.post('/new', generateCv.GenerateCvNew);
 router.get('/get-all', generateCv.FindAllCv);

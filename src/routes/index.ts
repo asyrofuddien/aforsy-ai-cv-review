@@ -14,6 +14,7 @@ import queueService from '../services/queue.service';
 import jobDescriptionRoutes from './jobDescription.routes';
 import CVGeneratorRoutes from '../routes/cvGenerator.routes';
 import authRoutes from './auth.routes';
+import adminRoutes from './admin.routes';
 import { authenticate, requireAdmin } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -88,6 +89,7 @@ router.get('/', (req, res) => {
 // All product and account data routes below this point require an active session.
 router.use(authenticate);
 router.use('/test', requireAdmin);
+router.use('/admin', adminRoutes);
 
 // Product routes use the authenticated user as the owner of all created data.
 router.use('/upload', uploadRoutes);

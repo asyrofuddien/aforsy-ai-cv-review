@@ -5,11 +5,13 @@ import * as Handlebars from 'handlebars';
 import puppeteer from 'puppeteer';
 import pdf from 'pdf-parse';
 import { randomUUID } from 'crypto';
-import { asyncHandler } from '../middlewares/error.middleware';
+import { asyncHandler, AppError } from '../middlewares/error.middleware';
 import { Resume, ResumeNew } from '../types/evaluation.types';
 import AtsPdf from '../models/atsPDF.model';
 import TemplateModel from '../models/Template.model';
 import CvDraft from '../models/cvDraft.model';
+import AtsTemplate from '../models/atsTemplate.model';
+import { getActiveAtsTemplate } from '../services/atsTemplate.service';
 
 // Register Handlebars helper (register once, outside the class)
 Handlebars.registerHelper('lookup', function (obj: Record<string, any>, field: string): any {
@@ -58,13 +60,13 @@ const atsTemplateStyles = `
   body.ats-template--compact li, body.ats-template--compact .entry-description, body.ats-template--compact .simple-text { font-size: 8.5pt; line-height: 1.25; }
 `;
 
-const applyAtsTemplateStyle = (html: string, templateId?: string): { html: string; pageMargin: string } => {
-  if (templateId && !['classic', 'modern', 'compact'].includes(templateId)) {
-    throw new Error('Unsupported ATS template');
-  }
-  const selectedStyle = templateId || 'classic';
+const applyAtsTemplateStyle = (html: string, variant: string, layout: { pageMargin: string; headingColor: string; accentColor: string }): { html: string; pageMargin: string } => {
+  if (!['classic', 'modern', 'compact'].includes(variant)) throw new Error('Unsupported ATS template layout');
+  if (!['0.3in', '0.4in', '0.5in'].includes(layout.pageMargin) || !/^#[0-9a-f]{6}$/i.test(layout.headingColor) || !/^#[0-9a-f]{6}$/i.test(layout.accentColor)) throw new Error('Invalid ATS template layout configuration');
+  const selectedStyle = variant;
   const styledHtml = html.replace(/<body\b[^>]*>/i, `<body class="ats-template--${selectedStyle}">`);
-  const result = styledHtml.replace(/<\/head>/i, `<style>${atsTemplateStyles}</style></head>`);
+  const configuredStyles = `${atsTemplateStyles}\nbody.ats-template--${selectedStyle} h2.section-title { color: ${layout.headingColor}; border-bottom-color: ${layout.accentColor}; }`;
+  const result = styledHtml.replace(/<\/head>/i, `<style>${configuredStyles}</style></head>`);
   const hasSemanticHeadings = /<h1\b/i.test(result) && /<h2\b/i.test(result);
   const hasFontAndMargins = /font-family\s*:/i.test(result) && /(?:padding|margin)\s*:/i.test(result);
   const hasUnsupportedLayout = /<(?:table|img)\b/i.test(result);
@@ -286,13 +288,17 @@ export class CVGeneratorController {
         fs.mkdirSync(resultsDir, { recursive: true });
       }
 
+      const templateId = resumeData.atsTemplateId || 'classic';
+      const selectedAtsTemplate = await getActiveAtsTemplate(templateId);
+      if (!selectedAtsTemplate) throw new AppError('Selected ATS template is unavailable. Choose an active template and try again.', 400);
+
       const templateData = await TemplateModel.findOne({ name: 'new_template' }).lean();
 
       const templateStr = loadTemplate(templateData?.content, 'public/templates/template.html');
 
       // Compile and render template
       const template = Handlebars.compile(templateStr);
-      const renderedTemplate = applyAtsTemplateStyle(template(resumeData), resumeData.atsTemplateId);
+      const renderedTemplate = applyAtsTemplateStyle(template(resumeData), selectedAtsTemplate.layout.variant, selectedAtsTemplate.layout);
       const html = renderedTemplate.html;
 
       // Save HTML file
@@ -434,6 +440,11 @@ export class CVGeneratorController {
     }
     res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:");
     res.type('html').send(document.html_text || '');
+  });
+
+  ListAtsTemplates = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+    const templates = await AtsTemplate.find({ status: 'active' }).select('id name description version status layout preview').sort({ name: 1 }).lean();
+    res.json({ success: true, data: templates });
   });
 }
 

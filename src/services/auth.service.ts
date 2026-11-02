@@ -78,11 +78,12 @@ export const issueSession = async (user: IUser, req: Request, res: Response) => 
     csrfHash: hashOpaqueToken(csrfToken),
     expiresAt,
   });
+  res.clearCookie(SESSION_COOKIE, { httpOnly: true, secure: req.secure || config.nodeEnv === 'production', sameSite: 'lax', path: '/api' });
   res.cookie(SESSION_COOKIE, rawToken, {
     httpOnly: true,
     secure: req.secure || config.nodeEnv === 'production',
     sameSite: 'lax',
-    path: '/api',
+    path: '/',
     expires: expiresAt,
   });
   return { csrfToken, expiresAt };
@@ -106,11 +107,12 @@ export const refreshSession = async (req: Request, res: Response) => {
     csrfHash: hashOpaqueToken(csrfToken),
     expiresAt,
   });
+  res.clearCookie(SESSION_COOKIE, { httpOnly: true, secure: req.secure || config.nodeEnv === 'production', sameSite: 'lax', path: '/api' });
   res.cookie(SESSION_COOKIE, rawToken, {
     httpOnly: true,
     secure: req.secure || config.nodeEnv === 'production',
     sameSite: 'lax',
-    path: '/api',
+    path: '/',
     expires: expiresAt,
   });
   return { csrfToken, expiresAt };
@@ -122,13 +124,28 @@ export const rotateCsrfToken = async (sessionId: string): Promise<string> => {
   return csrfToken;
 };
 
-export const clearSessionCookie = (req: Request, res: Response) =>
-  res.clearCookie(SESSION_COOKIE, {
+export const clearSessionCookie = (req: Request, res: Response) => {
+  const options = {
+    httpOnly: true,
+    secure: req.secure || config.nodeEnv === 'production',
+    sameSite: 'lax' as const,
+  };
+  res.clearCookie(SESSION_COOKIE, { ...options, path: '/api' });
+  res.clearCookie(SESSION_COOKIE, { ...options, path: '/' });
+};
+
+export const syncSessionCookieForAppRoutes = (req: Request, res: Response, expiresAt: Date): void => {
+  const token = getCookie(req.headers.cookie, SESSION_COOKIE);
+  if (!token) return;
+  res.clearCookie(SESSION_COOKIE, { httpOnly: true, secure: req.secure || config.nodeEnv === 'production', sameSite: 'lax', path: '/api' });
+  res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: req.secure || config.nodeEnv === 'production',
     sameSite: 'lax',
-    path: '/api',
+    path: '/',
+    expires: expiresAt,
   });
+};
 
 export const getCookie = (header: string | undefined, name: string): string | undefined => {
   if (!header) return undefined;

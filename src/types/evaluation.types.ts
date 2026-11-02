@@ -156,7 +156,7 @@ export interface OthersSection {
 // ==========================================
 export interface ResumeNew {
   personalInfo: PersonalInfo;
-  atsTemplateId?: 'classic' | 'modern' | 'compact';
+  atsTemplateId?: string;
   professional?: ProfessionalSection[];
   education?: EducationSection[];
   organisational?: OrganisationalSection[];

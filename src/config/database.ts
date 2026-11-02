@@ -1,10 +1,12 @@
 import mongoose from 'mongoose';
 import config from './config';
 import logger from '../utils/logger';
+import { ensureDefaultAtsTemplates } from '../services/atsTemplate.service';
 
 export const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect(config.database.mongoUri);
+    await ensureDefaultAtsTemplates();
     logger.info('MongoDB connected successfully');
   } catch (error) {
     logger.error('MongoDB connection error:', error);

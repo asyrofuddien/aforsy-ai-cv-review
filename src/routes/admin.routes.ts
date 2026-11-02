@@ -1,0 +1,18 @@
+import { Router } from 'express';
+import adminController from '../controllers/admin.controller';
+import { requireAdmin } from '../middlewares/auth.middleware';
+
+const router = Router();
+router.use(requireAdmin);
+
+router.get('/summary', adminController.summary);
+router.get('/users', adminController.listUsers);
+router.patch('/users/:id/status', adminController.setUserStatus);
+router.patch('/users/:id/role', adminController.setUserRole);
+router.get('/templates', adminController.listTemplates);
+router.post('/templates', adminController.createTemplate);
+router.patch('/templates/:id', adminController.updateTemplate);
+router.delete('/templates/:id', adminController.archiveTemplate);
+router.get('/audit', adminController.listAudit);
+
+export default router;
