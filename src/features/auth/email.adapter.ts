@@ -14,6 +14,14 @@ interface AuthEmail {
   url: string;
 }
 
+interface ReviewCompleteEmail {
+  locale?: Locale;
+  email: string;
+  displayName: string;
+  evaluationId: string;
+  candidateName?: string;
+}
+
 const escapeHtml = (value: string): string =>
   value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!);
 
@@ -105,4 +113,68 @@ export const sendAuthEmail = async (input: AuthEmail): Promise<void> => {
     auth: config.auth.smtpUser ? { user: config.auth.smtpUser, pass: config.auth.smtpPassword } : undefined,
   });
   await transporter.sendMail({ from: config.auth.emailFrom, to: email, subject, text, html });
+};
+
+export const buildReviewCompleteEmailContent = ({ displayName, evaluationId, candidateName, locale = 'en' }: ReviewCompleteEmail) => {
+  const id = locale === 'id';
+  const url = new URL(`/results/${encodeURIComponent(evaluationId)}`, config.auth.frontendUrl).toString();
+  const safeName = escapeHtml(displayName);
+  const safeCandidate = escapeHtml(candidateName || (id ? 'CV Anda' : 'your CV'));
+  const safeUrl = escapeHtml(url);
+  const subject = id ? 'Review CV Anda sudah selesai' : 'Your CV review is ready';
+  const greeting = id ? `Halo ${displayName},` : `Hi ${displayName},`;
+  const text = `${greeting}\n\nReview untuk ${candidateName || (id ? 'CV Anda' : 'your CV')} sudah selesai. Lihat hasilnya: ${url}`;
+  const html = `<!doctype html>
+<html lang="${locale}">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
+  <body style="margin:0;padding:32px 16px;background:#f1f7fc;color:#334155;font-family:Arial,'Helvetica Neue',sans-serif">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto">
+      <tr><td style="padding:4px 0 22px;text-align:center"><span style="color:#334155;font-size:25px;font-weight:700;letter-spacing:-.7px">Landly<span style="color:#1e9df1">.</span></span></td></tr>
+      <tr><td style="overflow:hidden;background:#fff;border:1px solid #e2eaf1;border-radius:18px;box-shadow:0 8px 30px rgba(51,65,85,.06)">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="height:5px;background:#1e9df1;font-size:0;line-height:0">&nbsp;</td></tr></table>
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td style="padding:36px 40px 40px">
+          <div style="width:44px;height:44px;margin:0 0 22px;border-radius:14px;background:#eaf6ff;color:#1689d7;text-align:center;font-size:24px;font-weight:700;line-height:44px">✓</div>
+          <p style="margin:0 0 8px;color:#1689d7;font-size:13px;font-weight:700;letter-spacing:.3px">${id ? 'REVIEW CV SELESAI' : 'CV REVIEW COMPLETE'}</p>
+          <h1 style="margin:0 0 18px;color:#243244;font-size:25px;line-height:1.3;letter-spacing:-.4px">${id ? 'Hasil review Anda siap' : 'Your review is ready'}</h1>
+          <p style="margin:0 0 10px;font-size:15px;line-height:1.7">${id ? 'Halo' : 'Hi'} ${safeName},</p>
+          <p style="margin:0 0 28px;color:#526174;font-size:15px;line-height:1.7">${id ? `Review untuk <strong style="color:#334155">${safeCandidate}</strong> sudah selesai. Buka hasilnya untuk melihat evaluasi dan saran yang dipersonalisasi.` : `The review for <strong style="color:#334155">${safeCandidate}</strong> is complete. Open your results to see your evaluation and personalized suggestions.`}</p>
+          <table role="presentation" cellspacing="0" cellpadding="0"><tr><td align="center" style="border-radius:10px;background:#1e9df1"><a href="${safeUrl}" style="display:inline-block;padding:14px 23px;color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px">${id ? 'Lihat hasil review' : 'View review results'} &nbsp;→</a></td></tr></table>
+          <p style="margin:26px 0 8px;color:#64748b;font-size:13px;line-height:1.6">${id ? 'Tombol tidak berfungsi? Salin tautan berikut ke browser Anda:' : 'Button not working? Copy this link into your browser:'}</p>
+          <p style="margin:0;word-break:break-all;font-size:12px;line-height:1.6"><a href="${safeUrl}" style="color:#1689d7">${safeUrl}</a></p>
+        </td></tr></table>
+      </td></tr>
+      <tr><td style="padding:22px 12px;text-align:center;color:#64748b;font-size:12px;line-height:1.7">Landly · ${id ? 'Persiapkan CV untuk peluang berikutnya' : 'CV tools for your next opportunity'}</td></tr>
+    </table>
+  </body>
+</html>`;
+  return { subject, text, html };
+};
+
+export const sendReviewCompleteEmail = async (input: ReviewCompleteEmail): Promise<void> => {
+  const { subject, text, html } = buildReviewCompleteEmailContent(input);
+  if (config.auth.emailProvider === 'resend') {
+    if (!config.auth.resendApiKey) throw new Error('RESEND_API_KEY is required when EMAIL_PROVIDER=resend');
+    const response = await fetch(`${config.auth.resendApiUrl}/emails`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${config.auth.resendApiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: config.auth.emailFrom, to: [input.email], subject, text, html }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    const result = (await response.json().catch(() => ({}))) as { message?: unknown };
+    if (!response.ok) throw new Error(`Resend email delivery failed (${response.status}): ${typeof result.message === 'string' ? result.message : 'Unknown Resend API error'}`);
+    logger.info('Review completion email sent', { provider: 'resend' });
+    return;
+  }
+  if (config.auth.emailProvider !== 'smtp') throw new Error(`Unsupported EMAIL_PROVIDER: ${config.auth.emailProvider}`);
+  if (!config.auth.smtpHost) {
+    if (config.nodeEnv === 'production') throw new Error('Email delivery is not configured');
+    logger.warn('Review completion email not delivered: development SMTP is not configured');
+    return;
+  }
+  const transporter = nodemailer.createTransport({
+    host: config.auth.smtpHost, port: config.auth.smtpPort, secure: config.auth.smtpSecure,
+    auth: config.auth.smtpUser ? { user: config.auth.smtpUser, pass: config.auth.smtpPassword } : undefined,
+  });
+  await transporter.sendMail({ from: config.auth.emailFrom, to: input.email, subject, text, html });
+  logger.info('Review completion email sent', { provider: 'smtp' });
 };

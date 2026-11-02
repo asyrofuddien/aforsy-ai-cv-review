@@ -18,6 +18,7 @@ export interface ReviewWorkflowDependencies {
     warn?(message: string, metadata?: unknown): void;
     error?(_message: string, _metadata?: unknown): void;
   };
+  notifyCompleted?: (evaluationId: string, candidateName?: string) => Promise<void>;
 }
 
 async function runStage<T>(
@@ -42,7 +43,7 @@ async function runStage<T>(
 }
 
 export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
-  const { repository, evaluator, summary, jobMatcher, logger } = dependencies;
+  const { repository, evaluator, summary, jobMatcher, logger, notifyCompleted } = dependencies;
   return {
     async process(payload: ReviewJobPayload): Promise<ReviewResult | null> {
       const locale = payload.locale === 'id' ? 'id' : 'en';
@@ -84,7 +85,17 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
         }
         const candidateName = result.extractedInfo?.name && !['Unknown', 'Unknown Candidate'].includes(result.extractedInfo.name)
           ? result.extractedInfo.name : undefined;
-        await runStage(logger, 'save completed review and job matches', () => repository.complete(payload.evaluationId, candidateName, response));
+        const completed = await runStage(logger, 'save completed review and job matches', () => repository.complete(payload.evaluationId, candidateName, response));
+        if (completed && notifyCompleted) {
+          try {
+            await runStage(logger, 'send review completion email', () => notifyCompleted(payload.evaluationId, candidateName));
+          } catch (error) {
+            logger?.warn?.('Review completed but completion email could not be delivered', {
+              evaluationId: payload.evaluationId,
+              error: error instanceof Error ? error.message : 'Unknown email delivery error',
+            });
+          }
+        }
         logger?.info?.('Review workflow completed', {
           evaluationId: payload.evaluationId,
           jobMatchingStatus: response.jobMatchingStatus,

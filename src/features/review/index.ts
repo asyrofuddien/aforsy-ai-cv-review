@@ -5,6 +5,7 @@ import { reviewRepository } from './review.repository';
 import { createReviewWorkflow } from './review.workflow';
 import { MatcherAIService } from '../cv-matcher/matcher.ai';
 import { jobsService } from '../jobs/jobs.service';
+import { sendReviewCompleteEmail } from '../auth/email.adapter';
 import type { CandidateForMatching } from '../jobs/model/job.types';
 
 const reviewAI = new ReviewAIService();
@@ -44,4 +45,21 @@ const jobMatcher = {
   },
 };
 
-export const reviewWorkflow = createReviewWorkflow({ repository: reviewRepository, evaluator: cvEvaluator, summary: reviewAI, jobMatcher, logger: appLogger.child({ scope: 'review' }) });
+export const reviewWorkflow = createReviewWorkflow({
+  repository: reviewRepository,
+  evaluator: cvEvaluator,
+  summary: reviewAI,
+  jobMatcher,
+  logger: appLogger.child({ scope: 'review' }),
+  async notifyCompleted(evaluationId, candidateName) {
+    const owner = await reviewRepository.findReviewOwner(evaluationId);
+    if (!owner) return;
+    await sendReviewCompleteEmail({
+      email: owner.user.email,
+      displayName: owner.user.displayName,
+      evaluationId,
+      candidateName,
+      locale: owner.locale === 'id' ? 'id' : 'en',
+    });
+  },
+});
