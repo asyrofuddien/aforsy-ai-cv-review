@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@pinecone-database/pinecone": "^6.1.2",
+    "@xmldom/xmldom": "^0.8.15",
     "bull": "^4.16.5",
     "bullmq": "^5.58.7",
     "cors": "^2.8.5",
@@ -32,6 +33,7 @@
     "helmet": "^7.0.0",
     "html-pdf-node": "^1.0.8",
     "joi": "^17.9.0",
+    "jszip": "^3.10.2",
     "mammoth": "^1.6.0",
     "moment-timezone": "^0.6.0",
     "mongoose": "^7.0.0",
