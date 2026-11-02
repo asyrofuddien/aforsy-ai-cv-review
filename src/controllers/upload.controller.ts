@@ -3,7 +3,9 @@ import { asyncHandler } from '../middlewares/error.middleware';
 import documentService from '../services/document.service';
 import parserService from '../services/parser.service';
 import { SUCCESS_MESSAGES } from '../utils/constants';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
+
+const logger = appLogger.child({ scope: 'upload' });
 
 export class UploadController {
   uploadDocuments = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {

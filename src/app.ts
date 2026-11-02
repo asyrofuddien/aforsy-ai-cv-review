@@ -1,5 +1,6 @@
 /// <reference path="./types/auth.d.ts" />
 import express from 'express';
+import { requestLogging } from './middlewares/request-logging.middleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import routes from './routes';
@@ -11,6 +12,8 @@ import config from './config/config';
 const path = require('path');
 
 const app = express();
+
+app.use(requestLogging);
 
 // Security middlewares
 app.use(helmet());
@@ -29,6 +32,7 @@ app.use(
       }
     },
     credentials: true,
+    exposedHeaders: ['X-Request-ID'],
   }),
 );
 

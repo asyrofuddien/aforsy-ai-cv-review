@@ -2,7 +2,9 @@ import { Pinecone, RecordMetadata } from '@pinecone-database/pinecone';
 import openaiService from '../llm/openai.service';
 import { getPineconeClient } from '../../config/vectordb';
 import config from '../../config/config';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
+
+const logger = appLogger.child({ scope: 'vectordb' });
 
 interface VectorDocument {
   id: string;
@@ -54,7 +56,7 @@ class VectorDBService {
 
   async upsertDocuments(documents: VectorDocument[]): Promise<void> {
     try {
-      logger.info(`📊 VectorDB: Upserting ${documents.length} documents`);
+      logger.debug(`📊 VectorDB: Upserting ${documents.length} documents`);
 
       const vectors = await Promise.all(
         documents.map(async (doc) => {
@@ -78,7 +80,7 @@ class VectorDBService {
       if (pinecone) {
         const index = pinecone.index(config.pinecone.indexName);
         await index.upsert(vectors);
-        logger.info('✅ VectorDB: Documents upserted to Pinecone');
+        logger.debug('✅ VectorDB: Documents upserted to Pinecone');
       } else {
         // Use in-memory store
         vectors.forEach((vector) => {
@@ -88,7 +90,7 @@ class VectorDBService {
             text: vector.metadata.text as string,
           });
         });
-        logger.info('✅ VectorDB: Documents stored in memory');
+        logger.debug('✅ VectorDB: Documents stored in memory');
       }
     } catch (error) {
       logger.error('VectorDB upsert error:', error);
@@ -98,7 +100,7 @@ class VectorDBService {
 
   async search(query: string, topK: number = 3, filter?: any): Promise<any[]> {
     try {
-      logger.info(`🔍 VectorDB: Searching for: ${query.substring(0, 50)}...`);
+      logger.debug('Searching vector database');
 
       const fullQueryEmbedding = await openaiService.generateEmbedding(query);
       // Reduce query embedding to 384 dimensions
@@ -131,7 +133,7 @@ class VectorDBService {
           .sort((a, b) => b.score - a.score)
           .slice(0, topK);
 
-        logger.info(`✅ VectorDB: Found ${results.length} results`);
+        logger.debug(`✅ VectorDB: Found ${results.length} results`);
         return results;
       }
     } catch (error) {

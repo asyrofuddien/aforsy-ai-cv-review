@@ -1,8 +1,10 @@
 import OpenAI from 'openai';
 import config from '../../config/config';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
 import { retryWithBackoff } from '../../utils/retry';
 import { AppError } from '../../middlewares/error.middleware';
+
+const logger = appLogger.child({ scope: 'ai' });
 
 class OpenAIService {
   private client!: OpenAI;
@@ -68,7 +70,7 @@ class OpenAIService {
 
       return completion.choices[0]?.message?.content || '';
     } catch (error) {
-      logger.error('AI completion error:', error);
+      logger.debug('AI request failed', error);
 
       if (
         typeof error === 'object' &&

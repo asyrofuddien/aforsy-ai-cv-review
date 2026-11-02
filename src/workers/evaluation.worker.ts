@@ -1,45 +1,38 @@
-import { Job } from 'bullmq';
-import queueService from '../services/queue.service';
-import evaluationService from '../services/evaluation/evaluation.service';
-import logger from '../utils/logger';
+import { Job } from "bullmq";
+import queueService from "../services/queue.service";
+import evaluationService from "../services/evaluation/evaluation.service";
+import appLogger from "../utils/logger";
+import { logContext } from "../utils/log-context";
 
-const processEvaluationJob = async (job: Job) => {
-  try {
-    let result;
-
-    logger.info(`🚀 Worker: Starting job ${job.id} for evaluation ${job.data.evaluationId}`);
-    result = await evaluationService.processEvaluation(job.data);
-
-    logger.info(`✅ Worker: Job ${job.id} completed successfully`);
-    return result;
-  } catch (error) {
-    logger.error(`❌ Worker: Job ${job.id} failed:`, error);
-    throw error;
-  }
-};
-
-const CVMatcherJob = async (job: Job) => {
-  try {
-    let result;
-
-    logger.info(`🚀 Worker: Starting job ${job.id} for cv-matcher ${job.data.cvDocumentId}`);
-    result = await evaluationService.processCvMatcher(job.data);
-
-    logger.info(`✅ Worker: Job ${job.id} completed successfully`);
-    return result;
-  } catch (error) {
-    logger.error(`❌ Worker: Job ${job.id} failed:`, error);
-    throw error;
-  }
-};
-
+const logger = appLogger.child({ scope: "worker" });
+function processJob(job: Job, type: "review" | "cv-matcher") {
+  return logContext.run(
+    {
+      jobId: String(job.id),
+      ...(job.data.evaluationId
+        ? { evaluationId: String(job.data.evaluationId) }
+        : {}),
+    },
+    async () => {
+      const started = performance.now();
+      logger.info("Job started", { type, attempt: job.attemptsMade + 1 });
+      // Queue's failed event owns failure logging; lower layers rethrow for retry.
+      const result =
+        type === "review"
+          ? await evaluationService.processEvaluation(job.data)
+          : await evaluationService.processCvMatcher(job.data);
+      logger.info("Job completed", {
+        type,
+        durationMs: Math.round(performance.now() - started),
+      });
+      return result;
+    },
+  );
+}
 export const startWorker = (): void => {
-  try {
-    queueService.initializeEvaluationWorker(processEvaluationJob);
-    queueService.initializeCVMatcherWorker(CVMatcherJob);
-    logger.info('🎯 Worker: Evaluation worker started successfully');
-  } catch (error) {
-    logger.error('❌ Worker: Failed to start worker:', error);
-    throw error;
-  }
+  queueService.initializeEvaluationWorker((job) => processJob(job, "review"));
+  queueService.initializeCVMatcherWorker((job) =>
+    processJob(job, "cv-matcher"),
+  );
+  logger.info("Workers ready", { queues: ["review", "cv-matcher"] });
 };

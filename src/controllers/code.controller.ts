@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { asyncHandler } from '../middlewares/error.middleware';
 import codeModel from '../models/code.model';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import { customAlphabet } from 'nanoid';
+
+const logger = appLogger.child({ scope: 'code' });
 
 const nano = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 8);
 
@@ -21,7 +23,7 @@ export class CodeGeneratorController {
 
     if (exists) throw new Error('Failed to generate unique code after 10 attempts');
 
-    logger.info(`Code Created: ${code}`);
+    logger.info('Access code created');
 
     await codeModel.create({ code });
 

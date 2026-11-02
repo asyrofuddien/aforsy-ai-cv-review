@@ -1,7 +1,9 @@
 import nodemailer from 'nodemailer';
 import config from '../config/config';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import { EmailTokenPurpose } from '../models/emailToken.model';
+
+const logger = appLogger.child({ scope: 'email' });
 
 interface AuthEmail {
   email: string;
@@ -72,7 +74,7 @@ export const sendAuthEmail = async ({ email, displayName, purpose, url }: AuthEm
       const message = typeof result.message === 'string' ? result.message : 'Unknown Resend API error';
       throw new Error(`Resend email delivery failed (${response.status}): ${message}`);
     }
-    logger.info(`Auth email sent through Resend (${purpose}) to ${email}`);
+    logger.info('Authentication email sent', { provider: 'resend', purpose });
     return;
   }
 
@@ -82,7 +84,7 @@ export const sendAuthEmail = async ({ email, displayName, purpose, url }: AuthEm
 
   if (!config.auth.smtpHost) {
     if (config.nodeEnv === 'production') throw new Error('Email delivery is not configured');
-    logger.info(`Development auth email (${purpose}) for ${email}: ${url}`);
+    logger.warn('Email not delivered: development SMTP is not configured', { purpose });
     return;
   }
 

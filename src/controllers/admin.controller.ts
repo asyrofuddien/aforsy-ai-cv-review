@@ -4,6 +4,7 @@ import { asyncHandler, AppError } from '../middlewares/error.middleware';
 import AdminAuditLog from '../models/adminAuditLog.model';
 import AtsTemplate, { AtsTemplateStatus, AtsTemplateVariant } from '../models/atsTemplate.model';
 import User from '../models/user.model';
+import AuthSession from '../models/authSession.model';
 
 const audit = (req: Request, action: string, targetType: 'user' | 'ats_template', targetId: string, details: Record<string, unknown> = {}) =>
   AdminAuditLog.create({ actorUserId: req.authUser!.userId, action, targetType, targetId, details });
@@ -67,7 +68,6 @@ export class AdminController {
     user.isActive = isActive;
     await user.save();
     if (!isActive) {
-      const AuthSession = (await import('../models/authSession.model')).default;
       await AuthSession.deleteMany({ userId: user._id });
     }
     await audit(req, isActive ? 'user.activated' : 'user.deactivated', 'user', user.id, { previous: oldValue, current: isActive });

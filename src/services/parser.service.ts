@@ -2,8 +2,10 @@ import fs from 'fs/promises';
 import pdf from 'pdf-parse';
 import mammoth from 'mammoth';
 import { AppError } from '../middlewares/error.middleware';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import path from 'path';
+
+const logger = appLogger.child({ scope: 'parser' });
 
 export class ParserService {
   async parseFile(filePath: string, mimeType: string): Promise<string> {
@@ -55,11 +57,7 @@ export class ParserService {
         .replace(/[ \t]{2,}/g, ' ')
         .trim();
 
-      logger.info(`Extracted ${cleanedText.length} characters from PDF`);
-      
-      // Log first 200 chars to help debug name extraction
-      const preview = cleanedText.substring(0, 200).replace(/\n/g, ' ');
-      logger.info(`PDF preview: ${preview}...`);
+      logger.debug(`Extracted ${cleanedText.length} characters from PDF`);
       
       return cleanedText;
     } catch (error) {

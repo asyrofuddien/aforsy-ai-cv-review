@@ -1,7 +1,9 @@
 // services/scoring/scoring.service.ts
 import { DetailedScores } from '../../types/evaluation.types';
 import { IJobDescription } from '../../models/jobDescription.model';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
+
+const logger = appLogger.child({ scope: 'scoring' });
 
 export class ScoringService {
   calculateOverallCVScore(rawMatchRate?: number): number {

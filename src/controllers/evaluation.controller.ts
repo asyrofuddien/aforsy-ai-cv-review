@@ -4,9 +4,11 @@ import queueService from '../services/queue.service';
 import JobDescription from '../models/jobDescription.model';
 import Evaluation from '../models/evaluation.model';
 import { ERROR_MESSAGES } from '../utils/constants';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import cvMatcherModel from '../models/cvMatcher.model';
 import Document from '../models/document.model';
+
+const logger = appLogger.child({ scope: 'review-api' });
 
 export class EvaluationController {
   startEvaluation = asyncHandler(

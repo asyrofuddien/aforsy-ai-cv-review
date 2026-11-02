@@ -3,9 +3,11 @@ import { connectDB } from './config/database';
 import { initializeVectorDB } from './config/vectordb';
 import { startWorker } from './workers/evaluation.worker';
 import config from './config/config';
-import logger from './utils/logger';
+import appLogger from './utils/logger';
 import fs from 'fs';
 import path from 'path';
+
+const logger = appLogger.child({ scope: 'server' });
 
 // Ensure upload directories exist
 const ensureUploadDirectories = () => {

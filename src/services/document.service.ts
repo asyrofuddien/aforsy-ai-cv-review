@@ -1,8 +1,10 @@
 import Document, { IDocument } from '../models/document.model';
 import { DOCUMENT_TYPES } from '../utils/constants';
 import { AppError } from '../middlewares/error.middleware';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import path from 'path';
+
+const logger = appLogger.child({ scope: 'documents' });
 
 export class DocumentService {
   async saveDocument(fileData: Express.Multer.File, type: 'cv' | 'project', userId: string, content?: string): Promise<IDocument> {
@@ -24,7 +26,7 @@ export class DocumentService {
       });
 
       await document.save();
-      logger.info(`Document saved: ${document.filename} at ${absolutePath}`);
+      logger.info('Document saved', { documentId: document.id });
       return document;
     } catch (error) {
       logger.error('Error saving document:', error);

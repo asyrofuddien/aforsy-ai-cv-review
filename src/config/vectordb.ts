@@ -1,6 +1,8 @@
 import { Pinecone } from '@pinecone-database/pinecone';
 import config from './config';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
+
+const logger = appLogger.child({ scope: 'vector-db' });
 
 let pineconeClient: Pinecone | null = null;
 

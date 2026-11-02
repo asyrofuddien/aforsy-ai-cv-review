@@ -4,7 +4,9 @@ import JobDescription from '../models/jobDescription.model';
 import parserService from '../services/parser.service';
 import vectordbService from '../services/vectordb/vectordb.service';
 import { AppError } from '../middlewares/error.middleware';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
+
+const logger = appLogger.child({ scope: 'jobDescription' });
 
 export class JobDescriptionController {
   // Create job description (manual input)

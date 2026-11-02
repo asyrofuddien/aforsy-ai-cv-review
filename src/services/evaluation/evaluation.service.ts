@@ -6,10 +6,12 @@ import JobDescription from '../../models/jobDescription.model';
 import documentModel from '../../models/document.model';
 import cvEvaluator from './cv.evaluator';
 import chainService from '../llm/chains';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
 import parserService from '../parser.service';
 import scrapingService from '../scraping.service';
 import { JobListing } from '@/types/evaluation.types';
+
+const logger = appLogger.child({ scope: 'review' });
 
 interface ScrapeJobsParams {
   roleSuggestion: string[];
@@ -39,7 +41,7 @@ class EvaluationService {
    */
   private async scrapeJobsFromAPI(params: ScrapeJobsParams): Promise<JobListing[]> {
     try {
-      logger.info(`🌐 Calling scrape API with params:`, {
+      logger.debug(`🌐 Calling scrape API with params:`, {
         job_suggestions: params.roleSuggestion,
         seniority: params.seniority || 'Mid',
         location: params.location,
@@ -66,7 +68,7 @@ class EvaluationService {
       }
 
       const jobs = data.data?.jobs || [];
-      logger.info(`✅ Successfully fetched ${jobs.length} jobs from API`);
+      logger.debug(`✅ Successfully fetched ${jobs.length} jobs from API`);
 
       return jobs;
     } catch (error) {
@@ -113,7 +115,7 @@ class EvaluationService {
     const { evaluationId, cvDocumentId, jobDescriptionId, jobDescriptionText } = data;
 
     try {
-      logger.info(`🚀 Starting evaluation ${evaluationId}`);
+      logger.debug(`🚀 Starting evaluation ${evaluationId}`);
 
       // Update status to processing
       await Evaluation.findByIdAndUpdate(evaluationId, {
@@ -125,14 +127,14 @@ class EvaluationService {
       if (jobDescriptionId && !jobDesc) throw new Error('Job description not found');
 
       // Step 1: Evaluate CV
-      logger.info('📄 Step 1: Evaluating CV', { mode: jobDesc ? 'job_specific' : 'general' });
+      logger.debug('📄 Step 1: Evaluating CV', { mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general' });
       const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId, jobDescriptionText);
 
       // Job discovery is paused while the feature is coming soon.
       // CV review still supports an optional job description for its rubric.
 
       // Step 3: Generate final summary
-      logger.info('📝 Step 3: Generating final summary');
+      logger.debug('📝 Step 3: Generating final summary');
       const mode = jobDesc || jobDescriptionText ? 'job_specific' : 'general';
       const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation, mode);
 
@@ -166,7 +168,7 @@ class EvaluationService {
         result: finalResult,
       }, { omitUndefined: true });
 
-      logger.info(`✅ Evaluation ${evaluationId} completed successfully`);
+      logger.debug(`✅ Evaluation ${evaluationId} completed successfully`);
       return finalResult;
     } catch (error) {
       let message = 'Unknown error';
@@ -187,21 +189,21 @@ class EvaluationService {
     const { cvMatcherId, cvDocumentId } = data;
 
     try {
-      logger.info(`🚀 Starting cv-matcher ${cvMatcherId}`);
+      logger.debug(`🚀 Starting cv-matcher ${cvMatcherId}`);
 
       // Update status to processing
       await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
         status: 'processing',
       });
 
-      logger.info('📄 Step 1: Fetching CV Document');
+      logger.debug('📄 Step 1: Fetching CV Document');
       const cvDocument = await documentModel.findById(cvDocumentId);
 
       if (!cvDocument) {
         throw new Error(`CV Document not found with ID: ${cvDocumentId}`);
       }
 
-      logger.info(`📄 CV Document found: ${cvDocument.filename} at ${cvDocument.path}`);
+      logger.debug(`📄 CV Document found: ${cvDocument.filename} at ${cvDocument.path}`);
 
       const file = {
         path: cvDocument.path,
@@ -209,7 +211,7 @@ class EvaluationService {
         filename: cvDocument.filename,
       };
 
-      logger.info('📄 Step 2: Extracting Raw Text from CV');
+      logger.debug('📄 Step 2: Extracting Raw Text from CV');
       let rawText: string;
 
       try {
@@ -219,7 +221,7 @@ class EvaluationService {
 
         // If file not found, check if we have cached content
         if (cvDocument.content) {
-          logger.info('Using cached content from database');
+          logger.debug('Using cached content from database');
           rawText = cvDocument.content;
         } else {
           throw new Error(`Failed to parse CV file and no cached content available: ${parseError.message}`);
@@ -230,9 +232,9 @@ class EvaluationService {
         throw new Error('CV file is empty or contains no readable text');
       }
 
-      logger.info(`📄 Extracted ${rawText.length} characters from CV`);
+      logger.debug(`📄 Extracted ${rawText.length} characters from CV`);
 
-      logger.info('📄 Step 3: Extract CV Structured JSON');
+      logger.debug('📄 Step 3: Extract CV Structured JSON');
       const extractedCv = await chainService.extractCVToJSON(rawText);
 
       // Ensure name is extracted, fallback to filename if not found
@@ -241,27 +243,27 @@ class EvaluationService {
         const filenameParts = cvDocument.filename.split('.');
         const possibleName = filenameParts[0].replace(/[-_]/g, ' ').trim();
         extractedCv.name = possibleName || 'Candidate';
-        logger.warn(`Name not found in CV, using fallback: ${extractedCv.name}`);
+        logger.warn('Candidate name missing from CV; using fallback label');
       }
 
       await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
         'result.user_profile.name': extractedCv?.name,
       });
 
-      logger.info('📄 Step 4: Role Suggestion');
+      logger.debug('📄 Step 4: Role Suggestion');
       const roleSuggestion = await chainService.RoleSuggestion(extractedCv);
 
-      logger.info('📄 Step 5: Scrape Job Listings');
+      logger.debug('📄 Step 5: Scrape Job Listings');
       const jobListed = await this.getJobListings(roleSuggestion.suggested_roles, roleSuggestion.seniority);
 
-      logger.info('🔍 Step 6: Matching with available jobs');
+      logger.debug('🔍 Step 6: Matching with available jobs');
       const jobMatches = await scrapingService.matchWithJobs(extractedCv, jobListed);
 
-      logger.info('📄 Step 7: Summary Recommendation');
+      logger.debug('📄 Step 7: Summary Recommendation');
       const summaryRecommendation = await chainService.SummaryRecommendation(extractedCv, roleSuggestion, jobListed);
 
       const summary = summaryRecommendation.summary;
-      logger.info('📄 Step 8: Final Result');
+      logger.debug('📄 Step 8: Final Result');
 
       const finalResult = {
         user_profile: {
@@ -280,7 +282,7 @@ class EvaluationService {
         result: finalResult,
       });
 
-      logger.info(`✅ CV-Matcher ${cvMatcherId} completed successfully`);
+      logger.debug(`✅ CV-Matcher ${cvMatcherId} completed successfully`);
       return finalResult;
     } catch (error) {
       let message = 'Unknown error';
@@ -288,7 +290,7 @@ class EvaluationService {
         message = error.message;
       }
 
-      logger.error(`❌ CV-Matcher ${cvMatcherId} failed:`, message);
+      logger.debug('CV matcher processing failed', { matcherId: cvMatcherId });
 
       await cvMatcherModel.findByIdAndUpdate(cvMatcherId, {
         status: 'failed',
@@ -304,7 +306,7 @@ class EvaluationService {
    */
   async testJobScraping(jobSuggestions: string[], seniority?: string, location = 'indonesia'): Promise<JobListing[]> {
     try {
-      logger.info('🧪 Testing job scraping functionality');
+      logger.debug('🧪 Testing job scraping functionality');
 
       const jobs = await this.scrapeJobsFromAPI({
         roleSuggestion: jobSuggestions,
@@ -312,7 +314,7 @@ class EvaluationService {
         location,
       });
 
-      logger.info(`✅ Test completed: Found ${jobs.length} jobs`);
+      logger.debug(`✅ Test completed: Found ${jobs.length} jobs`);
       return jobs;
     } catch (error) {
       logger.error('❌ Test failed:', error);

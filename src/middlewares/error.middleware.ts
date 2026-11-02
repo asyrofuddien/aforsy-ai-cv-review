@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
+
+const logger = appLogger.child({ scope: 'http-error' });
 
 export class AppError extends Error {
   statusCode: number;
@@ -23,14 +25,6 @@ export const errorMiddleware = (
   let error = { ...err };
   error.message = err.message;
 
-  // Log error
-  logger.error(`Error: ${err.message}`, {
-    error: err,
-    request: req.url,
-    method: req.method,
-    ip: req.ip,
-  });
-
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {
     const message = 'Resource not found';
@@ -51,7 +45,13 @@ export const errorMiddleware = (
     error = new AppError(message, 400);
   }
 
-  res.status((error as AppError).statusCode || 500).json({
+  const status = (error as AppError).statusCode || 500;
+  res.locals.failureLogged = true;
+  logger.log(status >= 500 ? 'error' : 'warn', 'Request failed', {
+    status, method: req.method, route: req.baseUrl + (req.route?.path || req.path), error: err,
+  });
+
+  res.status(status).json({
     success: false,
     error: {
       message: error.message || 'Server Error',

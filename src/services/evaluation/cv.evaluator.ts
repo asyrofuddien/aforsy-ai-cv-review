@@ -2,12 +2,14 @@
 import Document from '../../models/document.model';
 import JobDescription from '../../models/jobDescription.model';
 import chainService from '../llm/chains';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
+
+const logger = appLogger.child({ scope: 'cv-review' });
 
 export class CVEvaluator {
   async evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string) {
     try {
-      logger.info('📄 CV Evaluator: Starting evaluation');
+      logger.debug('📄 CV Evaluator: Starting evaluation');
 
       // Get CV document
       const cvDoc = await Document.findById(cvDocumentId);
@@ -56,7 +58,7 @@ export class CVEvaluator {
         matchRate: weightedScore,
       };
     } catch (error) {
-      logger.error('CV evaluation error:', error);
+      logger.debug('CV evaluation error:', error);
       throw error;
     }
   }

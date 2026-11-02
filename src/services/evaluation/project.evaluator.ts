@@ -1,12 +1,14 @@
 import Document from '../../models/document.model';
 import chainService from '../llm/chains';
 import vectordbService from '../vectordb/vectordb.service';
-import logger from '../../utils/logger';
+import appLogger from '../../utils/logger';
+
+const logger = appLogger.child({ scope: 'project-review' });
 
 export class ProjectEvaluator {
   async evaluate(projectDocumentId: string) {
     try {
-      logger.info('📁 Project Evaluator: Starting evaluation');
+      logger.debug('📁 Project Evaluator: Starting evaluation');
 
       // Get project document
       const projectDoc = await Document.findById(projectDocumentId);
@@ -36,7 +38,7 @@ export class ProjectEvaluator {
         score: evaluation.score || 5.0,
       };
     } catch (error) {
-      logger.error('Project evaluation error:', error);
+      logger.debug('Project evaluation error:', error);
       throw error;
     }
   }

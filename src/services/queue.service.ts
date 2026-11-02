@@ -3,7 +3,9 @@ import config from '../config/config';
 import Evaluation from '../models/evaluation.model';
 import cvMatcherModel from '../models/cvMatcher.model';
 import { CVMatcherRequest, EvaluationRequest } from '../types/evaluation.types';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
+
+const logger = appLogger.child({ scope: 'queue' });
 
 class QueueService {
   private evaluationQueue: Queue;
@@ -78,11 +80,11 @@ class QueueService {
 
   private setupQueueEvents() {
     this.queueEvents.on('completed', ({ jobId, returnvalue }) => {
-      logger.info(`Job ${jobId} completed`);
+      logger.debug('Queue completion event', { jobId, queue: 'review' });
     });
 
     this.queueEvents.on('failed', ({ jobId, failedReason }) => {
-      logger.error(`Job ${jobId} failed:`, failedReason);
+      logger.debug('Queue failure event', { jobId, queue: 'review' });
     });
 
     this.queueEvents.on('progress', ({ jobId, data }) => {
@@ -91,11 +93,11 @@ class QueueService {
 
     // Tambah event handlers untuk cvMatcherQueue
     this.cvMatcherQueueEvents.on('completed', ({ jobId, returnvalue }) => {
-      logger.info(`CV Matcher job ${jobId} completed`);
+      logger.debug('Queue completion event', { jobId, queue: 'cv-matcher' });
     });
 
     this.cvMatcherQueueEvents.on('failed', ({ jobId, failedReason }) => {
-      logger.error(`CV Matcher job ${jobId} failed:`, failedReason);
+      logger.debug('Queue failure event', { jobId, queue: 'cv-matcher' });
     });
 
     this.cvMatcherQueueEvents.on('progress', ({ jobId, data }) => {
@@ -150,11 +152,11 @@ class QueueService {
     });
 
     this.worker.on('completed', (job) => {
-      logger.info(`Worker completed job ${job.id}`);
+      logger.debug('Worker completion event', { jobId: job.id });
     });
 
     this.worker.on('failed', (job, error) => {
-      logger.error(`Worker failed on job ${job?.id}:`, error);
+      logger.error('Review job failed', { jobId: job?.id, evaluationId: job?.data.evaluationId, attempt: job?.attemptsMade, error });
     });
   }
 
@@ -168,11 +170,11 @@ class QueueService {
     });
 
     this.cvMatcherWorker.on('completed', (job) => {
-      logger.info(`CV Matcher worker completed job ${job.id}`);
+      logger.debug('Worker completion event', { jobId: job.id });
     });
 
     this.cvMatcherWorker.on('failed', (job, error) => {
-      logger.error(`CV Matcher worker failed on job ${job?.id}:`, error);
+      logger.error('CV matcher job failed', { jobId: job?.id, matcherId: job?.data.cvMatcherId, attempt: job?.attemptsMade, error });
     });
   }
 

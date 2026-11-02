@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 import config from './config';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import { ensureDefaultAtsTemplates } from '../services/atsTemplate.service';
+
+const logger = appLogger.child({ scope: 'mongodb' });
 
 export const connectDB = async (): Promise<void> => {
   try {

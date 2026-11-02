@@ -5,7 +5,7 @@ import { asyncHandler, AppError } from '../middlewares/error.middleware';
 import User, { IUser } from '../models/user.model';
 import AuthSession from '../models/authSession.model';
 import config from '../config/config';
-import logger from '../utils/logger';
+import appLogger from '../utils/logger';
 import {
   asPublicUser,
   clearSessionCookie,
@@ -21,6 +21,8 @@ import {
   syncSessionCookieForAppRoutes,
   verifyPassword,
 } from '../services/auth.service';
+
+const logger = appLogger.child({ scope: 'auth' });
 
 const googleClient = new OAuth2Client(config.auth.googleClientId, config.auth.googleClientSecret, config.auth.googleCallbackUrl);
 const frontend = () => config.auth.frontendUrl.replace(/\/$/, '');

@@ -1,5 +1,8 @@
+import appLogger from '../utils/logger';
 import { JobListing } from '../types/evaluation.types';
 import chainService from '../services/llm/chains';
+
+const logger = appLogger.child({ scope: 'jobs' });
 
 interface RapidAPIConfig {
   apiKey: string;
@@ -99,7 +102,7 @@ class ScrapingService {
             }
           }
         } catch (error) {
-          console.error(`Error fetching jobs for role: ${role}`, error);
+          logger.error(`Error fetching jobs for role: ${role}`, error);
           continue;
         }
       }
@@ -111,7 +114,7 @@ class ScrapingService {
 
       return allJobs;
     } catch (error) {
-      console.error('Error in FindJobs:', error);
+      logger.error('Error in FindJobs:', error);
       return this.getDummyJobs();
     }
   }
@@ -165,7 +168,7 @@ class ScrapingService {
       ...(params.employmentTypes && { employmentTypes: params.employmentTypes }),
     });
 
-    console.log('Searching jobs with params:', queryParams.toString());
+    logger.debug('Searching job listings');
 
     const url = `${this.config.baseUrl}/search?${queryParams.toString()}`;
 
@@ -219,13 +222,13 @@ class ScrapingService {
       });
 
       if (!response.ok) {
-        console.error(`Failed to fetch job detail for ID ${jobId}`);
+        logger.error(`Failed to fetch job detail for ID ${jobId}`);
         return null;
       }
 
       return await response.json();
     } catch (error) {
-      console.error(`Error fetching job detail for ID ${jobId}:`, error);
+      logger.error(`Error fetching job detail for ID ${jobId}:`, error);
       return null;
     }
   }
@@ -600,7 +603,7 @@ class ScrapingService {
             explanation: this.generateExplanation(validSkillMatch, validExperienceMatch, validResponsibilityMatch),
           };
         } catch (error) {
-          console.error(`Error matching job ${job.title}:`, error);
+          logger.error(`Error matching job ${job.title}:`, error);
           // Return job with default scores on error
           return {
             ...job,
@@ -640,13 +643,13 @@ class ScrapingService {
 
       // Validate the result
       if (isNaN(result) || !isFinite(result)) {
-        console.warn('Invalid skill match score received, defaulting to 0');
+        logger.warn('Invalid skill match score received, defaulting to 0');
         return 0;
       }
 
       return result;
     } catch (error) {
-      console.error('Error calculating skill match:', error);
+      logger.error('Error calculating skill match:', error);
       return 0;
     }
   }

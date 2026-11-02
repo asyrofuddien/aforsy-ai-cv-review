@@ -1,3 +1,4 @@
+import appLogger from '../utils/logger';
 import { Request, Response, NextFunction } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -12,6 +13,8 @@ import TemplateModel from '../models/Template.model';
 import CvDraft from '../models/cvDraft.model';
 import AtsTemplate from '../models/atsTemplate.model';
 import { getActiveAtsTemplate } from '../services/atsTemplate.service';
+
+const logger = appLogger.child({ scope: 'cv-generator' });
 
 // Register Handlebars helper (register once, outside the class)
 Handlebars.registerHelper('lookup', function (obj: Record<string, any>, field: string): any {
@@ -174,7 +177,7 @@ export class CVGeneratorController {
         const client = await page.target().createCDPSession();
         await client.send('Network.disable');
       } catch (err: any) {
-        console.warn('⚠️ Could not disable network:', err.message);
+        logger.warn('⚠️ Could not disable network:', err.message);
       }
 
       // Disable request interception as additional safety
@@ -237,7 +240,7 @@ export class CVGeneratorController {
         },
       });
     } catch (error: any) {
-      console.error('❌ Error generating PDF:', error);
+      logger.error('❌ Error generating PDF:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to generate CV',
@@ -249,12 +252,12 @@ export class CVGeneratorController {
         try {
           await browser.close();
         } catch (e) {
-          console.error('Error closing browser:', e);
+          logger.error('Error closing browser:', e);
         }
       }
       for (const filePath of temporaryFiles) {
         try { fs.unlinkSync(filePath); } catch (error: any) {
-          if (error.code !== 'ENOENT') console.error('Error removing temporary CV file:', error);
+          if (error.code !== 'ENOENT') logger.error('Error removing temporary CV file:', error);
         }
       }
     }
@@ -336,7 +339,7 @@ export class CVGeneratorController {
         const client = await page.target().createCDPSession();
         await client.send('Network.disable');
       } catch (err: any) {
-        console.warn('⚠️ Could not disable network:', err.message);
+        logger.warn('⚠️ Could not disable network:', err.message);
       }
 
       // Disable request interception as additional safety
@@ -404,7 +407,7 @@ export class CVGeneratorController {
         },
       });
     } catch (error: any) {
-      console.error('❌ Error generating PDF:', error);
+      logger.error('❌ Error generating PDF:', error);
       res.status(500).json({
         success: false,
         message: 'Failed to generate CV',
@@ -416,12 +419,12 @@ export class CVGeneratorController {
         try {
           await browser.close();
         } catch (e) {
-          console.error('Error closing browser:', e);
+          logger.error('Error closing browser:', e);
         }
       }
       for (const filePath of temporaryFiles) {
         try { fs.unlinkSync(filePath); } catch (error: any) {
-          if (error.code !== 'ENOENT') console.error('Error removing temporary CV file:', error);
+          if (error.code !== 'ENOENT') logger.error('Error removing temporary CV file:', error);
         }
       }
     }
