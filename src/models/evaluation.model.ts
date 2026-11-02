@@ -10,6 +10,7 @@ export interface IEvaluation extends Document {
   status: EvaluationStatus;
   result?: EvaluationResult;
   error?: string;
+  queueJobId?: string;
   code_id: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
   legacyUnclaimed: boolean;
@@ -79,6 +80,7 @@ const EvaluationSchema = new Schema(
       },
     },
     error: String,
+    queueJobId: { type: String },
   },
   {
     timestamps: true,

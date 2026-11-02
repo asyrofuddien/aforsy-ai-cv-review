@@ -11,6 +11,7 @@ export interface IEvaluation extends Document {
   status: EvaluationStatus;
   result?: EvaluationResult;
   error?: string;
+  queueJobId?: string;
   code_id: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
   legacyUnclaimed: boolean;
@@ -116,6 +117,7 @@ const CvMatcherSchema = new Schema(
     legacyUnclaimed: { type: Boolean, default: false, index: true },
     result: EvaluationResultSchema,
     error: String,
+    queueJobId: { type: String },
   },
   {
     timestamps: true,

@@ -8,6 +8,7 @@ export interface ICvAts extends Document {
   pdf_file?: string;
   html_text?: string;
   file_name?: string;
+  createdAt: Date;
 }
 
 const CvAtsSchema = new Schema(

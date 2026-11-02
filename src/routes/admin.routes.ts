@@ -7,6 +7,9 @@ router.use(requireAdmin);
 
 router.get('/summary', adminController.summary);
 router.get('/users', adminController.listUsers);
+router.get('/users/:id', adminController.getUserDetails);
+router.get('/users/:id/activity', adminController.getUserActivity);
+router.post('/users/:userId/processes/:type/:processId/retry', adminController.retryUserProcess);
 router.patch('/users/:id/status', adminController.setUserStatus);
 router.patch('/users/:id/role', adminController.setUserRole);
 router.get('/templates', adminController.listTemplates);

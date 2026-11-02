@@ -122,13 +122,14 @@ class QueueService {
         userId,
         status: 'queued',
       });
+      evaluation.queueJobId = evaluation.id;
 
       await evaluation.save();
 
       const job = await this.evaluationQueue.add('evaluate', {
         evaluationId: evaluation.id,
         ...data,
-      });
+      }, { jobId: evaluation.id });
 
       if (!job.id) {
         throw new Error('Failed to create job - no job ID returned');
@@ -188,6 +189,20 @@ class QueueService {
     return await this.cvMatcherQueue.getJob(jobId);
   }
 
+  async retryFailedJob(queueType: 'evaluation' | 'cv-matcher', jobId: string): Promise<boolean> {
+    const queue = queueType === 'evaluation' ? this.evaluationQueue : this.cvMatcherQueue;
+    const job = await queue.getJob(jobId);
+    if (!job || (await job.getState()) !== 'failed') return false;
+    await job.retry('failed');
+    return true;
+  }
+
+  async getJobState(queueType: 'evaluation' | 'cv-matcher', jobId: string): Promise<string | null> {
+    const queue = queueType === 'evaluation' ? this.evaluationQueue : this.cvMatcherQueue;
+    const job = await queue.getJob(jobId);
+    return job ? job.getState() : null;
+  }
+
   async getJobCounts() {
     return await this.evaluationQueue.getJobCounts();
   }
@@ -233,13 +248,14 @@ class QueueService {
         userId,
         status: 'queued',
       });
+      cvMatcher.queueJobId = cvMatcher.id;
 
       await cvMatcher.save();
 
       const job = await this.cvMatcherQueue.add('cv-matcher', {
         cvMatcherId: cvMatcher.id,
         ...data,
-      });
+      }, { jobId: cvMatcher.id });
 
       if (!job.id) {
         throw new Error('Failed to create job - no job ID returned');
