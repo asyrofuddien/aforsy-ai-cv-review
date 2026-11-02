@@ -64,14 +64,6 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api', routes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    version: 'v 2.0.0',
-    timestamp: new Date().toISOString(),
-  });
-});
 app.get('/api/pdf/:filename', authenticate, async (req, res, next) => {
   const { filename } = req.params;
   try {

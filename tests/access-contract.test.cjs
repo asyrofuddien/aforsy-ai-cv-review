@@ -32,9 +32,11 @@ function fixture() {
   const result = { id: resultId, _id: resultId, userId: 'owner-a', candidateName: 'Synthetic A', status: 'completed', result: { cvMatchRate: 65, mode: 'general', cvFeedback: 'Synthetic feedback' } };
   const model = {
     findOne: async query => Object.entries(query).every(([key, value]) => result[key] === value) ? result : null,
-    find: () => ({ sort: () => ({ limit: () => ({ select: async () => [result] }) }) }),
+    find: query => ({ sort() { return this; }, skip() { return this; }, limit() { return this; }, select: async () => query.userId === 'owner-a' ? [result] : [] }),
+    aggregate: async () => [{ _id: 'completed', count: 1 }],
+    countDocuments: async query => query.userId === 'owner-a' ? 1 : 0,
   };
-  const queue = { addEvaluationJob: async (data, userId) => { calls.enqueued.push({ data, userId }); return { id: 'synthetic-job', jobId: 'synthetic-job' }; } };
+  const queue = { addEvaluationJob: async (data, userId) => { calls.enqueued.push({ data, userId }); return { id: 'synthetic-job', jobId: 'synthetic-job' }; }, getJobCounts: async () => ({ waiting: 3, active: 2, completed: 7, failed: 1 }) };
   const validation = loadTs('src/middlewares/validation.middleware.ts', { './error.middleware': { AppError } });
   const controller = loadTs('src/controllers/evaluation.controller.ts', {
     '../utils/logger': logger, '../utils/locale': { requestLocale: () => 'id' },
@@ -42,7 +44,7 @@ function fixture() {
     '../middlewares/error.middleware': { AppError, asyncHandler },
     '../services/queue.service': queue,
     '../models/jobDescription.model': { exists: async () => true },
-    '../models/evaluation.model': model, '../models/cvMatcher.model': {},
+    '../models/evaluation.model': model, '../models/cvMatcher.model': { aggregate: async () => [{ _id: 'queued', count: 2 }] },
     '../models/document.model': { findOne: async query => query._id === cvId && query.userId === 'owner-a' ? { id: cvId } : null },
   }).default;
   const evaluationRoutes = loadTs('src/routes/evaluation.routes.ts', {
@@ -59,6 +61,9 @@ function fixture() {
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
+    '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },
+    './system.routes': loadTs('src/routes/system.routes.ts').default,
+    './reporting.routes': express.Router().get('/recent-evaluations', (_req, res) => res.json({ success: true, evaluations: [result] })),
     '../models/document.model': {}, '../models/evaluation.model': model,
     '../models/jobDescription.model': {}, '../models/code.model': {}, '../models/cvMatcher.model': {},
     '../models/atsPDF.model': {}, '../models/Template.model': {}, '../services/queue.service': queue,
@@ -124,4 +129,45 @@ test('review mutation validates CSRF, document owner and conflicting JD before e
     assert.equal(calls.enqueued[0].data.jobDescriptionText, undefined);
     assert.equal(calls.enqueued[0].data.locale, 'id');
   });
+});
+
+test('queue status is authenticated and scoped for users while admins see operational counts', async t => {
+  await withServer(t, async request => {
+    assert.equal((await request('/evaluate/queue-status')).status, 401);
+    const user = await request('/evaluate/queue-status', { owner: 'owner-a' });
+    assert.deepEqual(user.body.data, { waiting: 2, active: 0, completed: 1, failed: 0, delayed: 0, paused: 0 });
+    const admin = await request('/evaluate/queue-status', { owner: 'admin' });
+    assert.deepEqual(admin.body.data, { waiting: 3, active: 2, completed: 7, failed: 1, delayed: 0, paused: 0 });
+  });
+});
+
+test('review history is paginated and filters by authenticated owner', async t => {
+  await withServer(t, async request => {
+    assert.equal((await request('/evaluate/history')).status, 401);
+    const own = await request('/evaluate/history?page=1&limit=20', { owner: 'owner-a' });
+    assert.equal(own.status, 200);
+    assert.equal(own.body.data[0]._id, resultId);
+    assert.equal(own.body.pagination.total, 1);
+    const other = await request('/evaluate/history', { owner: 'owner-b' });
+    assert.deepEqual(other.body.data, []);
+    assert.equal(other.body.pagination.total, 0);
+  });
+});
+
+test('dashboard summary scopes user metrics and aggregates globally for admins', async () => {
+  const seen = [];
+  const controller = loadTs('src/controllers/dashboard.controller.ts', {
+    '../models/document.model': { countDocuments: async filter => { seen.push(filter); return 4; } },
+    '../models/evaluation.model': { aggregate: async pipeline => { seen.push(pipeline[0].$match); return [{ _id: 'completed', count: 2 }]; } },
+    '../models/cvMatcher.model': { countDocuments: async filter => { seen.push(filter); return 1; } },
+    '../models/atsPDF.model': { countDocuments: async filter => { seen.push(filter); return 3; } },
+    '../middlewares/error.middleware': { asyncHandler: handler => handler },
+  }).dashboardSummary;
+  const { invoke } = require('./helpers/load-ts.cjs');
+  const user = await invoke(controller, { authUser: { userId: 'owner-a', role: 'user' } });
+  assert.deepEqual(user.body.data, { documents: 4, evaluations: { completed: 2 }, cvMatches: 1, generatedCvs: 3 });
+  assert.ok(seen.slice(0, 4).every(filter => filter.userId === 'owner-a'));
+  seen.length = 0;
+  await invoke(controller, { authUser: { userId: 'admin', role: 'admin' } });
+  assert.deepEqual(seen.slice(0, 4), [{}, {}, {}, {}]);
 });

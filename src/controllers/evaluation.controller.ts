@@ -71,13 +71,27 @@ export class EvaluationController {
   // Optional: Add method to get queue status
   getQueueStatus = asyncHandler(
     async (req: Request, res: Response) => {
-      const counts = await queueService.getJobCounts();
+      const userId = req.authUser!.userId;
+      const isAdmin = req.authUser!.role === 'admin';
+      let counts: Record<string, number>;
+      if (isAdmin) {
+        counts = await queueService.getJobCounts();
+      } else {
+        const [evaluationCounts, matcherCounts] = await Promise.all([
+          Evaluation.aggregate([{ $match: { userId } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+          cvMatcherModel.aggregate([{ $match: { userId } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+        ]);
+        counts = [...evaluationCounts, ...matcherCounts].reduce<Record<string, number>>((acc, item) => {
+          acc[item._id] = (acc[item._id] || 0) + item.count;
+          return acc;
+        }, {});
+      }
 
       res.status(200).json({
         success: true,
         data: {
-          waiting: counts.waiting || 0,
-          active: counts.active || 0,
+          waiting: counts.waiting || counts.queued || 0,
+          active: counts.active || counts.processing || 0,
           completed: counts.completed || 0,
           failed: counts.failed || 0,
           delayed: counts.delayed || 0,
@@ -86,6 +100,17 @@ export class EvaluationController {
       });
     },
   );
+
+  getHistory = asyncHandler(async (req: Request, res: Response) => {
+    const page = Math.max(1, Number.parseInt(String(req.query.page || '1'), 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(String(req.query.limit || '20'), 10) || 20));
+    const filter = { userId: req.authUser!.userId };
+    const [evaluations, total] = await Promise.all([
+      Evaluation.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).select('candidateName status createdAt'),
+      Evaluation.countDocuments(filter),
+    ]);
+    res.json({ success: true, data: evaluations, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+  });
 
   getResult = asyncHandler(
     async (req: Request, res: Response) => {
