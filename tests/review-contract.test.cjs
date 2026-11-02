@@ -3,6 +3,22 @@ const assert = require('node:assert/strict');
 const { loadTs, logger } = require('./helpers/load-ts.cjs');
 
 const criteria = () => Array.from({ length: 6 }, (_, i) => ({ name: `Criterion ${i}`, score: 3.25, evidence: 'Source quote', suggestion: 'Clarify impact' }));
+
+test('review retry can reclaim a processing record when retry-state recovery did not persist', async () => {
+  const updates = [];
+  const { reviewRepository } = loadTs('src/features/review/review.repository.ts', {
+    '../../models/document.model': {},
+    '../../models/evaluation.model': { findOneAndUpdate: async (...args) => updates.push(args) },
+    '../../models/jobDescription.model': {},
+  });
+  await reviewRepository.markProcessing('review-1', false);
+  await reviewRepository.markProcessing('review-1', true);
+  assert.deepEqual(updates.map(([filter]) => filter.status.$in), [
+    ['queued', 'failed'],
+    ['queued', 'failed', 'processing'],
+  ]);
+});
+
 function fixture({ output = criteria(), content = 'Original synthetic CV', job = null } = {}) {
   const calls = [];
   const evaluator = loadTs('src/services/evaluation/cv.evaluator.ts', {
@@ -103,6 +119,7 @@ test('job matching runs inside the review workflow and persists results into rev
     './review.response': loadTs('src/features/review/review.response.ts'),
   });
   const calls = [];
+  const logs = [];
   const workflow = createReviewWorkflow({
     repository: {
       markProcessing: async () => {}, findJobDescription: async () => null,
@@ -111,6 +128,7 @@ test('job matching runs inside the review workflow and persists results into rev
     evaluator: { evaluate: async () => ({ extractedInfo: { name: 'Synthetic Person', skills: ['TypeScript'] }, matchRate: 80, evaluation: { criteria: criteria(), feedback: 'Review is ready' } }) },
     summary: { generateFinalSummary: async () => ({}) },
     jobMatcher: { findMatches: async profile => { calls.push(['match', profile]); return { suggestedRoles: ['Backend Developer'], jobs: [{ title: 'Engineer', score: 82 }] }; } },
+    logger: { info: (message, metadata) => logs.push([message, metadata]), error() {}, warn() {} },
   });
   const result = await workflow.process({ evaluationId: 'evaluation-match', cvDocumentId: 'cv-1' });
   assert.equal(result.jobMatchingStatus, 'completed');
@@ -118,6 +136,9 @@ test('job matching runs inside the review workflow and persists results into rev
   assert.deepEqual(result.jobMatches, [{ title: 'Engineer', score: 82 }]);
   assert.equal(calls[0][0], 'match');
   assert.equal(calls[1][0], 'complete');
+  assert.ok(logs.some(([message, metadata]) => message === 'Review stage started' && metadata.stage === 'analyze CV'));
+  assert.ok(logs.some(([message, metadata]) => message === 'Review stage completed' && metadata.stage === 'suggest roles, search jobs, and score matches'));
+  assert.ok(logs.some(([message]) => message === 'Review workflow completed'));
 });
 
 test('job matching failure leaves a successful CV review completed and reports the matching error', async () => {

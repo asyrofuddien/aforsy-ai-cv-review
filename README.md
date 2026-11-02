@@ -9,6 +9,7 @@ This service provides automated evaluation of job candidates by:
 - Accepting CV uploads (PDF, DOCX, TXT)
 - General document-quality review when no job description is selected
 - Optional comparison against a saved job description
+- Automatic matching against up to five job listings; a job-provider failure does not block the CV review
 - Providing detailed scoring and feedback
 - Processing evaluations asynchronously for scalability
 
@@ -32,6 +33,7 @@ This service provides automated evaluation of job candidates by:
 - **AI-Powered Evaluation**: Uses Sumopod's OpenAI-compatible API
 - **Vector Search (RAG)**: Context-aware evaluation using Pinecone vector database
 - **Asynchronous Processing**: Non-blocking evaluation with job queue
+- **Job Matching**: Searches configured RapidAPI, Greenhouse, or Lever sources and saves up to five scored matches with the review
 - **Detailed Scoring**: 5-point scale across multiple parameters
 - **Mock Mode**: Full functionality without API keys for testing
 - **Error Resilience**: Retry mechanisms and graceful fallbacks
@@ -146,6 +148,13 @@ PINECONE_INDEX_NAME=cv-evaluation
 # File Upload
 MAX_FILE_SIZE=10485760  # 10MB
 ALLOWED_FILE_TYPES=application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain
+
+# Job matching (RapidAPI with configured Greenhouse/Lever fallback by default)
+JOB_PROVIDER=rapidapi
+JOB_PROVIDER_FALLBACK=aggregate
+RAPIDAPI_KEY=
+GREENHOUSE_BOARDS=
+LEVER_SITES=
 ```
 
 ## 📚 API Documentation

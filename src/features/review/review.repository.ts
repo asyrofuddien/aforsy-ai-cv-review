@@ -9,7 +9,10 @@ export const reviewRepository = {
     const job = await JobDescription.findById(id);
     return job ? job.toObject() as ReviewDescription : null;
   },
-  markProcessing: (id: string) => Evaluation.findOneAndUpdate({ _id: id, status: { $in: ['queued', 'failed'] } }, { status: 'processing' }),
+  markProcessing: (id: string, retrying: boolean) => Evaluation.findOneAndUpdate(
+    { _id: id, status: { $in: retrying ? ['queued', 'failed', 'processing'] : ['queued', 'failed'] } },
+    { status: 'processing' },
+  ),
   complete: (id: string, candidateName: string | undefined, result: ReviewResult) =>
     Evaluation.findOneAndUpdate({ _id: id, status: 'processing' }, { status: 'completed', candidateName, result }, { omitUndefined: true }),
   fail: (id: string, message: string) => Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),

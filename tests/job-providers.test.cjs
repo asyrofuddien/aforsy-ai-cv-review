@@ -7,7 +7,7 @@ const providers = loadTs('src/features/jobs/providers/ats.adapter.ts', {
   '../../../config/config': { jobs: { provider: 'rapidapi', fallback: 'aggregate', greenhouseBoards: [], leverSites: [] } },
 });
 const { JobsService } = loadTs('src/features/jobs/jobs.service.ts', {
-  '../../utils/logger': { child() { return { warn() {}, debug() {} }; } },
+  '../../utils/logger': { child() { return { warn() {}, debug() {}, info() {}, error() {} }; } },
   './jobs.ai': { JobsAIService: class { beautifyDescription = async description => ({ description }); calculateSkillmatch = async () => ({ score: 0 }); } },
   './providers/ats.adapter': { configuredJobProvider: {} },
   './model/job.parser': { JobParser: class { parseProviderDetails = detail => ({ title: detail.data.title, company: 'Test', requirements: [], responsibilities: [], job_description: detail.data.description, location: 'Remote', seniority: 'Mid-level', posted_at: '', link: '', salary_range: '', job_type: '' }); } },

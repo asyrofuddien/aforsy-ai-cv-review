@@ -25,14 +25,26 @@ export class CVEvaluator {
 
   async evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string, locale: 'id' | 'en' = 'en') {
     try {
-      logger.debug('CV evaluator started');
+      const sourceStarted = performance.now();
+      logger.info('Loading CV source for review');
       const cvDoc = await this.repository.findCvDocument(cvDocumentId);
       if (!cvDoc) throw new Error('CV document not found');
       const jobDesc = jobDescriptionId ? await this.repository.findJobDescription(jobDescriptionId) : null;
       if (jobDescriptionId && !jobDesc) throw new Error('Job description not found');
       if (!cvDoc.content?.trim()) throw new Error('CV contains no readable text. Upload a text-based PDF, DOCX or TXT.');
+      logger.info('CV source loaded', {
+        durationMs: Math.round(performance.now() - sourceStarted),
+        characterCount: cvDoc.content.length,
+        hasJobDescription: Boolean(jobDesc || jobDescriptionText),
+      });
 
+      const extractionStarted = performance.now();
+      logger.info('CV information extraction started');
       const cvInfo = await this.ai.extractCVInfo(cvDoc.content);
+      logger.info('CV information extraction completed', { durationMs: Math.round(performance.now() - extractionStarted) });
+
+      const evaluationStarted = performance.now();
+      logger.info('CV criteria evaluation started', { mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general' });
       const evaluation = await this.ai.evaluateCV({ ...(cvInfo as object), sourceText: cvDoc.content }, {
         locale,
         mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general',
@@ -43,14 +55,19 @@ export class CVEvaluator {
         context: [],
         scoringWeigths: jobDesc?.scoringWeights,
       });
+      logger.info('CV criteria evaluation completed', {
+        durationMs: Math.round(performance.now() - evaluationStarted),
+        criteriaCount: Array.isArray(evaluation.criteria) ? evaluation.criteria.length : 0,
+      });
       const matchRate = validateAndAggregateReview(evaluation.criteria);
+      logger.info('CV review score calculated', { matchRate });
       return {
         extractedInfo: cvInfo as { name?: string },
         evaluation: { ...evaluation, strengths: evaluation.strengths || [], improvements: evaluation.gaps || [], recommendations: [] },
         matchRate,
       };
     } catch (error) {
-      logger.debug('CV evaluation failed', { error });
+      logger.error('CV evaluation failed', { error });
       throw error;
     }
   }

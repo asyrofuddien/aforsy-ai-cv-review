@@ -127,7 +127,16 @@ class QueueService {
     });
 
     this.worker.on('failed', (job, error) => {
-      logger.error('Review job failed', { jobId: job?.id, evaluationId: job?.data.evaluationId, attempt: job?.attemptsMade, error });
+      const attempt = job?.attemptsMade;
+      const maxAttempts = Number(job?.opts.attempts) || 1;
+      logger.error('Review job attempt failed', {
+        jobId: job?.id,
+        evaluationId: job?.data.evaluationId,
+        attempt,
+        maxAttempts,
+        retrying: attempt !== undefined && attempt < maxAttempts,
+        error,
+      });
     });
   }
 

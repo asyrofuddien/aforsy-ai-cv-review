@@ -29,34 +29,91 @@ export class JobsService {
     const seenJobs = new Set<string>();
     const errors: unknown[] = [];
     let completedSearches = 0;
-    for (const role of roleSuggestion.suggested_roles.slice(0, 3)) {
+    const roles = roleSuggestion.suggested_roles.slice(0, 3);
+    logger.info('Job provider search batch started', { roleCount: roles.length });
+    for (const [roleIndex, role] of roles.entries()) {
+      const roleStarted = performance.now();
       try {
+        logger.info('Job provider search started', { roleIndex: roleIndex + 1, roleCount: roles.length });
         const search = await this.provider.search(this.buildSearchParams(role, roleSuggestion.seniority));
         completedSearches += 1;
-        for (const { id: jobId } of search.data?.slice(0, 3) || []) {
+        const candidates = search.data?.slice(0, 3) || [];
+        logger.info('Job provider search completed', {
+          roleIndex: roleIndex + 1,
+          roleCount: roles.length,
+          resultCount: search.data?.length || 0,
+          detailCandidates: candidates.length,
+          durationMs: Math.round(performance.now() - roleStarted),
+        });
+        for (const [detailIndex, { id: jobId }] of candidates.entries()) {
+          logger.info('Job detail lookup started', {
+            roleIndex: roleIndex + 1,
+            detailIndex: detailIndex + 1,
+            detailCount: candidates.length,
+          });
+          const detailStarted = performance.now();
           const details = await this.provider.getDetails(jobId);
-          if (!details?.data) continue;
+          if (!details?.data) {
+            logger.info('Job detail lookup completed without details', {
+              roleIndex: roleIndex + 1,
+              detailIndex: detailIndex + 1,
+              durationMs: Math.round(performance.now() - detailStarted),
+            });
+            continue;
+          }
           const job = this.parser.parseProviderDetails(details);
           const dedupeKey = job.link || `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${job.location.toLowerCase()}`;
-          if (seenJobs.has(dedupeKey)) continue;
+          if (seenJobs.has(dedupeKey)) {
+            logger.info('Duplicate job listing skipped', { roleIndex: roleIndex + 1, detailIndex: detailIndex + 1 });
+            continue;
+          }
           seenJobs.add(dedupeKey);
           const enhanced = await this.enhance.beautifyDescription(details.data.description || '');
           job.job_description = enhanced.description || job.job_description;
           jobs.push(job);
+          logger.info('Job detail normalized', {
+            roleIndex: roleIndex + 1,
+            detailIndex: detailIndex + 1,
+            durationMs: Math.round(performance.now() - detailStarted),
+          });
         }
       } catch (error) {
         errors.push(error);
-        logger.warn('Job provider lookup failed; continuing with other role suggestions', { role, error });
+        logger.warn('Job provider lookup failed; continuing with other role suggestions', {
+          roleIndex: roleIndex + 1,
+          durationMs: Math.round(performance.now() - roleStarted),
+          error,
+        });
       }
     }
     if (!jobs.length && completedSearches === 0 && errors.length) {
+      logger.error('Every configured job provider search failed', { roleCount: roles.length, failureCount: errors.length });
       throw new Error(`Job matching could not run: ${errors.map(error => error instanceof Error ? error.message : 'provider error').join('; ')}`);
     }
+    logger.info('Job provider search batch completed', {
+      roleCount: roles.length,
+      completedSearches,
+      failedSearches: errors.length,
+      listingCount: jobs.length,
+    });
     return jobs;
   }
 
   async matchWithJobs(cv: CandidateForMatching, jobs: JobListing[]) {
-    return matchJobs(cv, jobs, (skills, requirements) => calculateSkillMatch(skills, requirements, this.skillMatch));
+    const started = performance.now();
+    logger.info('Job scoring started', { listingCount: jobs.length });
+    try {
+      const matches = await matchJobs(cv, jobs, (skills, requirements) => calculateSkillMatch(skills, requirements, this.skillMatch));
+      logger.info('Job scoring completed', {
+        listingCount: jobs.length,
+        matchCount: matches.length,
+        durationMs: Math.round(performance.now() - started),
+      });
+      return matches;
+    } catch (error) {
+      logger.error('Job scoring failed', { listingCount: jobs.length, durationMs: Math.round(performance.now() - started), error });
+      throw error;
+    }
   }
 
   async testJobScraping(jobSuggestions: string[], seniority?: string, location = 'indonesia'): Promise<JobListing[]> {
