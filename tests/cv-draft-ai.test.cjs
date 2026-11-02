@@ -52,6 +52,65 @@ test('AI transport gets source as data; malformed model output is rejected', asy
 
 const { importAiDraft } = require('../src/controllers/cv-draft-ai.controller');
 const invokeImport = req => new Promise((resolve, reject) => importAiDraft(req, {json:resolve}, reject));
+test('review import uses only the signed-in user CV and passes its review suggestions to AI', async () => {
+  const Evaluation = require('../src/models/evaluation.model').default;
+  const Document = require('../src/models/document.model').default;
+  const originalEvaluationFind = Evaluation.findOne;
+  const originalDocumentFind = Document.findOne;
+  const originalCompletion = ai.completion;
+  const key = config.ai.apiKey;
+  const reviewId = '507f1f77bcf86cd799439011';
+  const documentId = '507f1f77bcf86cd799439012';
+  const filters = [];
+  try {
+    config.ai.apiKey = 'test-only';
+    Evaluation.findOne = filter => {
+      filters.push(['evaluation', filter]);
+      return {
+        select() { return this; },
+        lean: async () => filter.userId === 'owner' ? {
+          cvDocumentId: documentId,
+          result: {
+            criteria: [{ name: 'Achievements', suggestion: 'Clarify measurable impact.' }],
+            missingInformation: ['Add a certification only if you have one.'],
+          },
+        } : null,
+      };
+    };
+    Document.findOne = filter => {
+      filters.push(['document', filter]);
+      return { select() { return this; }, lean: async () => ({ content: 'Original CV source with verified work history.' }) };
+    };
+    ai.completion = async (prompt, options) => {
+      assert.deepEqual(JSON.parse(prompt), {
+        source: 'Original CV source with verified work history.',
+        reviewGuidance: {
+          suggestions: [{ criterion: 'Achievements', suggestion: 'Clarify measurable impact.' }],
+          missingInformation: ['Add a certification only if you have one.'],
+        },
+      });
+      assert.match(options.systemPrompt, /original CV as the only source of facts/);
+      assert.match(options.systemPrompt, /Never turn missing information into invented details/);
+      return JSON.stringify(valid());
+    };
+
+    await assert.rejects(
+      invokeImport({ body: { evaluationId: reviewId }, authUser: { userId: 'other' } }),
+      error => error.statusCode === 404,
+    );
+    const result = await invokeImport({ body: { evaluationId: reviewId }, authUser: { userId: 'owner' } });
+    assert.equal(result.success, true);
+    assert.equal(filters[0][1].userId, 'other');
+    assert.equal(filters[1][1].userId, 'owner');
+    assert.deepEqual(filters[2][1], { _id: documentId, userId: 'owner', type: 'cv' });
+  } finally {
+    Evaluation.findOne = originalEvaluationFind;
+    Document.findOne = originalDocumentFind;
+    ai.completion = originalCompletion;
+    config.ai.apiKey = key;
+  }
+});
+
 test('upload handler rejects simultaneous file/text inputs before calling AI', async () => {
   await assert.rejects(invokeImport({body:{text:'This is my personal career story.'},file:{mimetype:'text/plain',buffer:Buffer.from('An existing CV with enough information.')}}), error => error.statusCode === 400);
 });

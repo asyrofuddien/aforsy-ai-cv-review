@@ -1,18 +1,63 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import pdf from "pdf-parse";
 import mammoth from "mammoth";
 import { asyncHandler, AppError } from "../middlewares/error.middleware";
+import Document from "../models/document.model";
+import Evaluation from "../models/evaluation.model";
 import { createAiDraft } from "../services/cv-draft-ai.service";
 
 export const importAiDraft = asyncHandler(
   async (req: Request, res: Response) => {
     const file = req.file;
     const story = req.body?.text;
-    if (story !== undefined && typeof story !== "string")
-      throw new AppError("Text must be a string.", 400);
-    if (file && story?.trim())
-      throw new AppError("Provide either a CV file or text, not both.", 400);
-    let source = story?.trim() || "";
+    let source = "";
+    let reviewGuidance:
+      | { suggestions: Array<{ criterion: string; suggestion: string }>; missingInformation: string[] }
+      | undefined;
+
+    if (req.body?.evaluationId !== undefined) {
+      const { evaluationId } = req.body;
+      if (typeof evaluationId !== "string" || !Types.ObjectId.isValid(evaluationId))
+        throw new AppError("Invalid review ID.", 400);
+      if (file || story !== undefined)
+        throw new AppError("Provide a review ID or a CV file or text, not multiple sources.", 400);
+
+      const evaluation = await Evaluation.findOne({
+        _id: evaluationId,
+        userId: req.authUser!.userId,
+        status: "completed",
+      })
+        .select("cvDocumentId result.criteria result.missingInformation")
+        .lean();
+      if (!evaluation?.result)
+        throw new AppError("Completed review not found.", 404);
+
+      const document = await Document.findOne({
+        _id: evaluation.cvDocumentId,
+        userId: req.authUser!.userId,
+        type: "cv",
+      })
+        .select("content")
+        .lean();
+      if (!document?.content?.trim())
+        throw new AppError("The original CV text is no longer available for this review.", 422);
+
+      source = document.content;
+      reviewGuidance = {
+        suggestions: (evaluation.result.criteria || [])
+          .filter((item) => item.suggestion?.trim())
+          .map((item) => ({ criterion: item.name, suggestion: item.suggestion })),
+        missingInformation: evaluation.result.missingInformation || [],
+      };
+    } else {
+      if (story !== undefined && typeof story !== "string")
+        throw new AppError("Text must be a string.", 400);
+      if (file && story?.trim())
+        throw new AppError("Provide either a CV file or text, not both.", 400);
+      source = story?.trim() || "";
+    }
+
     if (file) {
       try {
         if (
@@ -48,7 +93,7 @@ export const importAiDraft = asyncHandler(
         "Please shorten the source to 40,000 characters or fewer.",
         400,
       );
-    const draft = await createAiDraft(source);
+    const draft = await createAiDraft(source, reviewGuidance);
     res.json({ success: true, data: draft });
   },
 );
