@@ -5,6 +5,7 @@ export interface IEvaluation extends Document {
   candidateName?: string;
   cvDocumentId: mongoose.Types.ObjectId;
   jobDescriptionId?: mongoose.Types.ObjectId;
+  locale?: 'id' | 'en';
   evaluationMode: 'general' | 'job_specific';
   status: EvaluationStatus;
   result?: EvaluationResult;
@@ -38,6 +39,7 @@ const EvaluationSchema = new Schema(
       required: false,
       default: undefined,
     },
+    locale: { type: String, enum: ['id','en'], default: 'en' },
     evaluationMode: { type: String, enum: ['general', 'job_specific'], default: 'job_specific', required: true },
     status: {
       type: String,
@@ -46,6 +48,7 @@ const EvaluationSchema = new Schema(
       required: true,
     },
     result: {
+      locale: {type:String,enum:['id','en']},
       cvMatchRate: Number,
       cvFeedback: String,
       projectScore: Number,

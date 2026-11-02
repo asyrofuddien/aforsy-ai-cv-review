@@ -113,6 +113,7 @@ class EvaluationService {
 
   async processEvaluation(data: any): Promise<any> {
     const { evaluationId, cvDocumentId, jobDescriptionId, jobDescriptionText } = data;
+    const locale = data.locale === 'id' ? 'id' : 'en';
 
     try {
       logger.debug(`🚀 Starting evaluation ${evaluationId}`);
@@ -128,7 +129,7 @@ class EvaluationService {
 
       // Step 1: Evaluate CV
       logger.debug('📄 Step 1: Evaluating CV', { mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general' });
-      const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId, jobDescriptionText);
+      const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId, jobDescriptionText, locale);
 
       // Job discovery is paused while the feature is coming soon.
       // CV review still supports an optional job description for its rubric.
@@ -136,13 +137,14 @@ class EvaluationService {
       // Step 3: Generate final summary
       logger.debug('📝 Step 3: Generating final summary');
       const mode = jobDesc || jobDescriptionText ? 'job_specific' : 'general';
-      const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation, mode);
+      const overallSummary = await chainService.generateFinalSummary(cvResult.evaluation, mode, locale);
 
       const summary = overallSummary?.overall_summary || cvResult.evaluation.feedback;
       const recommendation = mode === 'general' ? '' : overallSummary?.recommendation;
 
       // Compile final result dengan info weights yang digunakan
       const finalResult = {
+        locale,
         cvMatchRate: cvResult.matchRate,
         criteria: cvResult.evaluation.criteria,
         jobMatches: [],

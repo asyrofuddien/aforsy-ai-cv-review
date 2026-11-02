@@ -1,3 +1,4 @@
+import { requestLocale } from '../utils/locale';
 import { Request, Response, NextFunction } from 'express';
 import { AppError, asyncHandler } from '../middlewares/error.middleware';
 import queueService from '../services/queue.service';
@@ -30,6 +31,7 @@ export class EvaluationController {
           jobDescriptionId: jobDescriptionId || undefined,
           candidateName,
           jobDescriptionText,
+          locale: requestLocale(req),
         },
         req.authUser!.userId,
       );
@@ -112,6 +114,7 @@ export class EvaluationController {
             overall_summary: evaluation.result.overallSummary,
             recommendation: evaluation.result.recommendation,
             mode: evaluation.result.mode || evaluation.evaluationMode,
+            locale: evaluation.result.locale || evaluation.locale || 'en',
             job_description: evaluation.result.jobDescription,
             missing_information: evaluation.result.missingInformation || [],
             detailed_scores: evaluation.result.detailedScores,

@@ -1,0 +1,4526 @@
+{
+  "; we will review requests under applicable law and any records we must retain.": {
+    "id": "; kami akan meninjau permintaan berdasarkan hukum yang berlaku dan catatan apa pun yang wajib kami simpan.",
+    "en": "; we will review requests under applicable law and any records we must retain."
+  },
+  "· v": {
+    "id": "· v",
+    "en": "· v"
+  },
+  "\"{value0}\" section has been added.": {
+    "id": "Bagian \"{value0}\" telah ditambahkan.",
+    "en": "\"{value0}\" section has been added."
+  },
+  "(Local data only)": {
+    "id": "(Hanya data lokal)",
+    "en": "(Local data only)"
+  },
+  "(optional)": {
+    "id": "(opsional)",
+    "en": "(optional)"
+  },
+  "(required)": {
+    "id": "(wajib)",
+    "en": "(required)"
+  },
+  "(should equal 1.0)": {
+    "id": "(seharusnya sama dengan 1.0)",
+    "en": "(should equal 1.0)"
+  },
+  "{value0}/40,000 characters.": {
+    "id": "{value0}/40.000 karakter.",
+    "en": "{value0}/40,000 characters."
+  },
+  "% complete": {
+    "id": "% selesai",
+    "en": "% complete"
+  },
+  "• Achievement or key point...": {
+    "id": "• Pencapaian atau poin utama...",
+    "en": "• Achievement or key point..."
+  },
+  "$name": {
+    "id": "$name",
+    "en": "$name"
+  },
+  "1. About this policy": {
+    "id": "1. Tentang kebijakan ini",
+    "en": "1. About this policy"
+  },
+  "1. Agreement and the service": {
+    "id": "1. Persetujuan dan layanan",
+    "en": "1. Agreement and the service"
+  },
+  "1. Upload CV": {
+    "id": "1. Unggah CV",
+    "en": "1. Upload CV"
+  },
+  "10. Governing terms and contact": {
+    "id": "10. Ketentuan yang berlaku dan kontak",
+    "en": "10. Governing terms and contact"
+  },
+  "10.1109/ICWS.2021.12345": {
+    "id": "10.1109/ICWS.2021.12345",
+    "en": "10.1109/ICWS.2021.12345"
+  },
+  "2. AI Analysis": {
+    "id": "2. Analisis AI",
+    "en": "2. AI Analysis"
+  },
+  "2. Information we process": {
+    "id": "2. Informasi yang kami proses",
+    "en": "2. Information we process"
+  },
+  "2. Your account": {
+    "id": "2. Akun Anda",
+    "en": "2. Your account"
+  },
+  "3. Get Results": {
+    "id": "3. Dapatkan Hasil",
+    "en": "3. Get Results"
+  },
+  "3. How we use information": {
+    "id": "3. Cara kami menggunakan informasi",
+    "en": "3. How we use information"
+  },
+  "3. Your content": {
+    "id": "3. Konten Anda",
+    "en": "3. Your content"
+  },
+  "4. AI processing and service providers": {
+    "id": "4. Pemrosesan AI dan penyedia layanan",
+    "en": "4. AI processing and service providers"
+  },
+  "4. AI-generated information": {
+    "id": "4. Informasi yang dihasilkan AI",
+    "en": "4. AI-generated information"
+  },
+  "5. Acceptable use": {
+    "id": "5. Penggunaan yang diperbolehkan",
+    "en": "5. Acceptable use"
+  },
+  "5. Cookies and similar technologies": {
+    "id": "5. Cookie dan teknologi serupa",
+    "en": "5. Cookies and similar technologies"
+  },
+  "6. Sharing and international processing": {
+    "id": "6. Pembagian dan pemrosesan internasional",
+    "en": "6. Sharing and international processing"
+  },
+  "6. Third-party services": {
+    "id": "6. Layanan pihak ketiga",
+    "en": "6. Third-party services"
+  },
+  "7. Availability and changes": {
+    "id": "7. Ketersediaan dan perubahan",
+    "en": "7. Availability and changes"
+  },
+  "7. Retention and your choices": {
+    "id": "7. Penyimpanan dan pilihan Anda",
+    "en": "7. Retention and your choices"
+  },
+  "8. Disclaimers and liability": {
+    "id": "8. Penafian dan tanggung jawab",
+    "en": "8. Disclaimers and liability"
+  },
+  "8. Security and children": {
+    "id": "8. Keamanan dan anak-anak",
+    "en": "8. Security and children"
+  },
+  "9. Changes and contact": {
+    "id": "9. Perubahan dan kontak",
+    "en": "9. Changes and contact"
+  },
+  "9. Suspension and termination": {
+    "id": "9. Penangguhan dan penghentian",
+    "en": "9. Suspension and termination"
+  },
+  "A brief summary of your professional background and key strengths...": {
+    "id": "Ringkasan singkat tentang latar belakang profesional dan keunggulan utama Anda...",
+    "en": "A brief summary of your professional background and key strengths..."
+  },
+  "A closer look at your CV": {
+    "id": "Tinjauan lebih dekat atas CV Anda",
+    "en": "A closer look at your CV"
+  },
+  "A complete sample preview is required before a template can be activated": {
+    "id": "Pratinjau contoh yang lengkap diperlukan sebelum template dapat diaktifkan",
+    "en": "A complete sample preview is required before a template can be activated"
+  },
+  "A general assessment of your CV content.": {
+    "id": "Penilaian umum atas isi CV Anda.",
+    "en": "A general assessment of your CV content."
+  },
+  "A simple place to prepare your next step": {
+    "id": "Tempat sederhana untuk mempersiapkan langkah Anda berikutnya",
+    "en": "A simple place to prepare your next step"
+  },
+  "ABC123XYZ": {
+    "id": "ABC123XYZ",
+    "en": "ABC123XYZ"
+  },
+  "Academic publications with DOI": {
+    "id": "Publikasi akademik dengan DOI",
+    "en": "Academic publications with DOI"
+  },
+  "Accent color": {
+    "id": "Warna aksen",
+    "en": "Accent color"
+  },
+  "Account activated": {
+    "id": "Akun diaktifkan",
+    "en": "Account activated"
+  },
+  "Account and template changes are recorded with the acting administrator and timestamp.": {
+    "id": "Perubahan akun dan template dicatat dengan administrator yang bertindak serta cap waktu.",
+    "en": "Account and template changes are recorded with the acting administrator and timestamp."
+  },
+  "Account data and CV materials are retained while needed to provide the service and protect its operation. Session records expire automatically. There is not yet a self-service account or CV deletion control. You may request access, correction, or deletion by contacting": {
+    "id": "Data akun dan materi CV disimpan selama diperlukan untuk menyediakan layanan dan melindungi operasinya. Catatan sesi kedaluwarsa secara otomatis. Belum ada kontrol penghapusan akun atau CV secara mandiri. Anda dapat meminta akses, koreksi, atau penghapusan dengan menghubungi",
+    "en": "Account data and CV materials are retained while needed to provide the service and protect its operation. Session records expire automatically. There is not yet a self-service account or CV deletion control. You may request access, correction, or deletion by contacting"
+  },
+  "Account deactivated": {
+    "id": "Akun dinonaktifkan",
+    "en": "Account deactivated"
+  },
+  "Account information:": {
+    "id": "Informasi akun:",
+    "en": "Account information:"
+  },
+  "Account not found": {
+    "id": "Akun tidak ditemukan",
+    "en": "Account not found"
+  },
+  "Account role changed": {
+    "id": "Peran akun diubah",
+    "en": "Account role changed"
+  },
+  "Achievement Title": {
+    "id": "Judul Prestasi",
+    "en": "Achievement Title"
+  },
+  "Achievements": {
+    "id": "Prestasi",
+    "en": "Achievements"
+  },
+  "Actionable Recommendations": {
+    "id": "Rekomendasi yang Dapat Ditindaklanjuti",
+    "en": "Actionable Recommendations"
+  },
+  "Actions": {
+    "id": "Tindakan",
+    "en": "Actions"
+  },
+  "Activate": {
+    "id": "Aktifkan",
+    "en": "Activate"
+  },
+  "Activation checks the sample, supported layout, font, margins, and contrast color format.": {
+    "id": "Aktivasi memeriksa sampel, tata letak yang didukung, font, margin, dan format warna kontras.",
+    "en": "Activation checks the sample, supported layout, font, margins, and contrast color format."
+  },
+  "active": {
+    "id": "Aktif",
+    "en": "active"
+  },
+  "Active": {
+    "id": "Aktif",
+    "en": "Active"
+  },
+  "Active (": {
+    "id": "Aktif (",
+    "en": "Active ("
+  },
+  "Active accounts": {
+    "id": "Akun aktif",
+    "en": "Active accounts"
+  },
+  "Active ATS templates": {
+    "id": "Template ATS aktif",
+    "en": "Active ATS templates"
+  },
+  "Active filters:": {
+    "id": "Filter aktif:",
+    "en": "Active filters:"
+  },
+  "active.": {
+    "id": "aktif.",
+    "en": "active."
+  },
+  "Add Achievement": {
+    "id": "Tambah Prestasi",
+    "en": "Add Achievement"
+  },
+  "Add at least 30 characters of readable CV information.": {
+    "id": "Tambahkan setidaknya 30 karakter informasi CV yang terbaca.",
+    "en": "Add at least 30 characters of readable CV information."
+  },
+  "Add Bullet": {
+    "id": "Tambah Poin",
+    "en": "Add Bullet"
+  },
+  "Add Certification": {
+    "id": "Tambah Sertifikasi",
+    "en": "Add Certification"
+  },
+  "Add Contact": {
+    "id": "Tambah Kontak",
+    "en": "Add Contact"
+  },
+  "Add Course/Module": {
+    "id": "Tambah Mata Kuliah/Modul",
+    "en": "Add Course/Module"
+  },
+  "Add custom sections like Skills, Certifications, Publications, Interests, etc.": {
+    "id": "Tambahkan bagian kustom seperti Keahlian, Sertifikasi, Publikasi, Minat, dll.",
+    "en": "Add custom sections like Skills, Certifications, Publications, Interests, etc."
+  },
+  "Add Entry": {
+    "id": "Tambah Entri",
+    "en": "Add Entry"
+  },
+  "Add Item": {
+    "id": "Tambah Item",
+    "en": "Add Item"
+  },
+  "Add Multiple Contacts": {
+    "id": "Tambah Beberapa Kontak",
+    "en": "Add Multiple Contacts"
+  },
+  "Add New Section": {
+    "id": "Tambah Bagian Baru",
+    "en": "Add New Section"
+  },
+  "Add Project": {
+    "id": "Tambah Proyek",
+    "en": "Add Project"
+  },
+  "Add Publication": {
+    "id": "Tambah Publikasi",
+    "en": "Add Publication"
+  },
+  "Add Section": {
+    "id": "Tambah Bagian",
+    "en": "Add Section"
+  },
+  "Add Skill Category": {
+    "id": "Tambah Kategori Keahlian",
+    "en": "Add Skill Category"
+  },
+  "Add Soft Skill": {
+    "id": "Tambah Soft Skill",
+    "en": "Add Soft Skill"
+  },
+  "Add tag (press Enter)": {
+    "id": "Tambah tag (tekan Enter)",
+    "en": "Add tag (press Enter)"
+  },
+  "Add Technical Requirement": {
+    "id": "Tambah Persyaratan Teknis",
+    "en": "Add Technical Requirement"
+  },
+  "Add volunteer work, memberships, or leadership roles": {
+    "id": "Tambahkan pekerjaan sukarela, keanggotaan, atau peran kepemimpinan",
+    "en": "Add volunteer work, memberships, or leadership roles"
+  },
+  "Add your educational background": {
+    "id": "Tambahkan latar belakang pendidikan Anda",
+    "en": "Add your educational background"
+  },
+  "Add your email, phone, LinkedIn, GitHub, portfolio, etc. For links, include the full URL.": {
+    "id": "Tambahkan email, telepon, LinkedIn, GitHub, portofolio, dll. Untuk tautan, sertakan URL lengkapnya.",
+    "en": "Add your email, phone, LinkedIn, GitHub, portfolio, etc. For links, include the full URL."
+  },
+  "Add your professional experience": {
+    "id": "Tambahkan pengalaman profesional Anda",
+    "en": "Add your professional experience"
+  },
+  "Additional Details (Optional)": {
+    "id": "Detail Tambahan (Opsional)",
+    "en": "Additional Details (Optional)"
+  },
+  "admin": {
+    "id": "Admin",
+    "en": "admin"
+  },
+  "Admin": {
+    "id": "Admin",
+    "en": "Admin"
+  },
+  "Admin dashboard": {
+    "id": "Dasbor admin",
+    "en": "Admin dashboard"
+  },
+  "Admin overview": {
+    "id": "Ringkasan admin",
+    "en": "Admin overview"
+  },
+  "Administration": {
+    "id": "Administrasi",
+    "en": "Administration"
+  },
+  "Administrator access required": {
+    "id": "Akses administrator diperlukan",
+    "en": "Administrator access required"
+  },
+  "AI Analysis in Progress...": {
+    "id": "Analisis AI Sedang Berlangsung...",
+    "en": "AI Analysis in Progress..."
+  },
+  "AI could not prepare a valid draft. Please try again or use a shorter input.": {
+    "id": "AI belum dapat menyiapkan draf yang valid. Coba lagi atau gunakan masukan yang lebih singkat.",
+    "en": "AI could not prepare a valid draft. Please try again or use a shorter input."
+  },
+  "AI CV review · ATS-friendly CV builder": {
+    "id": "Review CV AI · Pembuat CV ramah ATS",
+    "en": "AI CV review · ATS-friendly CV builder"
+  },
+  "AI CV Review & ATS-Friendly CV Builder | Landly": {
+    "id": "Review CV AI & Pembuat CV Ramah ATS | Landly",
+    "en": "AI CV Review & ATS-Friendly CV Builder | Landly"
+  },
+  "AI CV review, ATS-friendly CV creation and job matching tools.": {
+    "id": "Review CV AI, pembuatan CV ramah ATS, dan alat pencocokan kerja.",
+    "en": "AI CV review, ATS-friendly CV creation and job matching tools."
+  },
+  "AI drafting is currently unavailable. You can still fill in your CV manually.": {
+    "id": "Penyusunan AI sedang tidak tersedia. Anda masih dapat mengisi CV secara manual.",
+    "en": "AI drafting is currently unavailable. You can still fill in your CV manually."
+  },
+  "AI drafting is unavailable. Please try again.": {
+    "id": "Penyusunan AI tidak tersedia. Silakan coba lagi.",
+    "en": "AI drafting is unavailable. Please try again."
+  },
+  "AI Generated Content": {
+    "id": "Konten Hasil AI",
+    "en": "AI Generated Content"
+  },
+  "AI highlights your skills, experience, and areas to improve": {
+    "id": "AI menyoroti keahlian, pengalaman, dan area yang perlu Anda tingkatkan",
+    "en": "AI highlights your skills, experience, and areas to improve"
+  },
+  "AI is preparing your CV draft": {
+    "id": "AI sedang menyiapkan draf CV Anda",
+    "en": "AI is preparing your CV draft"
+  },
+  "AI recommendation:": {
+    "id": "Rekomendasi AI:",
+    "en": "AI recommendation:"
+  },
+  "AI returned an incomplete draft. Please try again.": {
+    "id": "Draf dari AI belum lengkap. Silakan coba lagi.",
+    "en": "AI returned an incomplete draft. Please try again."
+  },
+  "AI returned an incomplete review. Please retry.": {
+    "id": "AI menghasilkan ulasan yang tidak lengkap. Silakan coba lagi.",
+    "en": "AI returned an incomplete review. Please retry."
+  },
+  "AI returned malformed or truncated JSON. Please retry the review.": {
+    "id": "AI mengembalikan JSON yang rusak atau terpotong. Silakan ulangi ulasannya.",
+    "en": "AI returned malformed or truncated JSON. Please retry the review."
+  },
+  "AI Writer Assistant": {
+    "id": "Asisten Penulis AI",
+    "en": "AI Writer Assistant"
+  },
+  "AI-powered CV review and career tools": {
+    "id": "Ulasan CV dan alat karier berbasis AI",
+    "en": "AI-powered CV review and career tools"
+  },
+  "Alignment with job requirements": {
+    "id": "Kesesuaian dengan persyaratan pekerjaan",
+    "en": "Alignment with job requirements"
+  },
+  "all": {
+    "id": "semua",
+    "en": "all"
+  },
+  "All data has been cleared.": {
+    "id": "Semua data telah dihapus.",
+    "en": "All data has been cleared."
+  },
+  "All options use a single-column layout with readable headings and selectable text for applicant tracking systems.": {
+    "id": "Semua opsi menggunakan tata letak satu kolom dengan judul yang mudah dibaca dan teks yang dapat dipilih untuk sistem pelacakan pelamar (ATS).",
+    "en": "All options use a single-column layout with readable headings and selectable text for applicant tracking systems."
+  },
+  "All reviews": {
+    "id": "Semua ulasan",
+    "en": "All reviews"
+  },
+  "All Status": {
+    "id": "Semua Status",
+    "en": "All Status"
+  },
+  "All submissions": {
+    "id": "Semua pengajuan",
+    "en": "All submissions"
+  },
+  "Already have an account?": {
+    "id": "Sudah punya akun?",
+    "en": "Already have an account?"
+  },
+  "Amazon Web Services": {
+    "id": "Amazon Web Services",
+    "en": "Amazon Web Services"
+  },
+  "An account already exists for this email": {
+    "id": "Akun sudah ada untuk email ini",
+    "en": "An account already exists for this email"
+  },
+  "An account keeps your drafts and reviews together.": {
+    "id": "Dengan akun, draf dan ulasan Anda tersimpan dalam satu tempat.",
+    "en": "An account keeps your drafts and reviews together."
+  },
+  "Analyzed on": {
+    "id": "Dianalisis pada",
+    "en": "Analyzed on"
+  },
+  "Analyzing with AI...": {
+    "id": "Menganalisis dengan AI...",
+    "en": "Analyzing with AI..."
+  },
+  "Another job description with this slug exists": {
+    "id": "Ada deskripsi pekerjaan lain dengan slug ini",
+    "en": "Another job description with this slug exists"
+  },
+  "API Documentation": {
+    "id": "Dokumentasi API",
+    "en": "API Documentation"
+  },
+  "API Healthy": {
+    "id": "API Sehat",
+    "en": "API Healthy"
+  },
+  "API Information": {
+    "id": "Informasi API",
+    "en": "API Information"
+  },
+  "API Offline": {
+    "id": "API Offline",
+    "en": "API Offline"
+  },
+  "API Status": {
+    "id": "Status API",
+    "en": "API Status"
+  },
+  "API Status Unknown": {
+    "id": "Status API Tidak Diketahui",
+    "en": "API Status Unknown"
+  },
+  "Apply": {
+    "id": "Terapkan",
+    "en": "Apply"
+  },
+  "Applying this replaces your form content and automatically saves the new draft to your account. Your selected CV template will be kept. Check all facts and complete any missing details in the form.": {
+    "id": "Menerapkan ini akan mengganti isi formulir Anda dan otomatis menyimpan draf baru ke akun Anda. Template CV yang Anda pilih akan tetap dipertahankan. Periksa semua fakta dan lengkapi detail yang belum terisi di formulir.",
+    "en": "Applying this replaces your form content and automatically saves the new draft to your account. Your selected CV template will be kept. Check all facts and complete any missing details in the form."
+  },
+  "April": {
+    "id": "April",
+    "en": "April"
+  },
+  "Archive": {
+    "id": "Arsipkan",
+    "en": "Archive"
+  },
+  "Archive template": {
+    "id": "Arsipkan template",
+    "en": "Archive template"
+  },
+  "Archive this template?": {
+    "id": "Arsipkan template ini?",
+    "en": "Archive this template?"
+  },
+  "archived": {
+    "id": "Diarsipkan",
+    "en": "archived"
+  },
+  "Areas to Improve": {
+    "id": "Area yang Perlu Ditingkatkan",
+    "en": "Areas to Improve"
+  },
+  "At least one active ATS template must remain": {
+    "id": "Setidaknya satu template ATS aktif harus tetap ada",
+    "en": "At least one active ATS template must remain"
+  },
+  "ATS Reports": {
+    "id": "Laporan ATS",
+    "en": "ATS Reports"
+  },
+  "ATS resume template": {
+    "id": "Template CV ATS",
+    "en": "ATS resume template"
+  },
+  "ATS template validation failed": {
+    "id": "Validasi template ATS gagal",
+    "en": "ATS template validation failed"
+  },
+  "ATS templates": {
+    "id": "Template ATS",
+    "en": "ATS templates"
+  },
+  "Audit activity could not be loaded.": {
+    "id": "Aktivitas audit tidak dapat dimuat.",
+    "en": "Audit activity could not be loaded."
+  },
+  "Audit events": {
+    "id": "Peristiwa audit",
+    "en": "Audit events"
+  },
+  "August": {
+    "id": "Agustus",
+    "en": "August"
+  },
+  "Authentication required": {
+    "id": "Autentikasi diperlukan",
+    "en": "Authentication required"
+  },
+  "Authors": {
+    "id": "Penulis",
+    "en": "Authors"
+  },
+  "Avg Size": {
+    "id": "Rata-rata Ukuran",
+    "en": "Avg Size"
+  },
+  "Awards & Honors": {
+    "id": "Penghargaan & Kehormatan",
+    "en": "Awards & Honors"
+  },
+  "Awards, honors with optional link": {
+    "id": "Penghargaan, kehormatan dengan tautan opsional",
+    "en": "Awards, honors with optional link"
+  },
+  "AWS Certified Solutions Architect": {
+    "id": "AWS Certified Solutions Architect",
+    "en": "AWS Certified Solutions Architect"
+  },
+  "Bachelor of Science in Computer Science": {
+    "id": "Sarjana Sains dalam Ilmu Komputer",
+    "en": "Bachelor of Science in Computer Science"
+  },
+  "Back": {
+    "id": "Kembali",
+    "en": "Back"
+  },
+  "Back to CV Review": {
+    "id": "Kembali ke Review CV",
+    "en": "Back to CV Review"
+  },
+  "Back to sign in": {
+    "id": "Kembali ke halaman masuk",
+    "en": "Back to sign in"
+  },
+  "Bahasa Indonesia": {
+    "id": "Bahasa Indonesia",
+    "en": "Bahasa Indonesia"
+  },
+  "Base URL:": {
+    "id": "URL Dasar:",
+    "en": "Base URL:"
+  },
+  "Based on your skills and experience, these roles would be a great fit": {
+    "id": "Berdasarkan keahlian dan pengalaman Anda, peran-peran ini sangat cocok",
+    "en": "Based on your skills and experience, these roles would be a great fit"
+  },
+  "Basic Information": {
+    "id": "Informasi Dasar",
+    "en": "Basic Information"
+  },
+  "basic site usage and diagnostic information. The site may use Vercel Analytics and Google advertising technology where enabled by the deployment configuration; those providers may use cookies or similar technologies under their own policies.": {
+    "id": "informasi penggunaan situs dasar dan diagnostik. Situs dapat menggunakan Vercel Analytics dan teknologi iklan Google jika diaktifkan oleh konfigurasi deployment; penyedia tersebut dapat menggunakan cookie atau teknologi serupa berdasarkan kebijakan mereka masing-masing.",
+    "en": "basic site usage and diagnostic information. The site may use Vercel Analytics and Google advertising technology where enabled by the deployment configuration; those providers may use cookies or similar technologies under their own policies."
+  },
+  "Behind your score": {
+    "id": "Di balik skor Anda",
+    "en": "Behind your score"
+  },
+  "Brief description of the achievement...": {
+    "id": "Deskripsi singkat pencapaian...",
+    "en": "Brief description of the achievement..."
+  },
+  "Brief description of the course...": {
+    "id": "Deskripsi singkat kursus...",
+    "en": "Brief description of the course..."
+  },
+  "Brief description of the project...": {
+    "id": "Deskripsi singkat proyek...",
+    "en": "Brief description of the project..."
+  },
+  "Brief description of your role...": {
+    "id": "Deskripsi singkat peran Anda...",
+    "en": "Brief description of your role..."
+  },
+  "Brief description...": {
+    "id": "Deskripsi singkat...",
+    "en": "Brief description..."
+  },
+  "Bring your experience with you": {
+    "id": "Bawa pengalaman Anda ke mana saja",
+    "en": "Bring your experience with you"
+  },
+  "Bring your improvements into a clean, ATS-friendly CV.": {
+    "id": "Terapkan perbaikan Anda ke dalam CV yang rapi dan ramah ATS.",
+    "en": "Bring your improvements into a clean, ATS-friendly CV."
+  },
+  "browse files": {
+    "id": "telusuri berkas",
+    "en": "browse files"
+  },
+  "Browser ID:": {
+    "id": "ID Browser:",
+    "en": "Browser ID:"
+  },
+  "Build a clearer CV.": {
+    "id": "Buat CV yang lebih jelas.",
+    "en": "Build a clearer CV."
+  },
+  "Build a readable CV and get practical feedback on your experience.": {
+    "id": "Buat CV yang mudah dibaca dan dapatkan masukan praktis tentang pengalaman Anda.",
+    "en": "Build a readable CV and get practical feedback on your experience."
+  },
+  "Build an ATS-friendly CV": {
+    "id": "Buat CV yang ramah ATS",
+    "en": "Build an ATS-friendly CV"
+  },
+  "Build an ATS-friendly CV and get AI feedback on clarity, experience and achievements. Review your CV with or without a job description in Landly.": {
+    "id": "Buat CV yang ramah ATS dan dapatkan masukan AI tentang kejelasan, pengalaman, dan pencapaian. Tinjau CV Anda dengan atau tanpa deskripsi pekerjaan di Landly.",
+    "en": "Build an ATS-friendly CV and get AI feedback on clarity, experience and achievements. Review your CV with or without a job description in Landly."
+  },
+  "Build CV": {
+    "id": "Buat CV",
+    "en": "Build CV"
+  },
+  "Build your CV": {
+    "id": "Buat CV Anda",
+    "en": "Build your CV"
+  },
+  "Cancel": {
+    "id": "Batal",
+    "en": "Cancel"
+  },
+  "Candidate": {
+    "id": "Kandidat",
+    "en": "Candidate"
+  },
+  "Candidate name": {
+    "id": "Nama kandidat",
+    "en": "Candidate name"
+  },
+  "Candidate Profile": {
+    "id": "Profil Kandidat",
+    "en": "Candidate Profile"
+  },
+  "Candidate Seniority Levels": {
+    "id": "Tingkat Senioritas Kandidat",
+    "en": "Candidate Seniority Levels"
+  },
+  "Cannot delete the default job description": {
+    "id": "Tidak dapat menghapus deskripsi pekerjaan default",
+    "en": "Cannot delete the default job description"
+  },
+  "Capacity Metrics": {
+    "id": "Metrik Kapasitas",
+    "en": "Capacity Metrics"
+  },
+  "Category (e.g., Languages)": {
+    "id": "Kategori (mis. Bahasa)",
+    "en": "Category (e.g., Languages)"
+  },
+  "Category-based skills list": {
+    "id": "Daftar keterampilan per kategori",
+    "en": "Category-based skills list"
+  },
+  "Certificate ID (Optional)": {
+    "id": "ID Sertifikat (Opsional)",
+    "en": "Certificate ID (Optional)"
+  },
+  "Certificate URL (Optional)": {
+    "id": "URL Sertifikat (Opsional)",
+    "en": "Certificate URL (Optional)"
+  },
+  "Certification Title": {
+    "id": "Judul Sertifikasi",
+    "en": "Certification Title"
+  },
+  "Certifications": {
+    "id": "Sertifikasi",
+    "en": "Certifications"
+  },
+  "Change": {
+    "id": "Ubah",
+    "en": "Change"
+  },
+  "Check your email": {
+    "id": "Periksa email Anda",
+    "en": "Check your email"
+  },
+  "Check your email for a verification link.": {
+    "id": "Periksa email Anda untuk tautan verifikasi.",
+    "en": "Check your email for a verification link."
+  },
+  "Checking API status": {
+    "id": "Memeriksa status API",
+    "en": "Checking API status"
+  },
+  "Choose a CV file first.": {
+    "id": "Pilih file CV terlebih dahulu.",
+    "en": "Choose a CV file first."
+  },
+  "Choose a different CV file": {
+    "id": "Pilih file CV lain",
+    "en": "Choose a different CV file"
+  },
+  "Choose a new password": {
+    "id": "Pilih kata sandi baru",
+    "en": "Choose a new password"
+  },
+  "Choose a predefined category or create a custom section.": {
+    "id": "Pilih kategori yang tersedia atau buat bagian khusus.",
+    "en": "Choose a predefined category or create a custom section."
+  },
+  "Choose a saved job (optional)": {
+    "id": "Pilih pekerjaan tersimpan (opsional)",
+    "en": "Choose a saved job (optional)"
+  },
+  "Choose a saved job or paste its description, or turn this option off for a general review.": {
+    "id": "Pilih pekerjaan tersimpan atau tempel deskripsinya, atau matikan opsi ini untuk tinjauan umum.",
+    "en": "Choose a saved job or paste its description, or turn this option off for a general review."
+  },
+  "Choose a supported single-column layout. Template settings are validated before activation.": {
+    "id": "Pilih tata letak satu kolom yang didukung. Pengaturan template divalidasi sebelum aktivasi.",
+    "en": "Choose a supported single-column layout. Template settings are validated before activation."
+  },
+  "Choose an ATS template": {
+    "id": "Pilih template ATS",
+    "en": "Choose an ATS template"
+  },
+  "Choose your starting point": {
+    "id": "Pilih titik awal Anda",
+    "en": "Choose your starting point"
+  },
+  "City, State": {
+    "id": "Kota, Negara Bagian",
+    "en": "City, State"
+  },
+  "Classic": {
+    "id": "Klasik",
+    "en": "Classic"
+  },
+  "Clear": {
+    "id": "Bersihkan",
+    "en": "Clear"
+  },
+  "Clear all": {
+    "id": "Hapus semua",
+    "en": "Clear all"
+  },
+  "Clear draft": {
+    "id": "Hapus draf",
+    "en": "Clear draft"
+  },
+  "Clear filters": {
+    "id": "Hapus filter",
+    "en": "Clear filters"
+  },
+  "Clear Filters": {
+    "id": "Hapus Filter",
+    "en": "Clear Filters"
+  },
+  "Clear My Data": {
+    "id": "Hapus Data Saya",
+    "en": "Clear My Data"
+  },
+  "Clear Test Data": {
+    "id": "Hapus Data Uji",
+    "en": "Clear Test Data"
+  },
+  "Clear your CV draft?": {
+    "id": "Hapus draf CV Anda?",
+    "en": "Clear your CV draft?"
+  },
+  "Click on a CV from the list to preview it here": {
+    "id": "Klik CV dari daftar untuk melihat pratinjaunya di sini",
+    "en": "Click on a CV from the list to preview it here"
+  },
+  "Click the button below to generate your ATS-friendly resume.": {
+    "id": "Klik tombol di bawah untuk membuat CV yang ramah ATS untuk Anda.",
+    "en": "Click the button below to generate your ATS-friendly resume."
+  },
+  "Click to Browse Files": {
+    "id": "Klik untuk Telusuri File",
+    "en": "Click to Browse Files"
+  },
+  "Close tutorial": {
+    "id": "Tutup tutorial",
+    "en": "Close tutorial"
+  },
+  "Code for America": {
+    "id": "Code for America",
+    "en": "Code for America"
+  },
+  "Code Found!": {
+    "id": "Kode Ditemukan!",
+    "en": "Code Found!"
+  },
+  "Code Generated": {
+    "id": "Kode Dibuat",
+    "en": "Code Generated"
+  },
+  "code is required!": {
+    "id": "kode wajib diisi!",
+    "en": "code is required!"
+  },
+  "code not found!": {
+    "id": "kode tidak ditemukan!",
+    "en": "code not found!"
+  },
+  "Codes Generated": {
+    "id": "Kode Dibuat",
+    "en": "Codes Generated"
+  },
+  "Codes Utilized": {
+    "id": "Kode Digunakan",
+    "en": "Codes Utilized"
+  },
+  "Collapse sidebar": {
+    "id": "Ciutkan bilah samping",
+    "en": "Collapse sidebar"
+  },
+  "column": {
+    "id": "kolom",
+    "en": "column"
+  },
+  "Coming soon": {
+    "id": "Segera hadir",
+    "en": "Coming soon"
+  },
+  "Coming Soon": {
+    "id": "Segera Hadir",
+    "en": "Coming Soon"
+  },
+  "Communication, learning mindset, teamwork/leadership": {
+    "id": "Komunikasi, mindset belajar, kerja tim/kepemimpinan",
+    "en": "Communication, learning mindset, teamwork/leadership"
+  },
+  "Compact": {
+    "id": "Ringkas",
+    "en": "Compact"
+  },
+  "Compact · 0.3 in": {
+    "id": "Ringkas · 0,3 inci",
+    "en": "Compact · 0.3 in"
+  },
+  "Company": {
+    "id": "Perusahaan",
+    "en": "Company"
+  },
+  "Compare your profile with relevant job opportunities and see where your experience fits.": {
+    "id": "Bandingkan profil Anda dengan peluang kerja yang relevan dan lihat di mana pengalaman Anda cocok.",
+    "en": "Compare your profile with relevant job opportunities and see where your experience fits."
+  },
+  "Compared against the job description you supplied.": {
+    "id": "Dibandingkan dengan deskripsi kerja yang Anda berikan.",
+    "en": "Compared against the job description you supplied."
+  },
+  "completed": {
+    "id": "Selesai",
+    "en": "completed"
+  },
+  "Completed": {
+    "id": "Selesai",
+    "en": "Completed"
+  },
+  "Completed (": {
+    "id": "Selesai (",
+    "en": "Completed ("
+  },
+  "Completion Rate": {
+    "id": "Tingkat Penyelesaian",
+    "en": "Completion Rate"
+  },
+  "Conditional": {
+    "id": "Bersyarat",
+    "en": "Conditional"
+  },
+  "Confirm account change": {
+    "id": "Konfirmasi perubahan akun",
+    "en": "Confirm account change"
+  },
+  "Confirm change": {
+    "id": "Konfirmasi perubahan",
+    "en": "Confirm change"
+  },
+  "Confirm new password": {
+    "id": "Konfirmasi kata sandi baru",
+    "en": "Confirm new password"
+  },
+  "Confirm password": {
+    "id": "Konfirmasi kata sandi",
+    "en": "Confirm password"
+  },
+  "Confirm your email address to activate your account.": {
+    "id": "Konfirmasi alamat email Anda untuk mengaktifkan akun.",
+    "en": "Confirm your email address to activate your account."
+  },
+  "Contact Information": {
+    "id": "Informasi Kontak",
+    "en": "Contact Information"
+  },
+  "Contacts:": {
+    "id": "Kontak:",
+    "en": "Contacts:"
+  },
+  "Content": {
+    "id": "Konten",
+    "en": "Content"
+  },
+  "Continue to sign in": {
+    "id": "Lanjutkan untuk masuk",
+    "en": "Continue to sign in"
+  },
+  "Continue with Google": {
+    "id": "Lanjutkan dengan Google",
+    "en": "Continue with Google"
+  },
+  "Core Metrics": {
+    "id": "Metrik Utama",
+    "en": "Core Metrics"
+  },
+  "Could not archive template": {
+    "id": "Tidak dapat mengarsipkan templat",
+    "en": "Could not archive template"
+  },
+  "Could not read this file. Use a text-based PDF, DOCX or TXT. Scanned PDFs need OCR first.": {
+    "id": "Tidak dapat membaca file ini. Gunakan PDF, DOCX, atau TXT berbasis teks. PDF hasil pindai perlu OCR terlebih dahulu.",
+    "en": "Could not read this file. Use a text-based PDF, DOCX or TXT. Scanned PDFs need OCR first."
+  },
+  "Could not save template": {
+    "id": "Tidak dapat menyimpan templat",
+    "en": "Could not save template"
+  },
+  "Could not update user": {
+    "id": "Tidak dapat memperbarui pengguna",
+    "en": "Could not update user"
+  },
+  "Count": {
+    "id": "Jumlah",
+    "en": "Count"
+  },
+  "Course/Module Title": {
+    "id": "Judul Kursus/Modul",
+    "en": "Course/Module Title"
+  },
+  "Courses, webinars taken": {
+    "id": "Kursus dan webinar yang diikuti",
+    "en": "Courses, webinars taken"
+  },
+  "Create a clean, readable resume and keep your draft ready to improve.": {
+    "id": "Buat CV yang rapi dan mudah dibaca serta siapkan draf Anda untuk disempurnakan.",
+    "en": "Create a clean, readable resume and keep your draft ready to improve."
+  },
+  "Create a Landly account with your email address.": {
+    "id": "Buat akun Landly dengan alamat email Anda.",
+    "en": "Create a Landly account with your email address."
+  },
+  "Create a template using one of the supported ATS-safe layouts.": {
+    "id": "Buat templat menggunakan salah satu tata letak aman ATS yang didukung.",
+    "en": "Create a template using one of the supported ATS-safe layouts."
+  },
+  "Create account": {
+    "id": "Buat akun",
+    "en": "Create account"
+  },
+  "Create an account": {
+    "id": "Buat akun",
+    "en": "Create an account"
+  },
+  "Create an ATS-friendly CV and use AI to review your experience, achievements and wording. Add a job description when you want feedback for a specific role.": {
+    "id": "Buat CV yang ramah ATS dan gunakan AI untuk meninjau pengalaman, pencapaian, dan pilihan kata Anda. Tambahkan deskripsi kerja saat Anda ingin masukan untuk posisi tertentu.",
+    "en": "Create an ATS-friendly CV and use AI to review your experience, achievements and wording. Add a job description when you want feedback for a specific role."
+  },
+  "Create an ATS-friendly resume in minutes": {
+    "id": "Buat CV ramah ATS dalam hitungan menit",
+    "en": "Create an ATS-friendly resume in minutes"
+  },
+  "Create and secure your account, verify your email, support sign-in, and reset your password.": {
+    "id": "Buat dan amankan akun Anda, verifikasi email, dukung proses masuk, dan atur ulang kata sandi.",
+    "en": "Create and secure your account, verify your email, support sign-in, and reset your password."
+  },
+  "Create ATS template": {
+    "id": "Buat templat ATS",
+    "en": "Create ATS template"
+  },
+  "Create First Job Description": {
+    "id": "Buat Deskripsi Kerja Pertama",
+    "en": "Create First Job Description"
+  },
+  "Create first template": {
+    "id": "Buat template pertama",
+    "en": "Create first template"
+  },
+  "Create Job": {
+    "id": "Buat Lowongan",
+    "en": "Create Job"
+  },
+  "Create Job Description": {
+    "id": "Buat Deskripsi Kerja",
+    "en": "Create Job Description"
+  },
+  "Create New": {
+    "id": "Buat Baru",
+    "en": "Create New"
+  },
+  "Create New CV": {
+    "id": "Buat CV Baru",
+    "en": "Create New CV"
+  },
+  "Create template": {
+    "id": "Buat template",
+    "en": "Create template"
+  },
+  "Create your account": {
+    "id": "Buat akun Anda",
+    "en": "Create your account"
+  },
+  "Created": {
+    "id": "Dibuat",
+    "en": "Created"
+  },
+  "Created:": {
+    "id": "Dibuat:",
+    "en": "Created:"
+  },
+  "Creating account…": {
+    "id": "Membuat akun…",
+    "en": "Creating account…"
+  },
+  "Credential ID (Optional)": {
+    "id": "ID Kredensial (Opsional)",
+    "en": "Credential ID (Optional)"
+  },
+  "Current password is incorrect": {
+    "id": "Kata sandi saat ini salah",
+    "en": "Current password is incorrect"
+  },
+  "Currently working here (Present)": {
+    "id": "Sedang bekerja di sini (Sekarang)",
+    "en": "Currently working here (Present)"
+  },
+  "Custom": {
+    "id": "Kustom",
+    "en": "Custom"
+  },
+  "cv": {
+    "id": "cv",
+    "en": "cv"
+  },
+  "CV": {
+    "id": "CV",
+    "en": "CV"
+  },
+  "CV and job-search information:": {
+    "id": "Informasi CV dan pencarian kerja:",
+    "en": "CV and job-search information:"
+  },
+  "CV contains no readable text. Upload a text-based PDF, DOCX or TXT.": {
+    "id": "CV tidak berisi teks yang dapat dibaca. Unggah PDF, DOCX, atau TXT berbasis teks.",
+    "en": "CV contains no readable text. Upload a text-based PDF, DOCX or TXT."
+  },
+  "CV Document": {
+    "id": "Dokumen CV",
+    "en": "CV Document"
+  },
+  "CV document not found": {
+    "id": "Dokumen CV tidak ditemukan",
+    "en": "CV document not found"
+  },
+  "CV feedback, scores, job matches, and generated text are automated estimates based on the information available to the service. They may be incomplete or inaccurate and are not guarantees of employment, hiring outcomes, or professional advice. Review and verify all content before relying on it or sharing it with an employer.": {
+    "id": "Masukan CV, skor, kecocokan pekerjaan, dan teks yang dihasilkan merupakan perkiraan otomatis berdasarkan informasi yang tersedia bagi layanan. Hasil tersebut mungkin tidak lengkap atau tidak akurat, dan bukan jaminan pekerjaan, hasil rekrutmen, atau nasihat profesional. Tinjau dan verifikasi semua konten sebelum mengandalkannya atau membagikannya kepada pemberi kerja.",
+    "en": "CV feedback, scores, job matches, and generated text are automated estimates based on the information available to the service. They may be incomplete or inaccurate and are not guarantees of employment, hiring outcomes, or professional advice. Review and verify all content before relying on it or sharing it with an employer."
+  },
+  "CV file is empty or contains no readable text": {
+    "id": "File CV kosong atau tidak berisi teks yang dapat dibaca",
+    "en": "CV file is empty or contains no readable text"
+  },
+  "CV files and extracted text, contact details and career history you enter, job descriptions used for analysis, CV drafts, generated CVs, and review or matching results.": {
+    "id": "Berkas CV dan teks hasil ekstraksi, detail kontak dan riwayat karier yang Anda masukkan, deskripsi pekerjaan yang digunakan untuk analisis, draf CV, CV yang dihasilkan, serta hasil review atau pencocokan.",
+    "en": "CV files and extracted text, contact details and career history you enter, job descriptions used for analysis, CV drafts, generated CVs, and review or matching results."
+  },
+  "CV files are required": {
+    "id": "File CV diperlukan",
+    "en": "CV files are required"
+  },
+  "CV generated successfully": {
+    "id": "CV berhasil dibuat",
+    "en": "CV generated successfully"
+  },
+  "CV Generator": {
+    "id": "Generator CV",
+    "en": "CV Generator"
+  },
+  "CV list refreshed successfully.": {
+    "id": "Daftar CV berhasil diperbarui.",
+    "en": "CV list refreshed successfully."
+  },
+  "CV Match Rate": {
+    "id": "Tingkat Kecocokan CV",
+    "en": "CV Match Rate"
+  },
+  "CV Matches": {
+    "id": "Kecocokan CV",
+    "en": "CV Matches"
+  },
+  "CV PDF Preview": {
+    "id": "Pratinjau PDF CV",
+    "en": "CV PDF Preview"
+  },
+  "CV Preview": {
+    "id": "Pratinjau CV",
+    "en": "CV Preview"
+  },
+  "CV preview couldn’t load.": {
+    "id": "Pratinjau CV tidak dapat dimuat.",
+    "en": "CV preview couldn’t load."
+  },
+  "CV quality estimate": {
+    "id": "Perkiraan kualitas CV",
+    "en": "CV quality estimate"
+  },
+  "CV Review": {
+    "id": "Ulasan CV",
+    "en": "CV Review"
+  },
+  "CV Review Results": {
+    "id": "Hasil Review CV",
+    "en": "CV Review Results"
+  },
+  "CV Review Status": {
+    "id": "Status Review CV",
+    "en": "CV Review Status"
+  },
+  "CV Section to Write": {
+    "id": "Bagian CV untuk Ditulis",
+    "en": "CV Section to Write"
+  },
+  "CV/Resume Generator": {
+    "id": "Generator CV/Resume",
+    "en": "CV/Resume Generator"
+  },
+  "cvDocumentId is required": {
+    "id": "cvDocumentId wajib diisi",
+    "en": "cvDocumentId is required"
+  },
+  "Date": {
+    "id": "Tanggal",
+    "en": "Date"
+  },
+  "Date (Newest First)": {
+    "id": "Tanggal (Terbaru Dulu)",
+    "en": "Date (Newest First)"
+  },
+  "Date (Optional)": {
+    "id": "Tanggal (Opsional)",
+    "en": "Date (Optional)"
+  },
+  "Date unavailable": {
+    "id": "Tanggal tidak tersedia",
+    "en": "Date unavailable"
+  },
+  "Deactivate": {
+    "id": "Nonaktifkan",
+    "en": "Deactivate"
+  },
+  "Deactivate {value0}? Their sessions will be revoked and they will lose access.": {
+    "id": "Nonaktifkan {value0}? Sesi mereka akan diakhiri dan akses akun akan dicabut.",
+    "en": "Deactivate {value0}? Their sessions will be revoked and they will lose access."
+  },
+  "December": {
+    "id": "Desember",
+    "en": "December"
+  },
+  "Default": {
+    "id": "Bawaan",
+    "en": "Default"
+  },
+  "Default job description updated": {
+    "id": "Deskripsi pekerjaan bawaan diperbarui",
+    "en": "Default job description updated"
+  },
+  "Degree": {
+    "id": "Gelar",
+    "en": "Degree"
+  },
+  "Deleted {value0} evaluations and {value1} documents": {
+    "id": "Menghapus {value0} evaluasi dan {value1} dokumen",
+    "en": "Deleted {value0} evaluations and {value1} documents"
+  },
+  "Description": {
+    "id": "Deskripsi",
+    "en": "Description"
+  },
+  "Description (Optional)": {
+    "id": "Deskripsi (Opsional)",
+    "en": "Description (Optional)"
+  },
+  "Detailed analysis of how your profile matches each job": {
+    "id": "Analisis terperinci tentang kecocokan profil Anda dengan setiap pekerjaan",
+    "en": "Detailed analysis of how your profile matches each job"
+  },
+  "Detailed Insights": {
+    "id": "Wawasan Terperinci",
+    "en": "Detailed Insights"
+  },
+  "Details worth adding": {
+    "id": "Detail yang layak ditambahkan",
+    "en": "Details worth adding"
+  },
+  "Developed scalable APIs": {
+    "id": "Mengembangkan API yang skalabel",
+    "en": "Developed scalable APIs"
+  },
+  "Development Environment Only": {
+    "id": "Hanya untuk Lingkungan Pengembangan",
+    "en": "Development Environment Only"
+  },
+  "Discard": {
+    "id": "Buang",
+    "en": "Discard"
+  },
+  "Discover opportunities that fit your experience. We’re preparing this feature — for now, explore your CV feedback and focus on your next revision.": {
+    "id": "Temukan peluang yang sesuai dengan pengalaman Anda. Fitur ini sedang kami siapkan — untuk saat ini, jelajahi umpan balik CV Anda dan fokus pada revisi berikutnya.",
+    "en": "Discover opportunities that fit your experience. We’re preparing this feature — for now, explore your CV feedback and focus on your next revision."
+  },
+  "Do I need a job description to review my CV?": {
+    "id": "Apakah saya perlu deskripsi pekerjaan untuk meninjau CV saya?",
+    "en": "Do I need a job description to review my CV?"
+  },
+  "Do not upload unlawful content, malicious files, or another person’s personal information unless you have permission and a valid reason to do so.": {
+    "id": "Jangan mengunggah konten yang melanggar hukum, file berbahaya, atau informasi pribadi orang lain kecuali Anda memiliki izin dan alasan yang sah untuk melakukannya.",
+    "en": "Do not upload unlawful content, malicious files, or another person’s personal information unless you have permission and a valid reason to do so."
+  },
+  "Document Details": {
+    "id": "Detail Dokumen",
+    "en": "Document Details"
+  },
+  "Document not found": {
+    "id": "Dokumen tidak ditemukan",
+    "en": "Document not found"
+  },
+  "Document Processing": {
+    "id": "Pemrosesan Dokumen",
+    "en": "Document Processing"
+  },
+  "DOCX contains no readable text": {
+    "id": "DOCX tidak berisi teks yang dapat dibaca",
+    "en": "DOCX contains no readable text"
+  },
+  "Does an ATS-friendly CV guarantee an interview?": {
+    "id": "Apakah CV ramah ATS menjamin wawancara?",
+    "en": "Does an ATS-friendly CV guarantee an interview?"
+  },
+  "DOI (Optional)": {
+    "id": "DOI (Opsional)",
+    "en": "DOI (Optional)"
+  },
+  "Done": {
+    "id": "Selesai",
+    "en": "Done"
+  },
+  "Download": {
+    "id": "Unduh",
+    "en": "Download"
+  },
+  "Download CV": {
+    "id": "Unduh CV",
+    "en": "Download CV"
+  },
+  "Download Failed": {
+    "id": "Unduhan Gagal",
+    "en": "Download Failed"
+  },
+  "Download PDF": {
+    "id": "Unduh PDF",
+    "en": "Download PDF"
+  },
+  "Download PDF file": {
+    "id": "Unduh berkas PDF",
+    "en": "Download PDF file"
+  },
+  "Download Started": {
+    "id": "Unduhan Dimulai",
+    "en": "Download Started"
+  },
+  "Download template JSON untuk diisi offline, atau import data yang sudah Anda siapkan. Data juga auto-save otomatis!": {
+    "id": "Download template JSON untuk diisi offline, atau import data yang sudah Anda siapkan. Data juga auto-save otomatis!",
+    "en": "Download the JSON template to fill in offline, or import data you've already prepared. Your data also auto-saves!"
+  },
+  "Downloading {value0}'s CV": {
+    "id": "Mengunduh CV {value0}",
+    "en": "Downloading {value0}'s CV"
+  },
+  "draft": {
+    "id": "Draf",
+    "en": "draft"
+  },
+  "Draft": {
+    "id": "Draf",
+    "en": "Draft"
+  },
+  "Draft applied": {
+    "id": "Draf diterapkan",
+    "en": "Draft applied"
+  },
+  "Draft data must be an object": {
+    "id": "Data draf harus berupa objek",
+    "en": "Draft data must be an object"
+  },
+  "Draft deleted": {
+    "id": "Draf dihapus",
+    "en": "Draft deleted"
+  },
+  "Draft is too large": {
+    "id": "Draf terlalu besar",
+    "en": "Draft is too large"
+  },
+  "Draft owner no longer matches the active account.": {
+    "id": "Pemilik draf tidak lagi sesuai dengan akun aktif.",
+    "en": "Draft owner no longer matches the active account."
+  },
+  "Drag & drop job description file here, or click to select": {
+    "id": "Seret & letakkan berkas deskripsi pekerjaan di sini, atau klik untuk memilih",
+    "en": "Drag & drop job description file here, or click to select"
+  },
+  "Drag & drop your CV here": {
+    "id": "Seret & letakkan CV Anda di sini",
+    "en": "Drag & drop your CV here"
+  },
+  "Drop your CV here": {
+    "id": "Letakkan CV Anda di sini",
+    "en": "Drop your CV here"
+  },
+  "Drop your CV here!": {
+    "id": "Letakkan CV Anda di sini!",
+    "en": "Drop your CV here!"
+  },
+  "Drop your file here, or": {
+    "id": "Letakkan berkas Anda di sini, atau",
+    "en": "Drop your file here, or"
+  },
+  "Duration": {
+    "id": "Durasi",
+    "en": "Duration"
+  },
+  "e.g. analyst-classic": {
+    "id": "mis. analyst-classic",
+    "en": "e.g. analyst-classic"
+  },
+  "e.g., 'Make it professional and highlight leadership skills' or 'Focus on technical achievements with metrics'": {
+    "id": "mis., 'Buat lebih profesional dan tonjolkan keterampilan kepemimpinan' atau 'Fokus pada pencapaian teknis dengan metrik'",
+    "en": "e.g., 'Make it professional and highlight leadership skills' or 'Focus on technical achievements with metrics'"
+  },
+  "e.g., 5+ years of Node.js experience": {
+    "id": "mis., pengalaman Node.js 5+ tahun",
+    "en": "e.g., 5+ years of Node.js experience"
+  },
+  "e.g., Strong communication skills": {
+    "id": "mis., Keterampilan komunikasi yang kuat",
+    "en": "e.g., Strong communication skills"
+  },
+  "Easy Navigation": {
+    "id": "Navigasi Mudah",
+    "en": "Easy Navigation"
+  },
+  "Edit": {
+    "id": "Edit",
+    "en": "Edit"
+  },
+  "Edit ATS template": {
+    "id": "Edit templat ATS",
+    "en": "Edit ATS template"
+  },
+  "Edit Job Description": {
+    "id": "Edit Deskripsi Pekerjaan",
+    "en": "Edit Job Description"
+  },
+  "education": {
+    "id": "pendidikan",
+    "en": "education"
+  },
+  "Education": {
+    "id": "Pendidikan",
+    "en": "Education"
+  },
+  "education entries": {
+    "id": "entri pendidikan",
+    "en": "education entries"
+  },
+  "Email": {
+    "id": "Email",
+    "en": "Email"
+  },
+  "Email delivery is not configured": {
+    "id": "Pengiriman email belum dikonfigurasi",
+    "en": "Email delivery is not configured"
+  },
+  "Email or password is incorrect": {
+    "id": "Email atau kata sandi salah",
+    "en": "Email or password is incorrect"
+  },
+  "Email verification": {
+    "id": "Verifikasi email",
+    "en": "Email verification"
+  },
+  "Email verified. You can sign in now.": {
+    "id": "Email terverifikasi. Anda dapat masuk sekarang.",
+    "en": "Email verified. You can sign in now."
+  },
+  "Employee of the Year": {
+    "id": "Karyawan Tahun Ini",
+    "en": "Employee of the Year"
+  },
+  "End Date": {
+    "id": "Tanggal Berakhir",
+    "en": "End Date"
+  },
+  "English": {
+    "id": "Inggris",
+    "en": "English"
+  },
+  "Enter a valid email address": {
+    "id": "Masukkan alamat email yang valid",
+    "en": "Enter a valid email address"
+  },
+  "Enter candidate name": {
+    "id": "Masukkan nama kandidat",
+    "en": "Enter candidate name"
+  },
+  "Enter candidate name...": {
+    "id": "Masukkan nama kandidat...",
+    "en": "Enter candidate name..."
+  },
+  "Enter item...": {
+    "id": "Masukkan item...",
+    "en": "Enter item..."
+  },
+  "Enter job description...": {
+    "id": "Masukkan deskripsi pekerjaan...",
+    "en": "Enter job description..."
+  },
+  "Enter section title...": {
+    "id": "Masukkan judul bagian...",
+    "en": "Enter section title..."
+  },
+  "Enter your content here (e.g., English (Native), Spanish (Professional))": {
+    "id": "Masukkan konten Anda di sini (mis. Inggris (Native), Spanyol (Profesional))",
+    "en": "Enter your content here (e.g., English (Native), Spanish (Professional))"
+  },
+  "entries": {
+    "id": "entri",
+    "en": "entries"
+  },
+  "Entry title": {
+    "id": "Judul entri",
+    "en": "Entry title"
+  },
+  "Environment:": {
+    "id": "Lingkungan:",
+    "en": "Environment:"
+  },
+  "Error": {
+    "id": "Error",
+    "en": "Error"
+  },
+  "Error Loading Results": {
+    "id": "Gagal Memuat Hasil",
+    "en": "Error Loading Results"
+  },
+  "Errors": {
+    "id": "Error",
+    "en": "Errors"
+  },
+  "Evaluation history": {
+    "id": "Riwayat evaluasi",
+    "en": "Evaluation history"
+  },
+  "Evaluation ID: {value0}": {
+    "id": "ID Evaluasi: {value0}",
+    "en": "Evaluation ID: {value0}"
+  },
+  "Evaluation Started": {
+    "id": "Evaluasi Dimulai",
+    "en": "Evaluation Started"
+  },
+  "Evaluation Status Distribution": {
+    "id": "Distribusi Status Evaluasi",
+    "en": "Evaluation Status Distribution"
+  },
+  "Every review. A better next step.": {
+    "id": "Setiap ulasan, satu langkah lebih baik.",
+    "en": "Every review. A better next step."
+  },
+  "Everything in one place": {
+    "id": "Semuanya dalam satu tempat",
+    "en": "Everything in one place"
+  },
+  "Evidence from your CV": {
+    "id": "Bukti dari CV Anda",
+    "en": "Evidence from your CV"
+  },
+  "Expand sidebar": {
+    "id": "Perluas sidebar",
+    "en": "Expand sidebar"
+  },
+  "Experience": {
+    "id": "Pengalaman",
+    "en": "Experience"
+  },
+  "experience entries ·": {
+    "id": "entri pengalaman ·",
+    "en": "experience entries ·"
+  },
+  "Experience Match": {
+    "id": "Kecocokan Pengalaman",
+    "en": "Experience Match"
+  },
+  "Explore job matches": {
+    "id": "Jelajahi kecocokan pekerjaan",
+    "en": "Explore job matches"
+  },
+  "Explore review": {
+    "id": "Jelajahi ulasan",
+    "en": "Explore review"
+  },
+  "Explore the evidence and a practical revision for each criterion.": {
+    "id": "Jelajahi bukti dan revisi praktis untuk setiap kriteria.",
+    "en": "Explore the evidence and a practical revision for each criterion."
+  },
+  "failed": {
+    "id": "Gagal",
+    "en": "failed"
+  },
+  "Failed": {
+    "id": "Gagal",
+    "en": "Failed"
+  },
+  "Failed (": {
+    "id": "Gagal (",
+    "en": "Failed ("
+  },
+  "Failed to clear test data": {
+    "id": "Gagal menghapus data uji",
+    "en": "Failed to clear test data"
+  },
+  "Failed to create job - no job ID returned": {
+    "id": "Gagal membuat pekerjaan - ID pekerjaan tidak dikembalikan",
+    "en": "Failed to create job - no job ID returned"
+  },
+  "Failed to create job description": {
+    "id": "Gagal membuat deskripsi pekerjaan",
+    "en": "Failed to create job description"
+  },
+  "Failed to delete job description": {
+    "id": "Gagal menghapus deskripsi pekerjaan",
+    "en": "Failed to delete job description"
+  },
+  "Failed to download the PDF. Please try again.": {
+    "id": "Gagal mengunduh PDF. Silakan coba lagi.",
+    "en": "Failed to download the PDF. Please try again."
+  },
+  "Failed to fetch CV results.": {
+    "id": "Gagal mengambil hasil CV.",
+    "en": "Failed to fetch CV results."
+  },
+  "Failed to fetch job description": {
+    "id": "Gagal mengambil deskripsi pekerjaan",
+    "en": "Failed to fetch job description"
+  },
+  "Failed to fetch job descriptions": {
+    "id": "Gagal mengambil deskripsi pekerjaan",
+    "en": "Failed to fetch job descriptions"
+  },
+  "Failed to fetch recent data": {
+    "id": "Gagal mengambil data terbaru",
+    "en": "Failed to fetch recent data"
+  },
+  "Failed to fetch statistics": {
+    "id": "Gagal mengambil statistik",
+    "en": "Failed to fetch statistics"
+  },
+  "Failed to generate completion": {
+    "id": "Gagal menghasilkan penyelesaian",
+    "en": "Failed to generate completion"
+  },
+  "Failed to generate CV": {
+    "id": "Gagal membuat CV",
+    "en": "Failed to generate CV"
+  },
+  "Failed to generate CV. Please try again.": {
+    "id": "Gagal membuat CV. Silakan coba lagi.",
+    "en": "Failed to generate CV. Please try again."
+  },
+  "Failed to generate unique code after 10 attempts": {
+    "id": "Gagal menghasilkan kode unik setelah 10 percobaan",
+    "en": "Failed to generate unique code after 10 attempts"
+  },
+  "Failed to open PDF in new tab.": {
+    "id": "Gagal membuka PDF di tab baru.",
+    "en": "Failed to open PDF in new tab."
+  },
+  "Failed to parse file": {
+    "id": "Gagal mengurai file",
+    "en": "Failed to parse file"
+  },
+  "Failed to save document": {
+    "id": "Gagal menyimpan dokumen",
+    "en": "Failed to save document"
+  },
+  "Failed to set default job description": {
+    "id": "Gagal menetapkan deskripsi pekerjaan bawaan",
+    "en": "Failed to set default job description"
+  },
+  "Failed to update job description": {
+    "id": "Gagal memperbarui deskripsi pekerjaan",
+    "en": "Failed to update job description"
+  },
+  "Features": {
+    "id": "Fitur",
+    "en": "Features"
+  },
+  "February": {
+    "id": "Februari",
+    "en": "February"
+  },
+  "File not supported": {
+    "id": "File tidak didukung",
+    "en": "File not supported"
+  },
+  "Fill out the template and import it back.": {
+    "id": "Isi templat lalu impor kembali.",
+    "en": "Fill out the template and import it back."
+  },
+  "Filter by review status": {
+    "id": "Filter berdasarkan status ulasan",
+    "en": "Filter by review status"
+  },
+  "Filter by Status": {
+    "id": "Filter berdasarkan Status",
+    "en": "Filter by Status"
+  },
+  "Filters & Search": {
+    "id": "Filter & Pencarian",
+    "en": "Filters & Search"
+  },
+  "Find a review…": {
+    "id": "Cari ulasan…",
+    "en": "Find a review…"
+  },
+  "Find and filter your CV analysis results": {
+    "id": "Temukan dan filter hasil analisis CV Anda",
+    "en": "Find and filter your CV analysis results"
+  },
+  "Find roles that fit your profile, or match against a job description": {
+    "id": "Temukan peran yang cocok dengan profil Anda, atau bandingkan dengan deskripsi pekerjaan",
+    "en": "Find roles that fit your profile, or match against a job description"
+  },
+  "Finding the details that matter": {
+    "id": "Menemukan detail yang penting",
+    "en": "Finding the details that matter"
+  },
+  "Finish": {
+    "id": "Selesai",
+    "en": "Finish"
+  },
+  "Finished": {
+    "id": "Selesai",
+    "en": "Finished"
+  },
+  "Finishing Google sign-in": {
+    "id": "Menyelesaikan masuk dengan Google",
+    "en": "Finishing Google sign-in"
+  },
+  "Finishing your Google sign-in securely.": {
+    "id": "Menyelesaikan proses masuk Google Anda dengan aman.",
+    "en": "Finishing your Google sign-in securely."
+  },
+  "Forgot password?": {
+    "id": "Lupa kata sandi?",
+    "en": "Forgot password?"
+  },
+  "Form fields have been populated.": {
+    "id": "Kolom formulir telah diisi.",
+    "en": "Form fields have been populated."
+  },
+  "Form Reset": {
+    "id": "Formulir Direset",
+    "en": "Form Reset"
+  },
+  "Full Name": {
+    "id": "Nama Lengkap",
+    "en": "Full Name"
+  },
+  "Fully flexible format": {
+    "id": "Format sepenuhnya fleksibel",
+    "en": "Fully flexible format"
+  },
+  "general": {
+    "id": "Umum",
+    "en": "general"
+  },
+  "General review": {
+    "id": "Tinjauan umum",
+    "en": "General review"
+  },
+  "Generate again": {
+    "id": "Buat Ulang",
+    "en": "Generate again"
+  },
+  "Generate Draft": {
+    "id": "Buat Draf",
+    "en": "Generate Draft"
+  },
+  "Generate Resume": {
+    "id": "Buat CV",
+    "en": "Generate Resume"
+  },
+  "Generated CV not found": {
+    "id": "CV yang dibuat tidak ditemukan",
+    "en": "Generated CV not found"
+  },
+  "Generated CVs": {
+    "id": "CV yang Dibuat",
+    "en": "Generated CVs"
+  },
+  "Generated PDF failed ATS text extraction validation": {
+    "id": "PDF yang dibuat gagal validasi ekstraksi teks ATS",
+    "en": "Generated PDF failed ATS text extraction validation"
+  },
+  "Generating CV": {
+    "id": "Membuat CV",
+    "en": "Generating CV"
+  },
+  "Generating Draft...": {
+    "id": "Membuat Draf...",
+    "en": "Generating Draft..."
+  },
+  "Generating...": {
+    "id": "Sedang membuat...",
+    "en": "Generating..."
+  },
+  "Get a clear view of your strengths and opportunities": {
+    "id": "Lihat kekuatan dan peluang Anda dengan jelas",
+    "en": "Get a clear view of your strengths and opportunities"
+  },
+  "Get a detailed CV review and relevant job matches in one analysis. Add a job description for targeted feedback, or leave it off for a general review.": {
+    "id": "Dapatkan tinjauan CV mendetail dan kecocokan pekerjaan yang relevan dalam satu analisis. Tambahkan deskripsi pekerjaan untuk masukan yang tepat sasaran, atau biarkan kosong untuk tinjauan umum.",
+    "en": "Get a detailed CV review and relevant job matches in one analysis. Add a job description for targeted feedback, or leave it off for a general review."
+  },
+  "Get feedback you can use.": {
+    "id": "Dapatkan masukan yang bisa Anda gunakan.",
+    "en": "Get feedback you can use."
+  },
+  "Get started": {
+    "id": "Mulai",
+    "en": "Get started"
+  },
+  "Get structured feedback to make your experience clearer and easier to evaluate.": {
+    "id": "Dapatkan masukan terstruktur agar pengalaman Anda lebih jelas dan mudah dinilai.",
+    "en": "Get structured feedback to make your experience clearer and easier to evaluate."
+  },
+  "Get your first review": {
+    "id": "Dapatkan Tinjauan Pertama Anda",
+    "en": "Get your first review"
+  },
+  "Google account email is not verified": {
+    "id": "Email akun Google belum terverifikasi",
+    "en": "Google account email is not verified"
+  },
+  "Google did not return an identity token": {
+    "id": "Google tidak mengembalikan token identitas",
+    "en": "Google did not return an identity token"
+  },
+  "Google sign-in failed. Please try again.": {
+    "id": "Masuk dengan Google gagal. Silakan coba lagi.",
+    "en": "Google sign-in failed. Please try again."
+  },
+  "Google sign-in is not configured": {
+    "id": "Masuk dengan Google belum dikonfigurasi",
+    "en": "Google sign-in is not configured"
+  },
+  "Google sign-in requests basic identity scopes (email and profile). Landly uses the returned name, email, and Google account identifier to authenticate you and does not access Gmail, Google Drive, or other Google content.": {
+    "id": "Masuk dengan Google meminta izin identitas dasar (email dan profil). Landly menggunakan nama, email, dan pengenal akun Google yang dikembalikan untuk mengautentikasi Anda dan tidak mengakses Gmail, Google Drive, atau konten Google lainnya.",
+    "en": "Google sign-in requests basic identity scopes (email and profile). Landly uses the returned name, email, and Google account identifier to authenticate you and does not access Gmail, Google Drive, or other Google content."
+  },
+  "Google sign-in state validation failed": {
+    "id": "Validasi status masuk Google gagal",
+    "en": "Google sign-in state validation failed"
+  },
+  "Google sign-in was cancelled. You can try again or use email.": {
+    "id": "Masuk dengan Google dibatalkan. Anda bisa mencoba lagi atau menggunakan email.",
+    "en": "Google sign-in was cancelled. You can try again or use email."
+  },
+  "GPA (Optional)": {
+    "id": "IPK (Opsional)",
+    "en": "GPA (Optional)"
+  },
+  "Grant administrator access to {value0}?": {
+    "id": "Berikan akses administrator kepada {value0}?",
+    "en": "Grant administrator access to {value0}?"
+  },
+  "Gunakan tombol Next/Previous untuk navigasi antar section. Di section terakhir, klik \"Generate Resume\" untuk create CV Anda!": {
+    "id": "Gunakan tombol Next/Previous untuk navigasi antar section. Di section terakhir, klik “Generate Resume” untuk create CV Anda!",
+    "en": "Use the Next/Previous buttons to navigate between sections. On the last section, click \"Generate Resume\" to create your CV!"
+  },
+  "Hard Skills": {
+    "id": "Hard Skills",
+    "en": "Hard Skills"
+  },
+  "Headers:": {
+    "id": "Header:",
+    "en": "Headers:"
+  },
+  "Heading color": {
+    "id": "Warna Heading",
+    "en": "Heading color"
+  },
+  "Health Check": {
+    "id": "Health Check",
+    "en": "Health Check"
+  },
+  "Help & guide": {
+    "id": "Bantuan & Panduan",
+    "en": "Help & guide"
+  },
+  "Help and guide": {
+    "id": "Bantuan dan Panduan",
+    "en": "Help and guide"
+  },
+  "Hide": {
+    "id": "Sembunyikan",
+    "en": "Hide"
+  },
+  "Hide assistant": {
+    "id": "Tutup asisten",
+    "en": "Hide assistant"
+  },
+  "Hide Preview": {
+    "id": "Sembunyikan Pratinjau",
+    "en": "Hide Preview"
+  },
+  "Hobbies": {
+    "id": "Hobi",
+    "en": "Hobbies"
+  },
+  "Hobbies and interests": {
+    "id": "Hobi dan Minat",
+    "en": "Hobbies and interests"
+  },
+  "Home": {
+    "id": "Beranda",
+    "en": "Home"
+  },
+  "How is my CV information used?": {
+    "id": "Bagaimana informasi CV saya digunakan?",
+    "en": "How is my CV information used?"
+  },
+  "How Landly handles account information and CV content.": {
+    "id": "Bagaimana Landly menangani informasi akun dan konten CV.",
+    "en": "How Landly handles account information and CV content."
+  },
+  "How to review your CV with Landly": {
+    "id": "Cara meninjau CV Anda dengan Landly",
+    "en": "How to review your CV with Landly"
+  },
+  "HTML": {
+    "id": "HTML",
+    "en": "HTML"
+  },
+  "I graduated in Management in 2023. I worked as a marketing intern at… My responsibilities included… I’m comfortable using…": {
+    "id": "Saya lulus Manajemen tahun 2023. Saya pernah bekerja sebagai magang pemasaran di… Tanggung jawab saya meliputi… Saya terbiasa menggunakan…",
+    "en": "I graduated in Management in 2023. I worked as a marketing intern at… My responsibilities included… I’m comfortable using…"
+  },
+  "ID:": {
+    "id": "ID:",
+    "en": "ID:"
+  },
+  "If the account exists, a password reset link has been sent.": {
+    "id": "Jika akun tersebut ada, tautan reset kata sandi telah dikirim.",
+    "en": "If the account exists, a password reset link has been sent."
+  },
+  "If the account needs verification, a new link has been sent.": {
+    "id": "Jika akun perlu verifikasi, tautan baru telah dikirim.",
+    "en": "If the account needs verification, a new link has been sent."
+  },
+  "Impact of past work (scaling, performance, adoption)": {
+    "id": "Dampak pekerjaan sebelumnya (skala, performa, adopsi)",
+    "en": "Impact of past work (scaling, performance, adoption)"
+  },
+  "Import": {
+    "id": "Impor",
+    "en": "Import"
+  },
+  "Import & Export": {
+    "id": "Impor & Ekspor",
+    "en": "Import & Export"
+  },
+  "Import Failed": {
+    "id": "Impor Gagal",
+    "en": "Import Failed"
+  },
+  "In progress": {
+    "id": "Sedang berjalan",
+    "en": "In progress"
+  },
+  "In queue": {
+    "id": "Dalam antrean",
+    "en": "In queue"
+  },
+  "inactive": {
+    "id": "Nonaktif",
+    "en": "inactive"
+  },
+  "Inactive": {
+    "id": "Tidak aktif",
+    "en": "Inactive"
+  },
+  "Include your education, experience, skills and achievements.": {
+    "id": "Sertakan pendidikan, pengalaman, keahlian, dan pencapaian Anda.",
+    "en": "Include your education, experience, skills and achievements."
+  },
+  "Indonesian": {
+    "id": "Bahasa Indonesia",
+    "en": "Indonesian"
+  },
+  "Ini menampilkan progress pengisian CV Anda. Setiap section yang completed akan ditandai dengan checkmark hijau.": {
+    "id": "Ini menampilkan progress pengisian CV Anda. Setiap section yang completed akan ditandai dengan checkmark hijau.",
+    "en": "This shows the progress of your CV completion. Each completed section will be marked with a green checkmark."
+  },
+  "Initializing...": {
+    "id": "Menginisialisasi...",
+    "en": "Initializing..."
+  },
+  "Instructions for AI": {
+    "id": "Instruksi untuk AI",
+    "en": "Instructions for AI"
+  },
+  "Intelligent Review": {
+    "id": "Tinjauan Cerdas",
+    "en": "Intelligent Review"
+  },
+  "Interests": {
+    "id": "Minat",
+    "en": "Interests"
+  },
+  "Invalid ATS template layout configuration": {
+    "id": "Konfigurasi tata letak templat ATS tidak valid",
+    "en": "Invalid ATS template layout configuration"
+  },
+  "Invalid template status": {
+    "id": "Status templat tidak valid",
+    "en": "Invalid template status"
+  },
+  "isActive must be a boolean": {
+    "id": "isActive harus berupa boolean",
+    "en": "isActive must be a boolean"
+  },
+  "Issuer": {
+    "id": "Penerbit",
+    "en": "Issuer"
+  },
+  "It will no longer be available for new CVs.": {
+    "id": "Tidak akan lagi tersedia untuk CV baru.",
+    "en": "It will no longer be available for new CVs."
+  },
+  "items": {
+    "id": "item",
+    "en": "items"
+  },
+  "January": {
+    "id": "Januari",
+    "en": "January"
+  },
+  "Job Description": {
+    "id": "Deskripsi Pekerjaan",
+    "en": "Job Description"
+  },
+  "Job description created successfully": {
+    "id": "Deskripsi pekerjaan berhasil dibuat",
+    "en": "Job description created successfully"
+  },
+  "Job description deleted successfully": {
+    "id": "Deskripsi pekerjaan berhasil dihapus",
+    "en": "Job description deleted successfully"
+  },
+  "Job description file is required": {
+    "id": "File deskripsi lowongan wajib ada",
+    "en": "Job description file is required"
+  },
+  "Job description not found": {
+    "id": "Deskripsi lowongan tidak ditemukan",
+    "en": "Job description not found"
+  },
+  "Job description required": {
+    "id": "Deskripsi pekerjaan wajib diisi",
+    "en": "Job description required"
+  },
+  "Job description updated successfully": {
+    "id": "Deskripsi pekerjaan berhasil diperbarui",
+    "en": "Job description updated successfully"
+  },
+  "Job description uploaded successfully": {
+    "id": "Deskripsi lowongan berhasil diunggah",
+    "en": "Job description uploaded successfully"
+  },
+  "Job description used for this review": {
+    "id": "Deskripsi pekerjaan yang digunakan untuk tinjauan ini",
+    "en": "Job description used for this review"
+  },
+  "Job description with this slug already exists": {
+    "id": "Deskripsi lowongan dengan slug ini sudah ada",
+    "en": "Job description with this slug already exists"
+  },
+  "Job Descriptions": {
+    "id": "Deskripsi Pekerjaan",
+    "en": "Job Descriptions"
+  },
+  "Job Grade Performance": {
+    "id": "Kinerja Grade Pekerjaan",
+    "en": "Job Grade Performance"
+  },
+  "Job Management": {
+    "id": "Manajemen Pekerjaan",
+    "en": "Job Management"
+  },
+  "Job match estimate": {
+    "id": "Estimasi kecocokan pekerjaan",
+    "en": "Job match estimate"
+  },
+  "Job matches": {
+    "id": "Kecocokan pekerjaan",
+    "en": "Job matches"
+  },
+  "Job Matches": {
+    "id": "Kecocokan Pekerjaan",
+    "en": "Job Matches"
+  },
+  "job_specific": {
+    "id": "Sesuai lowongan",
+    "en": "job_specific"
+  },
+  "Job-specific review": {
+    "id": "Tinjauan khusus pekerjaan",
+    "en": "Job-specific review"
+  },
+  "John Doe": {
+    "id": "John Doe",
+    "en": "John Doe"
+  },
+  "John Doe, Jane Smith": {
+    "id": "John Doe, Jane Smith",
+    "en": "John Doe, Jane Smith"
+  },
+  "Joined": {
+    "id": "Bergabung",
+    "en": "Joined"
+  },
+  "July": {
+    "id": "Juli",
+    "en": "July"
+  },
+  "June": {
+    "id": "Juni",
+    "en": "June"
+  },
+  "Keep reviewing": {
+    "id": "Lanjut meninjau",
+    "en": "Keep reviewing"
+  },
+  "Key Points / Bullets": {
+    "id": "Poin Utama / Poin",
+    "en": "Key Points / Bullets"
+  },
+  "Klik \"Add Contact\" untuk menambahkan email, phone, LinkedIn, GitHub, portfolio, dll. Bisa tambah sebanyak yang Anda mau!": {
+    "id": "Klik \"Add Contact\" untuk menambahkan email, phone, LinkedIn, GitHub, portfolio, dll. Bisa tambah sebanyak yang Anda mau!",
+    "en": "Tap \"Add Contact\" to add email, phone, LinkedIn, GitHub, portfolio, etc. You can add as many as you want!"
+  },
+  "Klik icon ini untuk langsung jump ke section tertentu. Anda bisa mengisi section dalam urutan apapun.": {
+    "id": "Klik icon ini untuk langsung jump ke section tertentu. Anda bisa mengisi section dalam urutan apapun.",
+    "en": "Tap this icon to jump directly to a specific section. You can fill in the sections in any order."
+  },
+  "Klik tombol \"Show Preview\" untuk melihat preview CV Anda secara real-time. Perubahan akan langsung terlihat!": {
+    "id": "Klik tombol \"Show Preview\" untuk melihat preview CV Anda secara real-time. Perubahan akan langsung terlihat!",
+    "en": "Tap the \"Show Preview\" button to see a real-time preview of your CV. Changes will appear instantly!"
+  },
+  "Label (e.g., Email, Phone, LinkedIn)": {
+    "id": "Label (mis. Email, Telepon, LinkedIn)",
+    "en": "Label (e.g., Email, Phone, LinkedIn)"
+  },
+  "Landly": {
+    "id": "Landly",
+    "en": "Landly"
+  },
+  "Landly — AI CV Review and ATS CV Builder": {
+    "id": "Landly — Tinjauan CV AI dan Pembuat CV ATS",
+    "en": "Landly — AI CV Review and ATS CV Builder"
+  },
+  "Landly · Legal": {
+    "id": "Landly · Legal",
+    "en": "Landly · Legal"
+  },
+  "Landly API": {
+    "id": "Landly API",
+    "en": "Landly API"
+  },
+  "Landly API - All Endpoints": {
+    "id": "Landly API - Semua Endpoint",
+    "en": "Landly API - All Endpoints"
+  },
+  "Landly CV review": {
+    "id": "Tinjauan CV Landly",
+    "en": "Landly CV review"
+  },
+  "Landly home": {
+    "id": "Beranda Landly",
+    "en": "Landly home"
+  },
+  "Landly is a CV review, job matching, and ATS-friendly CV creation service available at aforsy.biz.id. This policy explains how we process information when you visit the site or use a Landly account. We process personal data in accordance with applicable data protection laws, including Indonesia’s Personal Data Protection Law (Law No. 27 of 2022).": {
+    "id": "Landly adalah layanan tinjauan CV, kecocokan pekerjaan, dan pembuatan CV ramah ATS yang tersedia di aforsy.biz.id. Kebijakan ini menjelaskan cara kami memproses informasi saat Anda mengunjungi situs atau menggunakan akun Landly. Kami memproses data pribadi sesuai dengan undang-undang perlindungan data yang berlaku, termasuk Undang-Undang Pelindungan Data Pribadi Indonesia (UU No. 27 Tahun 2022).",
+    "en": "Landly is a CV review, job matching, and ATS-friendly CV creation service available at aforsy.biz.id. This policy explains how we process information when you visit the site or use a Landly account. We process personal data in accordance with applicable data protection laws, including Indonesia’s Personal Data Protection Law (Law No. 27 of 2022)."
+  },
+  "Landly is an online workspace for creating CVs, reviewing CV content with AI, and exploring job matches. An account is required to use the CV tools.": {
+    "id": "Landly adalah ruang kerja online untuk membuat CV, meninjau konten CV dengan AI, dan menjelajahi kecocokan pekerjaan. Akun diperlukan untuk menggunakan alat CV.",
+    "en": "Landly is an online workspace for creating CVs, reviewing CV content with AI, and exploring job matches. An account is required to use the CV tools."
+  },
+  "Landly is provided on an “as available” basis. To the extent permitted by applicable law, we disclaim implied warranties and are not liable for indirect or consequential losses arising from use of the service. Nothing in these Terms limits rights or liability that cannot lawfully be excluded.": {
+    "id": "Landly disediakan atas dasar \"sebagaimana tersedia\". Sejauh diizinkan oleh hukum yang berlaku, kami menolak jaminan tersirat dan tidak bertanggung jawab atas kerugian tidak langsung atau konsekuensial yang timbul dari penggunaan layanan. Tidak ada dalam Syarat ini yang membatasi hak atau tanggung jawab yang tidak dapat dikecualikan secara hukum.",
+    "en": "Landly is provided on an “as available” basis. To the extent permitted by applicable law, we disclaim implied warranties and are not liable for indirect or consequential losses arising from use of the service. Nothing in these Terms limits rights or liability that cannot lawfully be excluded."
+  },
+  "Landly processes uploaded CV content to provide its review and generation features. Read the Privacy Policy for details about storage, AI providers and your information before uploading personal data.": {
+    "id": "Landly memproses konten CV yang diunggah untuk menyediakan fitur tinjauan dan pembuatannya. Baca Kebijakan Privasi untuk detail tentang penyimpanan, penyedia AI, dan informasi Anda sebelum mengunggah data pribadi.",
+    "en": "Landly processes uploaded CV content to provide its review and generation features. Read the Privacy Policy for details about storage, AI providers and your information before uploading personal data."
+  },
+  "Landly uses a necessary HTTP-only session cookie to keep you signed in. Google sign-in may set temporary security cookies during authentication. Analytics or advertising cookies may be used when those services are enabled. You can manage cookies through your browser; blocking necessary cookies may prevent sign-in or other features from working.": {
+    "id": "Landly menggunakan cookie sesi HTTP-only yang diperlukan untuk menjaga Anda tetap masuk. Proses masuk dengan Google dapat menetapkan cookie keamanan sementara selama autentikasi. Cookie analitik atau iklan dapat digunakan saat layanan tersebut diaktifkan. Anda dapat mengelola cookie melalui browser Anda; memblokir cookie yang diperlukan dapat mencegah proses masuk atau fitur lain berfungsi.",
+    "en": "Landly uses a necessary HTTP-only session cookie to keep you signed in. Google sign-in may set temporary security cookies during authentication. Analytics or advertising cookies may be used when those services are enabled. You can manage cookies through your browser; blocking necessary cookies may prevent sign-in or other features from working."
+  },
+  "Language": {
+    "id": "Bahasa",
+    "en": "Language"
+  },
+  "Languages": {
+    "id": "Bahasa",
+    "en": "Languages"
+  },
+  "Last updated: November 1, 2026": {
+    "id": "Terakhir diperbarui: 1 November 2026",
+    "en": "Last updated: November 1, 2026"
+  },
+  "Layout": {
+    "id": "Tata Letak",
+    "en": "Layout"
+  },
+  "Learn how Landly collects, uses, stores, and shares information when you use our CV tools.": {
+    "id": "Pelajari bagaimana Landly mengumpulkan, menggunakan, menyimpan, dan membagikan informasi saat Anda menggunakan alat CV kami.",
+    "en": "Learn how Landly collects, uses, stores, and shares information when you use our CV tools."
+  },
+  "Legal links": {
+    "id": "Tautan legal",
+    "en": "Legal links"
+  },
+  "Link (Optional)": {
+    "id": "Tautan (Opsional)",
+    "en": "Link (Optional)"
+  },
+  "Link Label (Optional)": {
+    "id": "Label Tautan (Opsional)",
+    "en": "Link Label (Optional)"
+  },
+  "Link URL (Optional)": {
+    "id": "URL Tautan (Opsional)",
+    "en": "Link URL (Optional)"
+  },
+  "List": {
+    "id": "Daftar",
+    "en": "List"
+  },
+  "Live Preview": {
+    "id": "Pratinjau Langsung",
+    "en": "Live Preview"
+  },
+  "Load Recent Data": {
+    "id": "Muat Data Terbaru",
+    "en": "Load Recent Data"
+  },
+  "Load Statistics": {
+    "id": "Muat Statistik",
+    "en": "Load Statistics"
+  },
+  "Loading account page": {
+    "id": "Memuat halaman akun",
+    "en": "Loading account page"
+  },
+  "Loading activity": {
+    "id": "Memuat aktivitas",
+    "en": "Loading activity"
+  },
+  "Loading CV preview": {
+    "id": "Memuat pratinjau CV",
+    "en": "Loading CV preview"
+  },
+  "Loading page content": {
+    "id": "Memuat konten halaman",
+    "en": "Loading page content"
+  },
+  "Loading results": {
+    "id": "Memuat hasil",
+    "en": "Loading results"
+  },
+  "Loading review": {
+    "id": "Memuat tinjauan",
+    "en": "Loading review"
+  },
+  "Loading reviews": {
+    "id": "Memuat tinjauan",
+    "en": "Loading reviews"
+  },
+  "Loading template catalog": {
+    "id": "Memuat katalog templat",
+    "en": "Loading template catalog"
+  },
+  "Loading users": {
+    "id": "Memuat pengguna",
+    "en": "Loading users"
+  },
+  "Loading your CV draft": {
+    "id": "Memuat draf CV Anda",
+    "en": "Loading your CV draft"
+  },
+  "Loading your workspace": {
+    "id": "Memuat ruang kerja Anda",
+    "en": "Loading your workspace"
+  },
+  "Loading...": {
+    "id": "Memuat...",
+    "en": "Loading..."
+  },
+  "Location": {
+    "id": "Lokasi",
+    "en": "Location"
+  },
+  "Location (Optional)": {
+    "id": "Lokasi (Opsional)",
+    "en": "Location (Optional)"
+  },
+  "Machine Learning Specialization": {
+    "id": "Machine Learning Specialization",
+    "en": "Machine Learning Specialization"
+  },
+  "Magna Cum Laude, Dean's List, etc.": {
+    "id": "Magna Cum Laude, Daftar Dekan, dll.",
+    "en": "Magna Cum Laude, Dean's List, etc."
+  },
+  "Main navigation": {
+    "id": "Navigasi utama",
+    "en": "Main navigation"
+  },
+  "Make admin": {
+    "id": "Jadikan admin",
+    "en": "Make admin"
+  },
+  "Make it stronger": {
+    "id": "Perkuat",
+    "en": "Make it stronger"
+  },
+  "Make your experience count.": {
+    "id": "Jadikan pengalaman Anda berarti.",
+    "en": "Make your experience count."
+  },
+  "Make your next move with confidence": {
+    "id": "Ambil langkah berikutnya dengan percaya diri",
+    "en": "Make your next move with confidence"
+  },
+  "Manage accounts, ATS templates, and review administrative activity.": {
+    "id": "Kelola akun, templat ATS, dan tinjau aktivitas administratif.",
+    "en": "Manage accounts, ATS templates, and review administrative activity."
+  },
+  "Manage safe, single-column layouts available in CV Builder.": {
+    "id": "Kelola tata letak satu kolom yang aman yang tersedia di CV Builder.",
+    "en": "Manage safe, single-column layouts available in CV Builder."
+  },
+  "March": {
+    "id": "Maret",
+    "en": "March"
+  },
+  "Mari kita kenalan dengan CV Generator. Tutorial ini akan memandu Anda membuat CV ATS-friendly dalam hitungan menit. Klik \"Next\" untuk mulai!": {
+    "id": "Mari kita kenalan dengan CV Generator. Tutorial ini akan memandu Anda membuat CV ATS-friendly dalam hitungan menit. Klik \"Next\" untuk mulai!",
+    "en": "Let's get to know CV Generator. This tutorial will guide you to create an ATS-friendly CV in minutes. Click \"Next\" to start!"
+  },
+  "Match Rate": {
+    "id": "Tingkat Kecocokan",
+    "en": "Match Rate"
+  },
+  "matches found": {
+    "id": "kecocokan ditemukan",
+    "en": "matches found"
+  },
+  "Maximum file size:": {
+    "id": "Ukuran file maksimum:",
+    "en": "Maximum file size:"
+  },
+  "May": {
+    "id": "Mei",
+    "en": "May"
+  },
+  "MB": {
+    "id": "MB",
+    "en": "MB"
+  },
+  "Method not implemented.": {
+    "id": "Metode belum diimplementasikan.",
+    "en": "Method not implemented."
+  },
+  "Missing Information": {
+    "id": "Informasi yang Hilang",
+    "en": "Missing Information"
+  },
+  "ML123456": {
+    "id": "ML123456",
+    "en": "ML123456"
+  },
+  "Mobile navigation": {
+    "id": "Navigasi seluler",
+    "en": "Mobile navigation"
+  },
+  "Modern": {
+    "id": "Modern",
+    "en": "Modern"
+  },
+  "Modules Taken": {
+    "id": "Modul yang Diambil",
+    "en": "Modules Taken"
+  },
+  "Month": {
+    "id": "Bulan",
+    "en": "Month"
+  },
+  "Monthly Upload Trends": {
+    "id": "Tren Unggahan Bulanan",
+    "en": "Monthly Upload Trends"
+  },
+  "More": {
+    "id": "Lainnya",
+    "en": "More"
+  },
+  "More navigation options": {
+    "id": "Opsi navigasi lainnya",
+    "en": "More navigation options"
+  },
+  "Mulai dengan mengisi nama, kontak (email, phone, LinkedIn), dan professional summary Anda.": {
+    "id": "Mulai dengan mengisi nama, kontak (email, phone, LinkedIn), dan professional summary Anda.",
+    "en": "Start by filling in your name, contact details (email, phone, LinkedIn), and your professional summary."
+  },
+  "My CVs": {
+    "id": "CV Saya",
+    "en": "My CVs"
+  },
+  "My Evaluation Results": {
+    "id": "Hasil Evaluasi Saya",
+    "en": "My Evaluation Results"
+  },
+  "Name": {
+    "id": "Nama",
+    "en": "Name"
+  },
+  "Name (A-Z)": {
+    "id": "Nama (A-Z)",
+    "en": "Name (A-Z)"
+  },
+  "Name and email are required fields": {
+    "id": "Nama dan email adalah kolom wajib",
+    "en": "Name and email are required fields"
+  },
+  "Name, description, and version are required": {
+    "id": "Nama, deskripsi, dan versi wajib diisi",
+    "en": "Name, description, and version are required"
+  },
+  "name, email address, password hash, account status, verification status, and an identifier from Google if you sign in with Google. We do not receive your Google password.": {
+    "id": "nama, alamat email, hash kata sandi, status akun, status verifikasi, dan pengenal dari Google jika Anda masuk dengan Google. Kami tidak menerima kata sandi Google Anda.",
+    "en": "name, email address, password hash, account status, verification status, and an identifier from Google if you sign in with Google. We do not receive your Google password."
+  },
+  "Name:": {
+    "id": "Nama:",
+    "en": "Name:"
+  },
+  "Need attention": {
+    "id": "Perlu perhatian",
+    "en": "Need attention"
+  },
+  "Needs a retry": {
+    "id": "Perlu dicoba lagi",
+    "en": "Needs a retry"
+  },
+  "New password": {
+    "id": "Kata sandi baru",
+    "en": "New password"
+  },
+  "New password must be 12 to 128 characters": {
+    "id": "Kata sandi baru harus 12 hingga 128 karakter",
+    "en": "New password must be 12 to 128 characters"
+  },
+  "New template": {
+    "id": "Template baru",
+    "en": "New template"
+  },
+  "New to Landly?": {
+    "id": "Baru di Landly?",
+    "en": "New to Landly?"
+  },
+  "new_template": {
+    "id": "new_template",
+    "en": "new_template"
+  },
+  "Next": {
+    "id": "Berikutnya",
+    "en": "Next"
+  },
+  "Next page": {
+    "id": "Halaman berikutnya",
+    "en": "Next page"
+  },
+  "Next Steps": {
+    "id": "Langkah Selanjutnya",
+    "en": "Next Steps"
+  },
+  "No": {
+    "id": "Tidak",
+    "en": "No"
+  },
+  "No additional sections added": {
+    "id": "Belum ada bagian tambahan ditambahkan",
+    "en": "No additional sections added"
+  },
+  "No administrative changes have been recorded yet.": {
+    "id": "Belum ada perubahan administratif yang tercatat.",
+    "en": "No administrative changes have been recorded yet."
+  },
+  "No bullets added. Click \"Add Bullet\" to add key points.": {
+    "id": "Belum ada bullet ditambahkan. Klik \"Tambah Bullet\" untuk menambahkan poin kunci.",
+    "en": "No bullets added. Click \"Add Bullet\" to add key points."
+  },
+  "No CV evaluation data available": {
+    "id": "Tidak ada data evaluasi CV",
+    "en": "No CV evaluation data available"
+  },
+  "No CV information could be extracted. Add more detail and try again.": {
+    "id": "Tidak ada informasi CV yang bisa diekstrak. Tambahkan lebih banyak detail dan coba lagi.",
+    "en": "No CV information could be extracted. Add more detail and try again."
+  },
+  "No CV Selected": {
+    "id": "Tidak Ada CV yang Dipilih",
+    "en": "No CV Selected"
+  },
+  "No CVs generated yet": {
+    "id": "Belum ada CV yang dibuat",
+    "en": "No CVs generated yet"
+  },
+  "No document data available": {
+    "id": "Tidak ada data dokumen",
+    "en": "No document data available"
+  },
+  "No evaluation data available": {
+    "id": "Tidak ada data evaluasi",
+    "en": "No evaluation data available"
+  },
+  "No evaluations found for this browser": {
+    "id": "Tidak ada evaluasi ditemukan untuk browser ini",
+    "en": "No evaluations found for this browser"
+  },
+  "No job descriptions found": {
+    "id": "Tidak ada deskripsi pekerjaan ditemukan",
+    "en": "No job descriptions found"
+  },
+  "No job grade data available": {
+    "id": "Tidak ada data jenjang jabatan",
+    "en": "No job grade data available"
+  },
+  "No organisational experience added": {
+    "id": "Belum ada pengalaman organisasi ditambahkan",
+    "en": "No organisational experience added"
+  },
+  "No organisational experience added yet. Add volunteer work, memberships, or leadership roles.": {
+    "id": "Belum ada pengalaman organisasi ditambahkan. Tambahkan kerja sukarela, keanggotaan, atau peran kepemimpinan.",
+    "en": "No organisational experience added yet. Add volunteer work, memberships, or leadership roles."
+  },
+  "No results found": {
+    "id": "Tidak ada hasil ditemukan",
+    "en": "No results found"
+  },
+  "No reviews match your search": {
+    "id": "Tidak ada ulasan yang cocok dengan pencarian Anda",
+    "en": "No reviews match your search"
+  },
+  "No seniority data available": {
+    "id": "Tidak ada data senioritas",
+    "en": "No seniority data available"
+  },
+  "No templates yet": {
+    "id": "Belum ada templat",
+    "en": "No templates yet"
+  },
+  "No upload trend data available": {
+    "id": "Tidak ada data tren unggahan",
+    "en": "No upload trend data available"
+  },
+  "No users found": {
+    "id": "Tidak ada pengguna ditemukan",
+    "en": "No users found"
+  },
+  "No. A readable CV helps communicate your experience, but applicant tracking systems and employer requirements vary. AI scores are estimates, not hiring decisions or guarantees of an interview.": {
+    "id": "Tidak. CV yang mudah dibaca membantu menyampaikan pengalaman Anda, tetapi sistem pelacakan pelamar dan persyaratan pemberi kerja bervariasi. Skor AI hanyalah perkiraan, bukan keputusan perekrutan atau jaminan wawancara.",
+    "en": "No. A readable CV helps communicate your experience, but applicant tracking systems and employer requirements vary. AI scores are estimates, not hiring decisions or guarantees of an interview."
+  },
+  "No. Leave the job description empty for feedback on document quality. Paste a job description or choose a saved role to also compare the CV with its stated requirements.": {
+    "id": "Tidak. Biarkan deskripsi pekerjaan kosong untuk mendapatkan masukan tentang kualitas dokumen. Tempelkan deskripsi pekerjaan atau pilih posisi tersimpan untuk juga membandingkan CV dengan persyaratan yang tercantum.",
+    "en": "No. Leave the job description empty for feedback on document quality. Paste a job description or choose a saved role to also compare the CV with its stated requirements."
+  },
+  "Not allowed by CORS": {
+    "id": "Tidak diizinkan oleh CORS",
+    "en": "Not allowed by CORS"
+  },
+  "Not provided": {
+    "id": "Belum diisi",
+    "en": "Not provided"
+  },
+  "Not saved": {
+    "id": "Belum disimpan",
+    "en": "Not saved"
+  },
+  "November": {
+    "id": "November",
+    "en": "November"
+  },
+  "October": {
+    "id": "Oktober",
+    "en": "October"
+  },
+  "of": {
+    "id": "dari",
+    "en": "of"
+  },
+  "Online Courses": {
+    "id": "Kursus Online",
+    "en": "Online Courses"
+  },
+  "Only completed results can be viewed": {
+    "id": "Hanya hasil yang selesai dapat dilihat",
+    "en": "Only completed results can be viewed"
+  },
+  "Open HTML version": {
+    "id": "Buka versi HTML",
+    "en": "Open HTML version"
+  },
+  "Open in new tab": {
+    "id": "Buka di tab baru",
+    "en": "Open in new tab"
+  },
+  "Open in New Tab": {
+    "id": "Buka di Tab Baru",
+    "en": "Open in New Tab"
+  },
+  "Open Source Task Manager": {
+    "id": "Manajer Tugas Open Source",
+    "en": "Open Source Task Manager"
+  },
+  "Open the link in the email to verify your address, then sign in.": {
+    "id": "Buka tautan di email untuk memverifikasi alamat Anda, lalu masuk.",
+    "en": "Open the link in the email to verify your address, then sign in."
+  },
+  "Optional · target feedback and matches to a specific role": {
+    "id": "Opsional · sasarkan masukan dan kecocokan ke posisi tertentu",
+    "en": "Optional · target feedback and matches to a specific role"
+  },
+  "or": {
+    "id": "atau",
+    "en": "or"
+  },
+  "OR": {
+    "id": "ATAU",
+    "en": "OR"
+  },
+  "Organisation": {
+    "id": "Organisasi",
+    "en": "Organisation"
+  },
+  "organisational": {
+    "id": "organisasi",
+    "en": "organisational"
+  },
+  "Organization": {
+    "id": "Organisasi",
+    "en": "Organization"
+  },
+  "others": {
+    "id": "lainnya",
+    "en": "others"
+  },
+  "Others": {
+    "id": "Lainnya",
+    "en": "Others"
+  },
+  "Overall Match Score": {
+    "id": "Skor Kecocokan Keseluruhan",
+    "en": "Overall Match Score"
+  },
+  "Overall Score": {
+    "id": "Skor Keseluruhan",
+    "en": "Overall Score"
+  },
+  "Overview of your professional profile": {
+    "id": "Ringkasan profil profesional Anda",
+    "en": "Overview of your professional profile"
+  },
+  "Page": {
+    "id": "Halaman",
+    "en": "Page"
+  },
+  "Password": {
+    "id": "Kata Sandi",
+    "en": "Password"
+  },
+  "Password must be 12 to 128 characters": {
+    "id": "Kata sandi harus 12 hingga 128 karakter",
+    "en": "Password must be 12 to 128 characters"
+  },
+  "Password reset link is invalid or expired": {
+    "id": "Tautan atur ulang kata sandi tidak valid atau telah kedaluwarsa",
+    "en": "Password reset link is invalid or expired"
+  },
+  "Password updated": {
+    "id": "Kata sandi diperbarui",
+    "en": "Password updated"
+  },
+  "Password updated. Sign in with your new password.": {
+    "id": "Kata sandi diperbarui. Masuk dengan kata sandi baru Anda.",
+    "en": "Password updated. Sign in with your new password."
+  },
+  "Passwords do not match.": {
+    "id": "Kata sandi tidak cocok.",
+    "en": "Passwords do not match."
+  },
+  "Paste a job description": {
+    "id": "Tempelkan deskripsi pekerjaan",
+    "en": "Paste a job description"
+  },
+  "Paste job description": {
+    "id": "Tempel deskripsi pekerjaan",
+    "en": "Paste job description"
+  },
+  "Paste the role responsibilities and requirements": {
+    "id": "Tempelkan tanggung jawab dan persyaratan posisi",
+    "en": "Paste the role responsibilities and requirements"
+  },
+  "PDF": {
+    "id": "PDF",
+    "en": "PDF"
+  },
+  "PDF contains no readable text": {
+    "id": "PDF tidak berisi teks yang dapat dibaca",
+    "en": "PDF contains no readable text"
+  },
+  "PDF page margin": {
+    "id": "Margin halaman PDF",
+    "en": "PDF page margin"
+  },
+  "PDF Preview": {
+    "id": "Pratinjau PDF",
+    "en": "PDF Preview"
+  },
+  "PDF, DOCX or TXT · up to 10 MB": {
+    "id": "PDF, DOCX atau TXT · hingga 10 MB",
+    "en": "PDF, DOCX or TXT · up to 10 MB"
+  },
+  "PDF, DOCX, or TXT · Maximum 10MB": {
+    "id": "PDF, DOCX, atau TXT · Maksimal 10MB",
+    "en": "PDF, DOCX, or TXT · Maximum 10MB"
+  },
+  "Personal Information": {
+    "id": "Informasi Pribadi",
+    "en": "Personal Information"
+  },
+  "Personal Project": {
+    "id": "Proyek Pribadi",
+    "en": "Personal Project"
+  },
+  "personalInfo.contacts": {
+    "id": "personalInfo.contacts",
+    "en": "personalInfo.contacts"
+  },
+  "Please enter a section title.": {
+    "id": "Silakan masukkan judul bagian.",
+    "en": "Please enter a section title."
+  },
+  "Please fill in all required fields": {
+    "id": "Silakan isi semua kolom wajib",
+    "en": "Please fill in all required fields"
+  },
+  "Please provide slug, title, and company name": {
+    "id": "Silakan isi slug, judul, dan nama perusahaan",
+    "en": "Please provide slug, title, and company name"
+  },
+  "Please shorten the source to 40,000 characters or fewer.": {
+    "id": "Mohon persingkat sumber menjadi 40.000 karakter atau kurang.",
+    "en": "Please shorten the source to 40,000 characters or fewer."
+  },
+  "Please try again.": {
+    "id": "Silakan coba lagi.",
+    "en": "Please try again."
+  },
+  "Please try again. Your existing reviews have not been changed.": {
+    "id": "Silakan coba lagi. Ulasan Anda yang sudah ada tidak diubah.",
+    "en": "Please try again. Your existing reviews have not been changed."
+  },
+  "Please upload a CV to continue.": {
+    "id": "Silakan unggah CV untuk melanjutkan.",
+    "en": "Please upload a CV to continue."
+  },
+  "Please upload a valid JSON file.": {
+    "id": "Silakan unggah file JSON yang valid.",
+    "en": "Please upload a valid JSON file."
+  },
+  "Please wait before generating more AI drafts.": {
+    "id": "Mohon tunggu sebelum membuat lebih banyak draf AI.",
+    "en": "Please wait before generating more AI drafts."
+  },
+  "Please wait while we create your resume.": {
+    "id": "Mohon tunggu sementara kami membuat CV Anda.",
+    "en": "Please wait while we create your resume."
+  },
+  "Practical tools for your job search": {
+    "id": "Alat praktis untuk pencarian kerja Anda",
+    "en": "Practical tools for your job search"
+  },
+  "Prepare my draft": {
+    "id": "Siapkan draf saya",
+    "en": "Prepare my draft"
+  },
+  "Preparing your draft…": {
+    "id": "Menyiapkan draf Anda…",
+    "en": "Preparing your draft…"
+  },
+  "Preparing your review": {
+    "id": "Menyiapkan ulasan Anda",
+    "en": "Preparing your review"
+  },
+  "Prevent abuse, troubleshoot errors, maintain service security, and understand basic product usage.": {
+    "id": "Mencegah penyalahgunaan, mendiagnosis error, menjaga keamanan layanan, dan memahami penggunaan produk dasar.",
+    "en": "Prevent abuse, troubleshoot errors, maintain service security, and understand basic product usage."
+  },
+  "Preview": {
+    "id": "Pratinjau",
+    "en": "Preview"
+  },
+  "Preview Failed": {
+    "id": "Pratinjau Gagal",
+    "en": "Preview Failed"
+  },
+  "Previous": {
+    "id": "Sebelumnya",
+    "en": "Previous"
+  },
+  "Previous page": {
+    "id": "Halaman sebelumnya",
+    "en": "Previous page"
+  },
+  "Primary Skills": {
+    "id": "Keahlian Utama",
+    "en": "Primary Skills"
+  },
+  "Privacy": {
+    "id": "Privasi",
+    "en": "Privacy"
+  },
+  "Privacy Policy": {
+    "id": "Kebijakan Privasi",
+    "en": "Privacy Policy"
+  },
+  "Privacy Policy | Landly": {
+    "id": "Kebijakan Privasi | Landly",
+    "en": "Privacy Policy | Landly"
+  },
+  "processing": {
+    "id": "Diproses",
+    "en": "processing"
+  },
+  "Processing": {
+    "id": "Memproses",
+    "en": "Processing"
+  },
+  "Processing Success": {
+    "id": "Pemrosesan Berhasil",
+    "en": "Processing Success"
+  },
+  "Product Utilization": {
+    "id": "Pemanfaatan Produk",
+    "en": "Product Utilization"
+  },
+  "professional": {
+    "id": "profesional",
+    "en": "professional"
+  },
+  "Professional": {
+    "id": "Pengalaman Kerja",
+    "en": "Professional"
+  },
+  "Professional Summary": {
+    "id": "Ringkasan Profesional",
+    "en": "Professional Summary"
+  },
+  "Progress Tracker": {
+    "id": "Pelacak Progres",
+    "en": "Progress Tracker"
+  },
+  "Progress:": {
+    "id": "Progres:",
+    "en": "Progress:"
+  },
+  "project": {
+    "id": "proyek",
+    "en": "project"
+  },
+  "Project document not found": {
+    "id": "Dokumen proyek tidak ditemukan",
+    "en": "Project document not found"
+  },
+  "Project Score": {
+    "id": "Skor Proyek",
+    "en": "Project Score"
+  },
+  "Project Title": {
+    "id": "Judul Proyek",
+    "en": "Project Title"
+  },
+  "Project URL (Optional)": {
+    "id": "URL Proyek (Opsional)",
+    "en": "Project URL (Optional)"
+  },
+  "Projects": {
+    "id": "Proyek",
+    "en": "Projects"
+  },
+  "Projects with tags and links": {
+    "id": "Proyek dengan tag dan tautan",
+    "en": "Projects with tags and links"
+  },
+  "Provide accurate account information, keep your sign-in credentials secure, and use only accounts you are authorized to access. You are responsible for activity under your account. Contact us promptly if you believe your account has been accessed without permission.": {
+    "id": "Berikan informasi akun yang akurat, jaga kerahasiaan kredensial masuk Anda, dan hanya gunakan akun yang berhak Anda akses. Anda bertanggung jawab atas aktivitas pada akun Anda. Segera hubungi kami jika Anda menduga akun Anda diakses tanpa izin.",
+    "en": "Provide accurate account information, keep your sign-in credentials secure, and use only accounts you are authorized to access. You are responsible for activity under your account. Contact us promptly if you believe your account has been accessed without permission."
+  },
+  "Provide either a CV file or text, not both.": {
+    "id": "Berikan file CV atau teks, jangan keduanya.",
+    "en": "Provide either a CV file or text, not both."
+  },
+  "Provided": {
+    "id": "Disediakan",
+    "en": "Provided"
+  },
+  "Publication Title": {
+    "id": "Judul Publikasi",
+    "en": "Publication Title"
+  },
+  "Publication URL (Optional)": {
+    "id": "URL Publikasi (Opsional)",
+    "en": "Publication URL (Optional)"
+  },
+  "Publications": {
+    "id": "Publikasi",
+    "en": "Publications"
+  },
+  "Quality Metrics": {
+    "id": "Metrik Kualitas",
+    "en": "Quality Metrics"
+  },
+  "Query Parameters:": {
+    "id": "Parameter Kueri:",
+    "en": "Query Parameters:"
+  },
+  "Questions about AI CV review": {
+    "id": "Pertanyaan tentang tinjauan CV AI",
+    "en": "Questions about AI CV review"
+  },
+  "Queue Active": {
+    "id": "Antrean Aktif",
+    "en": "Queue Active"
+  },
+  "Queue Overview": {
+    "id": "Ringkasan Antrean",
+    "en": "Queue Overview"
+  },
+  "Queue Status": {
+    "id": "Status Antrean",
+    "en": "Queue Status"
+  },
+  "queued": {
+    "id": "Dalam antrean",
+    "en": "queued"
+  },
+  "Queued": {
+    "id": "Dalam Antrean",
+    "en": "Queued"
+  },
+  "Quick Select": {
+    "id": "Pilih Cepat",
+    "en": "Quick Select"
+  },
+  "Rate limit exceeded, please try again later": {
+    "id": "Batas permintaan terlampaui, silakan coba lagi nanti",
+    "en": "Rate limit exceeded, please try again later"
+  },
+  "Reactivate": {
+    "id": "Aktifkan Kembali",
+    "en": "Reactivate"
+  },
+  "Reactivate {value0}? They will be able to sign in again.": {
+    "id": "Aktifkan kembali {value0}? Mereka akan dapat masuk kembali.",
+    "en": "Reactivate {value0}? They will be able to sign in again."
+  },
+  "Read the full CV analysis": {
+    "id": "Baca analisis CV lengkap",
+    "en": "Read the full CV analysis"
+  },
+  "Read the terms for using Landly CV review, job matching, and CV creation services.": {
+    "id": "Baca ketentuan penggunaan layanan review CV, pencocokan pekerjaan, dan pembuatan CV Landly.",
+    "en": "Read the terms for using Landly CV review, job matching, and CV creation services."
+  },
+  "Read your full analysis below for the available recommendations.": {
+    "id": "Baca analisis lengkap Anda di bawah untuk rekomendasi yang tersedia.",
+    "en": "Read your full analysis below for the available recommendations."
+  },
+  "Ready to Generate?": {
+    "id": "Siap Membuat?",
+    "en": "Ready to Generate?"
+  },
+  "Ready to prepare ·": {
+    "id": "Siap disiapkan ·",
+    "en": "Ready to prepare ·"
+  },
+  "Ready to read": {
+    "id": "Siap dibaca",
+    "en": "Ready to read"
+  },
+  "Receive practical suggestions to strengthen your CV": {
+    "id": "Terima saran praktis untuk memperkuat CV Anda",
+    "en": "Receive practical suggestions to strengthen your CV"
+  },
+  "Recent admin activity": {
+    "id": "Aktivitas admin terbaru",
+    "en": "Recent admin activity"
+  },
+  "Recent Data": {
+    "id": "Data Terbaru",
+    "en": "Recent Data"
+  },
+  "Recent Evaluations": {
+    "id": "Evaluasi Terbaru",
+    "en": "Recent Evaluations"
+  },
+  "Recent reviews": {
+    "id": "Review terbaru",
+    "en": "Recent reviews"
+  },
+  "Recent Uploads": {
+    "id": "Unggahan Terbaru",
+    "en": "Recent Uploads"
+  },
+  "References": {
+    "id": "Referensi",
+    "en": "References"
+  },
+  "Refresh": {
+    "id": "Segarkan",
+    "en": "Refresh"
+  },
+  "Refresh audit activity": {
+    "id": "Segarkan aktivitas audit",
+    "en": "Refresh audit activity"
+  },
+  "Refreshing...": {
+    "id": "Menyegarkan...",
+    "en": "Refreshing..."
+  },
+  "Remove": {
+    "id": "Hapus",
+    "en": "Remove"
+  },
+  "Remove admin": {
+    "id": "Hapus admin",
+    "en": "Remove admin"
+  },
+  "Remove administrator access from {value0}?": {
+    "id": "Cabut akses administrator dari {value0}?",
+    "en": "Remove administrator access from {value0}?"
+  },
+  "Remove File": {
+    "id": "Hapus File",
+    "en": "Remove File"
+  },
+  "Remove selected CV": {
+    "id": "Hapus CV Terpilih",
+    "en": "Remove selected CV"
+  },
+  "Request Body:": {
+    "id": "Isi Permintaan:",
+    "en": "Request Body:"
+  },
+  "requirements": {
+    "id": "persyaratan",
+    "en": "requirements"
+  },
+  "Requirements": {
+    "id": "Persyaratan",
+    "en": "Requirements"
+  },
+  "Resend verification email": {
+    "id": "Kirim ulang email verifikasi",
+    "en": "Resend verification email"
+  },
+  "RESEND_API_KEY is required when EMAIL_PROVIDER=resend": {
+    "id": "RESEND_API_KEY wajib diisi saat EMAIL_PROVIDER=resend",
+    "en": "RESEND_API_KEY is required when EMAIL_PROVIDER=resend"
+  },
+  "Reset": {
+    "id": "Atur Ulang",
+    "en": "Reset"
+  },
+  "Reset token is missing. Request a new link.": {
+    "id": "Token atur ulang tidak ditemukan. Minta tautan baru.",
+    "en": "Reset token is missing. Request a new link."
+  },
+  "Reset your password": {
+    "id": "Atur Ulang Kata Sandi Anda",
+    "en": "Reset your password"
+  },
+  "Responsibility Match": {
+    "id": "Kecocokan Tanggung Jawab",
+    "en": "Responsibility Match"
+  },
+  "results": {
+    "id": "hasil",
+    "en": "results"
+  },
+  "Results": {
+    "id": "Hasil",
+    "en": "Results"
+  },
+  "Retrieved": {
+    "id": "Diambil",
+    "en": "Retrieved"
+  },
+  "Retrived": {
+    "id": "Diambil",
+    "en": "Retrived"
+  },
+  "Retry": {
+    "id": "Coba Lagi",
+    "en": "Retry"
+  },
+  "Retry save": {
+    "id": "Coba Simpan Lagi",
+    "en": "Retry save"
+  },
+  "Review": {
+    "id": "Tinjau",
+    "en": "Review"
+  },
+  "Review a CV": {
+    "id": "Review CV",
+    "en": "Review a CV"
+  },
+  "Review all sections before generating your resume": {
+    "id": "Tinjau semua bagian sebelum membuat CV Anda",
+    "en": "Review all sections before generating your resume"
+  },
+  "Review another CV": {
+    "id": "Review CV lain",
+    "en": "Review another CV"
+  },
+  "Review complete": {
+    "id": "Review selesai",
+    "en": "Review complete"
+  },
+  "Review generated in {value0}": {
+    "id": "Ulasan dibuat dalam {value0}",
+    "en": "Review generated in {value0}"
+  },
+  "Review history": {
+    "id": "Riwayat review",
+    "en": "Review history"
+  },
+  "Review History": {
+    "id": "Riwayat Ulasan",
+    "en": "Review History"
+  },
+  "Review in progress": {
+    "id": "Review sedang berlangsung",
+    "en": "Review in progress"
+  },
+  "Review interrupted": {
+    "id": "Review terhenti",
+    "en": "Review interrupted"
+  },
+  "Review library": {
+    "id": "Pustaka review",
+    "en": "Review library"
+  },
+  "Review my CV": {
+    "id": "Review CV saya",
+    "en": "Review my CV"
+  },
+  "Review score": {
+    "id": "Skor review",
+    "en": "Review score"
+  },
+  "Review skills, experience, and qualifications": {
+    "id": "Tinjau keterampilan, pengalaman, dan kualifikasi",
+    "en": "Review skills, experience, and qualifications"
+  },
+  "Review the template details and try again.": {
+    "id": "Periksa detail template dan coba lagi.",
+    "en": "Review the template details and try again."
+  },
+  "Review unavailable": {
+    "id": "Review tidak tersedia",
+    "en": "Review unavailable"
+  },
+  "Review your CV": {
+    "id": "Review CV Anda",
+    "en": "Review your CV"
+  },
+  "Review your CV, explore job matches, and build an ATS-friendly resume with Landly.": {
+    "id": "Review CV Anda, jelajahi kecocokan kerja, dan buat CV ramah ATS dengan Landly.",
+    "en": "Review your CV, explore job matches, and build an ATS-friendly resume with Landly."
+  },
+  "Review Your Resume": {
+    "id": "Review CV Anda",
+    "en": "Review Your Resume"
+  },
+  "Revisit your feedback, find what needs attention, and turn your experience into a stronger CV.": {
+    "id": "Tinjau kembali masukan Anda, temukan hal yang perlu diperhatikan, dan ubah pengalaman Anda menjadi CV yang lebih kuat.",
+    "en": "Revisit your feedback, find what needs attention, and turn your experience into a stronger CV."
+  },
+  "Role": {
+    "id": "Peran",
+    "en": "Role"
+  },
+  "Role must be user or admin": {
+    "id": "Peran harus user atau admin",
+    "en": "Role must be user or admin"
+  },
+  "Safe preview sample": {
+    "id": "Contoh pratinjau aman",
+    "en": "Safe preview sample"
+  },
+  "Sample name": {
+    "id": "Nama contoh",
+    "en": "Sample name"
+  },
+  "Sample role": {
+    "id": "Peran contoh",
+    "en": "Sample role"
+  },
+  "Sample summary": {
+    "id": "Ringkasan contoh",
+    "en": "Sample summary"
+  },
+  "San Francisco, CA": {
+    "id": "San Francisco, CA",
+    "en": "San Francisco, CA"
+  },
+  "Save changes": {
+    "id": "Simpan perubahan",
+    "en": "Save changes"
+  },
+  "Saving...": {
+    "id": "Menyimpan...",
+    "en": "Saving..."
+  },
+  "Scaling Node.js Applications: Best Practices": {
+    "id": "Menykalakan Aplikasi Node.js: Praktik Terbaik",
+    "en": "Scaling Node.js Applications: Best Practices"
+  },
+  "Scoring Weights": {
+    "id": "Bobot Penilaian",
+    "en": "Scoring Weights"
+  },
+  "Search account details, inspect verification and role, and manage access.": {
+    "id": "Cari detail akun, periksa verifikasi dan peran, serta kelola akses.",
+    "en": "Search account details, inspect verification and role, and manage access."
+  },
+  "Search API failed after all retries": {
+    "id": "Search API gagal setelah semua upaya ulang",
+    "en": "Search API failed after all retries"
+  },
+  "Search by Name": {
+    "id": "Cari berdasarkan Nama",
+    "en": "Search by Name"
+  },
+  "Search job descriptions...": {
+    "id": "Cari deskripsi pekerjaan...",
+    "en": "Search job descriptions..."
+  },
+  "Search name or email": {
+    "id": "Cari nama atau email",
+    "en": "Search name or email"
+  },
+  "Search reviews by name or ID": {
+    "id": "Cari review berdasarkan nama atau ID",
+    "en": "Search reviews by name or ID"
+  },
+  "Search users": {
+    "id": "Cari pengguna",
+    "en": "Search users"
+  },
+  "Search:": {
+    "id": "Cari:",
+    "en": "Search:"
+  },
+  "Section Added": {
+    "id": "Bagian Ditambahkan",
+    "en": "Section Added"
+  },
+  "Section Navigation": {
+    "id": "Navigasi Bagian",
+    "en": "Section Navigation"
+  },
+  "Section Title": {
+    "id": "Judul Bagian",
+    "en": "Section Title"
+  },
+  "Section Title (e.g., Education)": {
+    "id": "Judul Bagian (mis. Pendidikan)",
+    "en": "Section Title (e.g., Education)"
+  },
+  "Section Title (e.g., Volunteer Experience)": {
+    "id": "Judul Bagian (mis. Pengalaman Sukarela)",
+    "en": "Section Title (e.g., Volunteer Experience)"
+  },
+  "Section Title (e.g., Work Experience)": {
+    "id": "Judul Bagian (mis. Pengalaman Kerja)",
+    "en": "Section Title (e.g., Work Experience)"
+  },
+  "sections": {
+    "id": "bagian",
+    "en": "sections"
+  },
+  "Security token missing or expired. Refresh the page and try again.": {
+    "id": "Token keamanan tidak ada atau kedaluwarsa. Muat ulang halaman dan coba lagi.",
+    "en": "Security token missing or expired. Refresh the page and try again."
+  },
+  "See how your data is used.": {
+    "id": "Lihat bagaimana data Anda digunakan.",
+    "en": "See how your data is used."
+  },
+  "See insights and relevant job matches": {
+    "id": "Lihat wawasan dan kecocokan kerja yang relevan",
+    "en": "See insights and relevant job matches"
+  },
+  "Select a CV section...": {
+    "id": "Pilih bagian CV...",
+    "en": "Select a CV section..."
+  },
+  "Select a CV to preview": {
+    "id": "Pilih CV untuk pratinjau",
+    "en": "Select a CV to preview"
+  },
+  "Select a template": {
+    "id": "Pilih templat",
+    "en": "Select a template"
+  },
+  "Select date": {
+    "id": "Pilih tanggal",
+    "en": "Select date"
+  },
+  "Select date range": {
+    "id": "Pilih rentang tanggal",
+    "en": "Select date range"
+  },
+  "Select status": {
+    "id": "Pilih status",
+    "en": "Select status"
+  },
+  "Select template": {
+    "id": "Pilih templat",
+    "en": "Select template"
+  },
+  "Selected": {
+    "id": "Dipilih",
+    "en": "Selected"
+  },
+  "Selected ATS template is unavailable. Choose an active template and try again.": {
+    "id": "Template ATS yang dipilih tidak tersedia. Pilih template yang aktif dan coba lagi.",
+    "en": "Selected ATS template is unavailable. Choose an active template and try again."
+  },
+  "Send account-related messages such as verification and password-reset emails.": {
+    "id": "Mengirim pesan terkait akun seperti email verifikasi dan pengaturan ulang kata sandi.",
+    "en": "Send account-related messages such as verification and password-reset emails."
+  },
+  "Send reset link": {
+    "id": "Kirim tautan atur ulang",
+    "en": "Send reset link"
+  },
+  "Sending…": {
+    "id": "Mengirim…",
+    "en": "Sending…"
+  },
+  "Senior Backend Engineer": {
+    "id": "Senior Backend Engineer",
+    "en": "Senior Backend Engineer"
+  },
+  "Seniority Level": {
+    "id": "Tingkat Senioritas",
+    "en": "Seniority Level"
+  },
+  "September": {
+    "id": "September",
+    "en": "September"
+  },
+  "Session and security information:": {
+    "id": "Informasi sesi dan keamanan:",
+    "en": "Session and security information:"
+  },
+  "Session expired. Please sign in again.": {
+    "id": "Sesi berakhir. Silakan masuk kembali.",
+    "en": "Session expired. Please sign in again."
+  },
+  "session identifiers stored in a secure, HTTP-only cookie, session expiry, and limited request/security logs used to operate and protect the service.": {
+    "id": "pengenal sesi yang disimpan dalam cookie aman khusus HTTP (HTTP-only), masa berlaku sesi, serta log permintaan/keamanan terbatas yang digunakan untuk menjalankan dan melindungi layanan.",
+    "en": "session identifiers stored in a secure, HTTP-only cookie, session expiry, and limited request/security logs used to operate and protect the service."
+  },
+  "Session is required": {
+    "id": "Sesi diperlukan",
+    "en": "Session is required"
+  },
+  "Set as Default": {
+    "id": "Jadikan Default",
+    "en": "Set as Default"
+  },
+  "Set EMAIL_FROM to an address on a verified Resend domain": {
+    "id": "Atur EMAIL_FROM ke alamat pada domain Resend terverifikasi",
+    "en": "Set EMAIL_FROM to an address on a verified Resend domain"
+  },
+  "Show": {
+    "id": "Tampilkan",
+    "en": "Show"
+  },
+  "Show more...": {
+    "id": "Tampilkan lebih banyak...",
+    "en": "Show more..."
+  },
+  "Show Preview": {
+    "id": "Tampilkan Pratinjau",
+    "en": "Show Preview"
+  },
+  "Showing": {
+    "id": "Menampilkan",
+    "en": "Showing"
+  },
+  "Sign in": {
+    "id": "Masuk",
+    "en": "Sign in"
+  },
+  "Sign in to Landly": {
+    "id": "Masuk ke Landly",
+    "en": "Sign in to Landly"
+  },
+  "Sign out": {
+    "id": "Keluar",
+    "en": "Sign out"
+  },
+  "Signed out": {
+    "id": "Berhasil keluar",
+    "en": "Signed out"
+  },
+  "Signing in…": {
+    "id": "Sedang masuk…",
+    "en": "Signing in…"
+  },
+  "Signing you in": {
+    "id": "Sedang memasukkan Anda",
+    "en": "Signing you in"
+  },
+  "Simple bullet list": {
+    "id": "Daftar poin sederhana",
+    "en": "Simple bullet list"
+  },
+  "Simple paragraph": {
+    "id": "Paragraf sederhana",
+    "en": "Simple paragraph"
+  },
+  "Skills": {
+    "id": "Keahlian",
+    "en": "Skills"
+  },
+  "Skills (comma separated)": {
+    "id": "Keahlian (dipisahkan koma)",
+    "en": "Skills (comma separated)"
+  },
+  "Skills Match": {
+    "id": "Kecocokan Keahlian",
+    "en": "Skills Match"
+  },
+  "Skip to how Landly works": {
+    "id": "Lewati ke cara kerja Landly",
+    "en": "Skip to how Landly works"
+  },
+  "Skip Tutorial": {
+    "id": "Lewati Tutorial",
+    "en": "Skip Tutorial"
+  },
+  "Slug": {
+    "id": "Slug",
+    "en": "Slug"
+  },
+  "Slug, title, and company are required": {
+    "id": "Slug, judul, dan perusahaan wajib diisi",
+    "en": "Slug, title, and company are required"
+  },
+  "Smart Job Matches": {
+    "id": "Pencocokan Pekerjaan Cerdas",
+    "en": "Smart Job Matches"
+  },
+  "Soft Skills": {
+    "id": "Soft Skills",
+    "en": "Soft Skills"
+  },
+  "Soft Skills:": {
+    "id": "Soft Skills:",
+    "en": "Soft Skills:"
+  },
+  "Software Engineer": {
+    "id": "Software Engineer",
+    "en": "Software Engineer"
+  },
+  "Some features rely on third-party services, including Google sign-in and AI processing providers. Their services may be subject to separate terms and privacy policies. Landly is not responsible for services outside its control.": {
+    "id": "Beberapa fitur bergantung pada layanan pihak ketiga, termasuk Google sign-in dan penyedia pemrosesan AI. Layanan mereka mungkin tunduk pada ketentuan dan kebijakan privasi terpisah. Landly tidak bertanggung jawab atas layanan di luar kendalinya.",
+    "en": "Some features rely on third-party services, including Google sign-in and AI processing providers. Their services may be subject to separate terms and privacy policies. Landly is not responsible for services outside its control."
+  },
+  "Something went wrong": {
+    "id": "Terjadi kesalahan",
+    "en": "Something went wrong"
+  },
+  "Something went wrong. Please try again.": {
+    "id": "Terjadi kesalahan. Silakan coba lagi.",
+    "en": "Something went wrong. Please try again."
+  },
+  "Soon": {
+    "id": "Segera",
+    "en": "Soon"
+  },
+  "Sort by": {
+    "id": "Urutkan berdasarkan",
+    "en": "Sort by"
+  },
+  "Sort By": {
+    "id": "Urutkan Berdasarkan",
+    "en": "Sort By"
+  },
+  "Speaking Engagements": {
+    "id": "Kegiatan sebagai Pembicara",
+    "en": "Speaking Engagements"
+  },
+  "Standard · 0.4 in": {
+    "id": "Standar · 0.4 inci",
+    "en": "Standard · 0.4 in"
+  },
+  "Stanford Online (Coursera)": {
+    "id": "Stanford Online (Coursera)",
+    "en": "Stanford Online (Coursera)"
+  },
+  "Start a new evaluation to see results here": {
+    "id": "Mulai evaluasi baru untuk melihat hasil di sini",
+    "en": "Start a new evaluation to see results here"
+  },
+  "Start by creating your first CV": {
+    "id": "Mulai dengan membuat CV pertama Anda",
+    "en": "Start by creating your first CV"
+  },
+  "Start Date": {
+    "id": "Tanggal Mulai",
+    "en": "Start Date"
+  },
+  "Start New Evaluation": {
+    "id": "Mulai Evaluasi Baru",
+    "en": "Start New Evaluation"
+  },
+  "Start with a little help from AI": {
+    "id": "Mulai dengan sedikit bantuan dari AI",
+    "en": "Start with a little help from AI"
+  },
+  "Start with AI": {
+    "id": "Mulai dengan AI",
+    "en": "Start with AI"
+  },
+  "Start with the information you have, make improvements at your own pace, and keep your work organized in your account.": {
+    "id": "Mulai dari informasi yang Anda miliki, lakukan perbaikan sesuai kecepatan Anda sendiri, dan simpan pekerjaan Anda dengan rapi di akun Anda.",
+    "en": "Start with the information you have, make improvements at your own pace, and keep your work organized in your account."
+  },
+  "Start with your basic contact information": {
+    "id": "Mulai dengan informasi kontak dasar Anda",
+    "en": "Start with your basic contact information"
+  },
+  "Status": {
+    "id": "Status",
+    "en": "Status"
+  },
+  "Status:": {
+    "id": "Status:",
+    "en": "Status:"
+  },
+  "Step": {
+    "id": "Langkah",
+    "en": "Step"
+  },
+  "Store your CV drafts and generated documents, process uploads, and provide CV review, matching, and CV generation features.": {
+    "id": "Menyimpan draf CV dan dokumen yang dihasilkan, memproses unggahan, serta menyediakan fitur tinjauan CV, pencocokan, dan pembuatan CV.",
+    "en": "Store your CV drafts and generated documents, process uploads, and provide CV review, matching, and CV generation features."
+  },
+  "Strengths": {
+    "id": "Kekuatan",
+    "en": "Strengths"
+  },
+  "Strong yes": {
+    "id": "Sangat ya",
+    "en": "Strong yes"
+  },
+  "Subtitle (Optional)": {
+    "id": "Subjudul (Opsional)",
+    "en": "Subtitle (Optional)"
+  },
+  "Subtitle or organization": {
+    "id": "Subjudul atau organisasi",
+    "en": "Subtitle or organization"
+  },
+  "Subtle blue headings with the same ATS-friendly structure.": {
+    "id": "Judul biru lembut dengan struktur ramah ATS yang sama.",
+    "en": "Subtle blue headings with the same ATS-friendly structure."
+  },
+  "Success": {
+    "id": "Berhasil",
+    "en": "Success"
+  },
+  "Successfully analyzed": {
+    "id": "Berhasil dianalisis",
+    "en": "Successfully analyzed"
+  },
+  "Suggested Roles": {
+    "id": "Posisi yang Disarankan",
+    "en": "Suggested Roles"
+  },
+  "Summary:": {
+    "id": "Ringkasan:",
+    "en": "Summary:"
+  },
+  "Supported File Types": {
+    "id": "Jenis File yang Didukung",
+    "en": "Supported File Types"
+  },
+  "Supported formats: PDF, DOCX, TXT (Max 10MB)": {
+    "id": "Format yang didukung: PDF, DOCX, TXT (Maks 10MB)",
+    "en": "Supported formats: PDF, DOCX, TXT (Max 10MB)"
+  },
+  "System Reliability": {
+    "id": "Keandalan Sistem",
+    "en": "System Reliability"
+  },
+  "System Statistics": {
+    "id": "Statistik Sistem",
+    "en": "System Statistics"
+  },
+  "Tags / Technologies": {
+    "id": "Tag / Teknologi",
+    "en": "Tags / Technologies"
+  },
+  "Tech Blog Weekly": {
+    "id": "Tech Blog Weekly",
+    "en": "Tech Blog Weekly"
+  },
+  "Tech Corp": {
+    "id": "Tech Corp",
+    "en": "Tech Corp"
+  },
+  "Tech Corp Inc.": {
+    "id": "Tech Corp Inc.",
+    "en": "Tech Corp Inc."
+  },
+  "Tech Mentor": {
+    "id": "Mentor Teknis",
+    "en": "Tech Mentor"
+  },
+  "Technical Requirements": {
+    "id": "Persyaratan Teknis",
+    "en": "Technical Requirements"
+  },
+  "Technical Skills": {
+    "id": "Keahlian Teknis",
+    "en": "Technical Skills"
+  },
+  "Technical:": {
+    "id": "Teknis:",
+    "en": "Technical:"
+  },
+  "Tell us a little more — at least 30 characters.": {
+    "id": "Ceritakan sedikit lebih banyak — minimal 30 karakter.",
+    "en": "Tell us a little more — at least 30 characters."
+  },
+  "Tell us about yourself": {
+    "id": "Ceritakan tentang diri Anda",
+    "en": "Tell us about yourself"
+  },
+  "Tell your story": {
+    "id": "Ceritakan kisah Anda",
+    "en": "Tell your story"
+  },
+  "Template": {
+    "id": "Template",
+    "en": "Template"
+  },
+  "Template activated": {
+    "id": "Template diaktifkan",
+    "en": "Template activated"
+  },
+  "Template archived": {
+    "id": "Template diarsipkan",
+    "en": "Template archived"
+  },
+  "Template created": {
+    "id": "Template dibuat",
+    "en": "Template created"
+  },
+  "Template deactivated": {
+    "id": "Template dinonaktifkan",
+    "en": "Template deactivated"
+  },
+  "Template Downloaded": {
+    "id": "Template Terunduh",
+    "en": "Template Downloaded"
+  },
+  "Template font or page margin is not supported": {
+    "id": "Font atau margin halaman template tidak didukung",
+    "en": "Template font or page margin is not supported"
+  },
+  "Template heading and accent colors must have at least 4.5:1 contrast on white": {
+    "id": "Warna judul dan aksen template harus memiliki kontras minimal 4.5:1 di atas putih",
+    "en": "Template heading and accent colors must have at least 4.5:1 contrast on white"
+  },
+  "Template ID": {
+    "id": "ID Template",
+    "en": "Template ID"
+  },
+  "Template ID must be a lowercase slug": {
+    "id": "ID template harus berupa slug huruf kecil",
+    "en": "Template ID must be a lowercase slug"
+  },
+  "Template Imported": {
+    "id": "Template Diimpor",
+    "en": "Template Imported"
+  },
+  "Template layout configuration is invalid": {
+    "id": "Konfigurasi tata letak template tidak valid",
+    "en": "Template layout configuration is invalid"
+  },
+  "Template must use a supported single-column layout": {
+    "id": "Template harus menggunakan tata letak satu kolom yang didukung",
+    "en": "Template must use a supported single-column layout"
+  },
+  "Template not found": {
+    "id": "Template tidak ditemukan",
+    "en": "Template not found"
+  },
+  "Template status was not changed": {
+    "id": "Status template tidak diubah",
+    "en": "Template status was not changed"
+  },
+  "Template updated": {
+    "id": "Template diperbarui",
+    "en": "Template updated"
+  },
+  "Terms for using Landly CV tools and AI feedback.": {
+    "id": "Ketentuan penggunaan alat CV Landly dan umpan balik AI.",
+    "en": "Terms for using Landly CV tools and AI feedback."
+  },
+  "Terms of Service": {
+    "id": "Ketentuan Layanan",
+    "en": "Terms of Service"
+  },
+  "Terms of Service | Landly": {
+    "id": "Ketentuan Layanan | Landly",
+    "en": "Terms of Service | Landly"
+  },
+  "Test data cleared": {
+    "id": "Data uji dihapus",
+    "en": "Test data cleared"
+  },
+  "Testing Tools": {
+    "id": "Alat Pengujian",
+    "en": "Testing Tools"
+  },
+  "Text": {
+    "id": "Teks",
+    "en": "Text"
+  },
+  "Text must be a string.": {
+    "id": "Teks harus berupa string.",
+    "en": "Text must be a string."
+  },
+  "Text-based PDF, DOCX or TXT · up to 10 MB. Scanned PDFs aren’t supported. Files are processed temporarily and aren’t stored.": {
+    "id": "PDF, DOCX, atau TXT berbasis teks · hingga 10 MB. PDF hasil pemindaian tidak didukung. File diproses sementara dan tidak disimpan.",
+    "en": "Text-based PDF, DOCX or TXT · up to 10 MB. Scanned PDFs aren’t supported. Files are processed temporarily and aren’t stored."
+  },
+  "The account change has been saved.": {
+    "id": "Perubahan akun telah disimpan.",
+    "en": "The account change has been saved."
+  },
+  "The big picture": {
+    "id": "Gambaran umum",
+    "en": "The big picture"
+  },
+  "The last active administrator cannot be deactivated": {
+    "id": "Administrator aktif terakhir tidak dapat dinonaktifkan",
+    "en": "The last active administrator cannot be deactivated"
+  },
+  "The last active administrator cannot be demoted": {
+    "id": "Administrator aktif terakhir tidak dapat diturunkan",
+    "en": "The last active administrator cannot be demoted"
+  },
+  "The review assesses text readability, profile clarity, experience, achievement evidence, section completeness, and spelling and grammar. Results include scores, CV evidence and revision suggestions. Extracted text does not verify visual layout.": {
+    "id": "Penilaian menilai keterbacaan teks, kejelasan profil, pengalaman, bukti pencapaian, kelengkapan bagian, serta ejaan dan tata bahasa. Hasilnya mencakup skor, bukti dari CV, dan saran revisi. Teks hasil ekstraksi tidak memverifikasi tata letak visual.",
+    "en": "The review assesses text readability, profile clarity, experience, achievement evidence, section completeness, and spelling and grammar. Results include scores, CV evidence and revision suggestions. Extracted text does not verify visual layout."
+  },
+  "The score averages the review criteria. Visual layout is not verified, and this is not a hiring prediction.": {
+    "id": "Skor merupakan rata-rata kriteria penilaian. Tata letak visual tidak diverifikasi, dan ini bukan prediksi perekrutan.",
+    "en": "The score averages the review criteria. Visual layout is not verified, and this is not a hiring prediction."
+  },
+  "The template catalog has been saved.": {
+    "id": "Katalog template telah disimpan.",
+    "en": "The template catalog has been saved."
+  },
+  "The template renderer is unavailable": {
+    "id": "Renderer template tidak tersedia",
+    "en": "The template renderer is unavailable"
+  },
+  "There was an error loading the PDF preview. You can still download the file.": {
+    "id": "Terjadi kesalahan saat memuat pratinjau PDF. Anda tetap dapat mengunduh file.",
+    "en": "There was an error loading the PDF preview. You can still download the file."
+  },
+  "These details weren’t visible in your CV. Add them where they reflect your actual experience.": {
+    "id": "Detail ini tidak terlihat di CV Anda. Tambahkan di bagian yang mencerminkan pengalaman Anda yang sebenarnya.",
+    "en": "These details weren’t visible in your CV. Add them where they reflect your actual experience."
+  },
+  "These Terms apply when you visit aforsy.biz.id or use Landly. Landly provides tools to review CVs, explore job matches, and create ATS-friendly CV documents. By using the service, you agree to these Terms and our": {
+    "id": "Ketentuan ini berlaku saat Anda mengunjungi aforsy.biz.id atau menggunakan Landly. Landly menyediakan alat untuk meninjau CV, menjelajahi kecocokan kerja, dan membuat dokumen CV yang ramah ATS. Dengan menggunakan layanan ini, Anda menyetujui Ketentuan ini dan",
+    "en": "These Terms apply when you visit aforsy.biz.id or use Landly. Landly provides tools to review CVs, explore job matches, and create ATS-friendly CV documents. By using the service, you agree to these Terms and our"
+  },
+  "These Terms are subject to applicable law and mandatory consumer protections. If a provision is unenforceable, the remaining provisions continue to apply to the extent permitted by law. Questions about these Terms can be sent to": {
+    "id": "Ketentuan ini tunduk pada hukum yang berlaku dan perlindungan konsumen yang bersifat wajib. Jika suatu ketentuan tidak dapat diberlakukan, ketentuan lainnya tetap berlaku sejauh diizinkan oleh hukum. Pertanyaan tentang Ketentuan ini dapat dikirim ke",
+    "en": "These Terms are subject to applicable law and mandatory consumer protections. If a provision is unenforceable, the remaining provisions continue to apply to the extent permitted by law. Questions about these Terms can be sent to"
+  },
+  "These tools are only available in development mode. The clear data function will not work in production.": {
+    "id": "Alat ini hanya tersedia dalam mode pengembangan. Fungsi hapus data tidak akan berfungsi di lingkungan produksi.",
+    "en": "These tools are only available in development mode. The clear data function will not work in production."
+  },
+  "This account is unavailable": {
+    "id": "Akun ini tidak tersedia",
+    "en": "This account is unavailable"
+  },
+  "This clears your form and auto-saves an empty draft. Previously generated CVs remain available in My CVs.": {
+    "id": "Ini mengosongkan formulir Anda dan otomatis menyimpan draf kosong. CV yang dibuat sebelumnya tetap tersedia di CV Saya.",
+    "en": "This clears your form and auto-saves an empty draft. Previously generated CVs remain available in My CVs."
+  },
+  "This email is linked to a different Google account": {
+    "id": "Email ini terhubung ke akun Google yang berbeda",
+    "en": "This email is linked to a different Google account"
+  },
+  "This endpoint is only available in development": {
+    "id": "Endpoint ini hanya tersedia di lingkungan pengembangan",
+    "en": "This endpoint is only available in development"
+  },
+  "This review couldn’t finish": {
+    "id": "Penilaian ini tidak dapat diselesaikan",
+    "en": "This review couldn’t finish"
+  },
+  "This review couldn’t finish. Open it for more details.": {
+    "id": "Penilaian ini tidak dapat diselesaikan. Buka untuk detail lebih lanjut.",
+    "en": "This review couldn’t finish. Open it for more details."
+  },
+  "This review keeps the language chosen when it was created.": {
+    "id": "Review ini mempertahankan bahasa yang dipilih saat dibuat.",
+    "en": "This review keeps the language chosen when it was created."
+  },
+  "This will replace your current form content and automatically save the new draft to your account. Your selected CV template stays the same. Missing details remain blank so you can complete them.": {
+    "id": "Ini akan menggantikan isi formulir Anda saat ini dan otomatis menyimpan draf baru ke akun Anda. Template CV yang Anda pilih tetap sama. Detail yang belum ada tetap dikosongkan agar Anda dapat melengkapinya.",
+    "en": "This will replace your current form content and automatically save the new draft to your account. Your selected CV template stays the same. Missing details remain blank so you can complete them."
+  },
+  "Tighter spacing to fit more content on fewer pages.": {
+    "id": "Spasi lebih rapat agar lebih banyak konten muat di lebih sedikit halaman.",
+    "en": "Tighter spacing to fit more content on fewer pages."
+  },
+  "Title": {
+    "id": "Judul",
+    "en": "Title"
+  },
+  "Title Required": {
+    "id": "Judul Wajib Diisi",
+    "en": "Title Required"
+  },
+  "To produce CV reviews and job matches, relevant CV text and job-description information are sent to the AI inference provider configured for Landly (currently Sumopod, using the GLM-5.3-Flash model). If vector search is enabled, relevant text may also be converted to embeddings and processed by Pinecone. These providers process information on our behalf under their respective terms and privacy practices. Do not include information in a CV that you do not want processed to provide the feature.": {
+    "id": "Untuk menghasilkan penilaian CV dan kecocokan kerja, teks CV dan informasi deskripsi pekerjaan yang relevan dikirim ke penyedia inferensi AI yang dikonfigurasi untuk Landly (saat ini Sumopod, menggunakan model GLM-5.3-Flash). Jika pencarian vektor diaktifkan, teks yang relevan juga dapat dikonversi menjadi embedding dan diproses oleh Pinecone. Penyedia ini memproses informasi atas nama kami berdasarkan ketentuan dan praktik privasi masing-masing. Jangan sertakan informasi dalam CV yang tidak ingin Anda proses untuk menyediakan fitur ini.",
+    "en": "To produce CV reviews and job matches, relevant CV text and job-description information are sent to the AI inference provider configured for Landly (currently Sumopod, using the GLM-5.3-Flash model). If vector search is enabled, relevant text may also be converted to embeddings and processed by Pinecone. These providers process information on our behalf under their respective terms and privacy practices. Do not include information in a CV that you do not want processed to provide the feature."
+  },
+  "Too many failed login attempts from this network. Please wait before trying again.": {
+    "id": "Terlalu banyak percobaan login gagal dari jaringan ini. Silakan tunggu sebelum mencoba lagi.",
+    "en": "Too many failed login attempts from this network. Please wait before trying again."
+  },
+  "Too many password reset attempts. Please try again later.": {
+    "id": "Terlalu banyak percobaan reset kata sandi. Silakan coba lagi nanti.",
+    "en": "Too many password reset attempts. Please try again later."
+  },
+  "Too many password reset requests. Please try again later.": {
+    "id": "Terlalu banyak permintaan reset kata sandi. Silakan coba lagi nanti.",
+    "en": "Too many password reset requests. Please try again later."
+  },
+  "Too many registration attempts. Please try again later.": {
+    "id": "Terlalu banyak percobaan pendaftaran. Silakan coba lagi nanti.",
+    "en": "Too many registration attempts. Please try again later."
+  },
+  "Too many requests from this IP, please try again later.": {
+    "id": "Terlalu banyak permintaan dari jaringan ini. Silakan coba lagi nanti.",
+    "en": "Too many requests from this IP, please try again later."
+  },
+  "Too many verification attempts. Please try again later.": {
+    "id": "Terlalu banyak percobaan verifikasi. Silakan coba lagi nanti.",
+    "en": "Too many verification attempts. Please try again later."
+  },
+  "Too many verification emails requested. Please try again later.": {
+    "id": "Terlalu banyak permintaan email verifikasi. Silakan coba lagi nanti.",
+    "en": "Too many verification emails requested. Please try again later."
+  },
+  "Total Documents": {
+    "id": "Total Dokumen",
+    "en": "Total Documents"
+  },
+  "Total Evaluations": {
+    "id": "Total Penilaian",
+    "en": "Total Evaluations"
+  },
+  "Total Jobs": {
+    "id": "Total Pekerjaan",
+    "en": "Total Jobs"
+  },
+  "Total Results": {
+    "id": "Total Hasil",
+    "en": "Total Results"
+  },
+  "Total Size": {
+    "id": "Total Ukuran",
+    "en": "Total Size"
+  },
+  "Total users": {
+    "id": "Total pengguna",
+    "en": "Total users"
+  },
+  "Total:": {
+    "id": "Total:",
+    "en": "Total:"
+  },
+  "Track and review your CV evaluations": {
+    "id": "Lacak dan tinjau penilaian CV Anda",
+    "en": "Track and review your CV evaluations"
+  },
+  "Traditional black and white, familiar to every recruiter.": {
+    "id": "Hitam putih klasik, akrab bagi setiap rekruter.",
+    "en": "Traditional black and white, familiar to every recruiter."
+  },
+  "Try a different name or choose another status.": {
+    "id": "Coba nama lain atau pilih status lain.",
+    "en": "Try a different name or choose another status."
+  },
+  "Try a different name or email search.": {
+    "id": "Coba nama lain atau pencarian email lain.",
+    "en": "Try a different name or email search."
+  },
+  "Try a new review": {
+    "id": "Coba ulasan baru",
+    "en": "Try a new review"
+  },
+  "Try adjusting your filters or search term": {
+    "id": "Coba sesuaikan filter atau kata kunci pencarian Anda",
+    "en": "Try adjusting your filters or search term"
+  },
+  "Try again": {
+    "id": "Coba lagi",
+    "en": "Try again"
+  },
+  "Try Again": {
+    "id": "Coba Lagi",
+    "en": "Try Again"
+  },
+  "Try again before editing so your existing draft stays safe.": {
+    "id": "Coba lagi sebelum mengedit agar draf Anda yang sudah ada tetap aman.",
+    "en": "Try again before editing so your existing draft stays safe."
+  },
+  "Turn your feedback into your next draft.": {
+    "id": "Ubah masukan Anda menjadi draf berikutnya.",
+    "en": "Turn your feedback into your next draft."
+  },
+  "TXT file is empty": {
+    "id": "File TXT kosong",
+    "en": "TXT file is empty"
+  },
+  "TXT, PDF, or DOCX": {
+    "id": "TXT, PDF, atau DOCX",
+    "en": "TXT, PDF, or DOCX"
+  },
+  "Type": {
+    "id": "Jenis",
+    "en": "Type"
+  },
+  "Unable to fetch queue status": {
+    "id": "Tidak dapat mengambil status antrean",
+    "en": "Unable to fetch queue status"
+  },
+  "Understand what’s working, see where you can improve, and make your next revision count.": {
+    "id": "Pahami apa yang sudah berjalan baik, lihat di mana Anda bisa memperbaiki, dan buat revisi berikutnya lebih berarti.",
+    "en": "Understand what’s working, see where you can improve, and make your next revision count."
+  },
+  "University of California": {
+    "id": "University of California",
+    "en": "University of California"
+  },
+  "Unknown": {
+    "id": "Tidak diketahui",
+    "en": "Unknown"
+  },
+  "Unknown Candidate": {
+    "id": "Kandidat Tidak Diketahui",
+    "en": "Unknown Candidate"
+  },
+  "Unsaved changes": {
+    "id": "Perubahan belum disimpan",
+    "en": "Unsaved changes"
+  },
+  "Unsupported ATS template layout": {
+    "id": "Tata letak templat ATS tidak didukung",
+    "en": "Unsupported ATS template layout"
+  },
+  "Unsupported file": {
+    "id": "File tidak didukung",
+    "en": "Unsupported file"
+  },
+  "Unsupported file type": {
+    "id": "Jenis file tidak didukung",
+    "en": "Unsupported file type"
+  },
+  "Untitled CV review": {
+    "id": "Ulasan CV tanpa judul",
+    "en": "Untitled CV review"
+  },
+  "Unverified": {
+    "id": "Belum terverifikasi",
+    "en": "Unverified"
+  },
+  "Up to 20,000 characters.": {
+    "id": "Hingga 20.000 karakter.",
+    "en": "Up to 20,000 characters."
+  },
+  "Update password": {
+    "id": "Perbarui kata sandi",
+    "en": "Update password"
+  },
+  "Updated": {
+    "id": "Diperbarui",
+    "en": "Updated"
+  },
+  "Updating…": {
+    "id": "Memperbarui…",
+    "en": "Updating…"
+  },
+  "Upload a PDF, DOCX or TXT file.": {
+    "id": "Unggah file PDF, DOCX, atau TXT.",
+    "en": "Upload a PDF, DOCX or TXT file."
+  },
+  "Upload an existing CV or tell your story. We’ll turn it into an editable draft.": {
+    "id": "Unggah CV yang sudah ada atau ceritakan kisah Anda. Kami akan mengubahnya menjadi draf yang bisa diedit.",
+    "en": "Upload an existing CV or tell your story. We’ll turn it into an editable draft."
+  },
+  "Upload CV": {
+    "id": "Unggah CV",
+    "en": "Upload CV"
+  },
+  "Upload from file": {
+    "id": "Unggah dari file",
+    "en": "Upload from file"
+  },
+  "Upload Job Description File": {
+    "id": "Unggah File Deskripsi Pekerjaan",
+    "en": "Upload Job Description File"
+  },
+  "Upload Method": {
+    "id": "Metode Unggah",
+    "en": "Upload Method"
+  },
+  "Upload one PDF, DOCX or TXT file up to 10 MB.": {
+    "id": "Unggah satu file PDF, DOCX, atau TXT hingga 10 MB.",
+    "en": "Upload one PDF, DOCX or TXT file up to 10 MB."
+  },
+  "Upload one PDF, DOCX or TXT file up to 10 MB. Use a document with selectable text; an image-only scan may not contain readable text for review.": {
+    "id": "Unggah satu file PDF, DOCX, atau TXT hingga 10 MB. Gunakan dokumen dengan teks yang dapat dipilih; hasil pindaian hanya gambar mungkin tidak memiliki teks yang dapat dibaca untuk diulas.",
+    "en": "Upload one PDF, DOCX or TXT file up to 10 MB. Use a document with selectable text; an image-only scan may not contain readable text for review."
+  },
+  "Upload your CV for practical feedback. Add a job description to tailor the review to a specific role.": {
+    "id": "Unggah CV Anda untuk mendapatkan masukan praktis. Tambahkan deskripsi pekerjaan agar ulasan disesuaikan dengan posisi tertentu.",
+    "en": "Upload your CV for practical feedback. Add a job description to tailor the review to a specific role."
+  },
+  "Upload Your CV/Resume": {
+    "id": "Unggah CV Anda",
+    "en": "Upload Your CV/Resume"
+  },
+  "Upload your previous CV": {
+    "id": "Unggah CV Anda sebelumnya",
+    "en": "Upload your previous CV"
+  },
+  "Upload your resume in PDF, DOCX, or TXT format": {
+    "id": "Unggah CV Anda dalam format PDF, DOCX, atau TXT",
+    "en": "Upload your resume in PDF, DOCX, or TXT format"
+  },
+  "Uploading CV...": {
+    "id": "Mengunggah CV...",
+    "en": "Uploading CV..."
+  },
+  "Uploading Document...": {
+    "id": "Mengunggah Dokumen...",
+    "en": "Uploading Document..."
+  },
+  "Uptime:": {
+    "id": "Waktu aktif:",
+    "en": "Uptime:"
+  },
+  "Usage information:": {
+    "id": "Informasi penggunaan:",
+    "en": "Usage information:"
+  },
+  "Use a job description": {
+    "id": "Gunakan deskripsi pekerjaan",
+    "en": "Use a job description"
+  },
+  "Use and auto-save draft": {
+    "id": "Gunakan draf dan simpan otomatis",
+    "en": "Use and auto-save draft"
+  },
+  "Use at least 12 characters.": {
+    "id": "Gunakan setidaknya 12 karakter.",
+    "en": "Use at least 12 characters."
+  },
+  "Use either pasted job description or a saved job, not both": {
+    "id": "Gunakan deskripsi pekerjaan yang ditempel atau pekerjaan tersimpan, jangan keduanya",
+    "en": "Use either pasted job description or a saved job, not both"
+  },
+  "Use this AI draft?": {
+    "id": "Gunakan draf AI ini?",
+    "en": "Use this AI draft?"
+  },
+  "Use this draft": {
+    "id": "Gunakan draf ini",
+    "en": "Use this draft"
+  },
+  "Use your email or continue with Google.": {
+    "id": "Gunakan email Anda atau lanjutkan dengan Google.",
+    "en": "Use your email or continue with Google."
+  },
+  "user": {
+    "id": "Pengguna",
+    "en": "user"
+  },
+  "User": {
+    "id": "Pengguna",
+    "en": "User"
+  },
+  "User accounts": {
+    "id": "Akun pengguna",
+    "en": "User accounts"
+  },
+  "User not found": {
+    "id": "Pengguna tidak ditemukan",
+    "en": "User not found"
+  },
+  "User updated": {
+    "id": "Pengguna diperbarui",
+    "en": "User updated"
+  },
+  "Utilization Rate": {
+    "id": "Tingkat Utilisasi",
+    "en": "Utilization Rate"
+  },
+  "Verification link is invalid or expired": {
+    "id": "Tautan verifikasi tidak valid atau kedaluwarsa",
+    "en": "Verification link is invalid or expired"
+  },
+  "Verification token is missing.": {
+    "id": "Token verifikasi tidak ada.",
+    "en": "Verification token is missing."
+  },
+  "Verified": {
+    "id": "Terverifikasi",
+    "en": "Verified"
+  },
+  "Verify your email before signing in": {
+    "id": "Verifikasi email Anda sebelum masuk",
+    "en": "Verify your email before signing in"
+  },
+  "Verify your email using the link we sent before signing in with Google.": {
+    "id": "Verifikasi email Anda menggunakan tautan yang kami kirim sebelum masuk dengan Google.",
+    "en": "Verify your email using the link we sent before signing in with Google."
+  },
+  "Version": {
+    "id": "Versi",
+    "en": "Version"
+  },
+  "Version:": {
+    "id": "Versi:",
+    "en": "Version:"
+  },
+  "View": {
+    "id": "Lihat",
+    "en": "View"
+  },
+  "View and download your ATS-optimized resumes": {
+    "id": "Lihat dan unduh CV Anda yang dioptimalkan untuk ATS",
+    "en": "View and download your ATS-optimized resumes"
+  },
+  "View detailed analysis": {
+    "id": "Lihat analisis mendetail",
+    "en": "View detailed analysis"
+  },
+  "View Details": {
+    "id": "Lihat Detail",
+    "en": "View Details"
+  },
+  "View Job Posting": {
+    "id": "Lihat Lowongan Kerja",
+    "en": "View Job Posting"
+  },
+  "View on GitHub": {
+    "id": "Lihat di GitHub",
+    "en": "View on GitHub"
+  },
+  "View status": {
+    "id": "Lihat status",
+    "en": "View status"
+  },
+  "Viewing": {
+    "id": "Melihat",
+    "en": "Viewing"
+  },
+  "Volunteer Experience": {
+    "id": "Pengalaman Organisasi",
+    "en": "Volunteer Experience"
+  },
+  "Waiting": {
+    "id": "Menunggu",
+    "en": "Waiting"
+  },
+  "Waiting (": {
+    "id": "Menunggu (",
+    "en": "Waiting ("
+  },
+  "Want to use a different CV?": {
+    "id": "Ingin menggunakan CV lain?",
+    "en": "Want to use a different CV?"
+  },
+  "We also rely on Google for Google sign-in, Vercel for site analytics where enabled, and an email delivery service configured for the environment. In local development, account emails are captured by Mailpit rather than delivered to a real inbox. Production email delivery uses the provider configured for that deployment.": {
+    "id": "Kami juga menggunakan Google untuk masuk dengan Google, Vercel untuk analitik situs jika diaktifkan, serta layanan pengiriman email yang dikonfigurasi untuk lingkungan tersebut. Dalam pengembangan lokal, email akun ditangkap oleh Mailpit alih-alih dikirim ke kotak masuk sungguhan. Pengiriman email di produksi menggunakan penyedia yang dikonfigurasi untuk penerapan tersebut.",
+    "en": "We also rely on Google for Google sign-in, Vercel for site analytics where enabled, and an email delivery service configured for the environment. In local development, account emails are captured by Mailpit rather than delivered to a real inbox. Production email delivery uses the provider configured for that deployment."
+  },
+  "We couldn’t load your reviews": {
+    "id": "Kami tidak dapat memuat ulasan Anda",
+    "en": "We couldn’t load your reviews"
+  },
+  "We couldn’t load your saved draft": {
+    "id": "Kami tidak dapat memuat draf tersimpan Anda",
+    "en": "We couldn’t load your saved draft"
+  },
+  "We do not sell your CV or account information. We share information with the service providers described above only as needed to operate features, comply with law, protect users and the service, or handle a business transfer. Providers may process data in countries other than yours, subject to their safeguards and applicable law.": {
+    "id": "Kami tidak menjual CV atau informasi akun Anda. Kami membagikan informasi kepada penyedia layanan yang dijelaskan di atas hanya sesuai kebutuhan untuk menjalankan fitur, mematuhi hukum, melindungi pengguna dan layanan, atau menangani pengalihan bisnis. Penyedia dapat memproses data di negara lain selain negara Anda, tunduk pada perlindungan yang mereka terapkan dan hukum yang berlaku.",
+    "en": "We do not sell your CV or account information. We share information with the service providers described above only as needed to operate features, comply with law, protect users and the service, or handle a business transfer. Providers may process data in countries other than yours, subject to their safeguards and applicable law."
+  },
+  "We may update this policy when the service or its data practices change. The updated version and date will be published on this page. Questions or requests can be sent to": {
+    "id": "Kami dapat memperbarui kebijakan ini ketika layanan atau praktik datanya berubah. Versi dan tanggal terbaru akan dipublikasikan di halaman ini. Pertanyaan atau permintaan dapat dikirim ke",
+    "en": "We may update this policy when the service or its data practices change. The updated version and date will be published on this page. Questions or requests can be sent to"
+  },
+  "We may update, suspend, or discontinue parts of Landly to maintain or improve the service, address security issues, or comply with law. We will take reasonable steps to communicate material changes when appropriate.": {
+    "id": "Kami dapat memperbarui, menangguhkan, atau menghentikan bagian dari Landly untuk memelihara atau meningkatkan layanan, menangani masalah keamanan, atau mematuhi hukum. Kami akan mengambil langkah yang wajar untuk mengomunikasikan perubahan penting bila sesuai.",
+    "en": "We may update, suspend, or discontinue parts of Landly to maintain or improve the service, address security issues, or comply with law. We will take reasonable steps to communicate material changes when appropriate."
+  },
+  "We sent a verification link to {value0}.": {
+    "id": "Kami mengirim tautan verifikasi ke {value0}.",
+    "en": "We sent a verification link to {value0}."
+  },
+  "We use reasonable technical and organizational safeguards, including password hashing, access-controlled sessions, and owner checks for private records. No online service can guarantee absolute security. Landly is designed for people seeking employment and is not intended for children under 18.": {
+    "id": "Kami menggunakan perlindungan teknis dan organisasi yang wajar, termasuk hashing kata sandi, sesi dengan kontrol akses, dan pemeriksaan pemilik untuk catatan privat. Tidak ada layanan online yang dapat menjamin keamanan absolut. Landly dirancang untuk orang yang mencari pekerjaan dan tidak ditujukan untuk anak di bawah 18 tahun.",
+    "en": "We use reasonable technical and organizational safeguards, including password hashing, access-controlled sessions, and owner checks for private records. No online service can guarantee absolute security. Landly is designed for people seeking employment and is not intended for children under 18."
+  },
+  "We’ll email a secure reset link if an account matches.": {
+    "id": "Kami akan mengirim tautan reset yang aman via email jika ada akun yang cocok.",
+    "en": "We’ll email a secure reset link if an account matches."
+  },
+  "We’re analysing your experience and preparing your feedback. This page updates automatically.": {
+    "id": "Kami sedang menganalisis pengalaman Anda dan menyiapkan umpan balik Anda. Halaman ini diperbarui secara otomatis.",
+    "en": "We’re analysing your experience and preparing your feedback. This page updates automatically."
+  },
+  "We’re working through your CV. Check back for your results.": {
+    "id": "Kami sedang menelaah CV Anda. Kembali lagi untuk melihat hasil Anda.",
+    "en": "We’re working through your CV. Check back for your results."
+  },
+  "Webinars Attended": {
+    "id": "Webinar yang Diikuti",
+    "en": "Webinars Attended"
+  },
+  "Welcome to CV/Resume Generator! 👋": {
+    "id": "Selamat datang di CV/Resume Generator! 👋",
+    "en": "Welcome to CV/Resume Generator! 👋"
+  },
+  "What does the AI CV review assess?": {
+    "id": "Apa saja yang dinilai oleh tinjauan CV AI?",
+    "en": "What does the AI CV review assess?"
+  },
+  "What happens next?": {
+    "id": "Apa yang terjadi selanjutnya?",
+    "en": "What happens next?"
+  },
+  "What is Landly?": {
+    "id": "Apa itu Landly?",
+    "en": "What is Landly?"
+  },
+  "Where to focus next": {
+    "id": "Fokus selanjutnya",
+    "en": "Where to focus next"
+  },
+  "Which CV files can I upload?": {
+    "id": "File CV apa saja yang bisa saya unggah?",
+    "en": "Which CV files can I upload?"
+  },
+  "Why This Match?": {
+    "id": "Mengapa Cocok?",
+    "en": "Why This Match?"
+  },
+  "Wide · 0.5 in": {
+    "id": "Lebar · 0.5 inci",
+    "en": "Wide · 0.5 in"
+  },
+  "will stop appearing in CV Builder. Previously generated CVs will not be changed.": {
+    "id": "akan berhenti muncul di CV Builder. CV yang dibuat sebelumnya tidak akan diubah.",
+    "en": "will stop appearing in CV Builder. Previously generated CVs will not be changed."
+  },
+  "With credential ID and document URL": {
+    "id": "Dengan ID kredensial dan URL dokumen",
+    "en": "With credential ID and document URL"
+  },
+  "Work Experience": {
+    "id": "Pengalaman Kerja",
+    "en": "Work Experience"
+  },
+  "Year": {
+    "id": "Tahun",
+    "en": "Year"
+  },
+  "Years of experience and project complexity": {
+    "id": "Tahun pengalaman dan kompleksitas proyek",
+    "en": "Years of experience and project complexity"
+  },
+  "Yes": {
+    "id": "Ya",
+    "en": "Yes"
+  },
+  "You cannot deactivate your own account": {
+    "id": "Anda tidak dapat menonaktifkan akun Anda sendiri",
+    "en": "You cannot deactivate your own account"
+  },
+  "You cannot remove your own administrator role": {
+    "id": "Anda tidak dapat menghapus peran administrator Anda sendiri",
+    "en": "You cannot remove your own administrator role"
+  },
+  "You may stop using Landly at any time. We may suspend or restrict access if reasonably necessary to protect the service or users, respond to unlawful activity, or enforce these Terms. Contact us if you need help with your account or data.": {
+    "id": "Anda dapat berhenti menggunakan Landly kapan saja. Kami dapat menangguhkan atau membatasi akses jika memang diperlukan untuk melindungi layanan atau pengguna, menanggapi aktivitas yang melanggar hukum, atau menegakkan Ketentuan ini. Hubungi kami jika Anda memerlukan bantuan terkait akun atau data Anda.",
+    "en": "You may stop using Landly at any time. We may suspend or restrict access if reasonably necessary to protect the service or users, respond to unlawful activity, or enforce these Terms. Contact us if you need help with your account or data."
+  },
+  "You must not misuse the service, attempt to bypass access controls, interfere with its availability or security, reverse engineer it except where applicable law permits, or use it to violate another person’s rights or applicable law.": {
+    "id": "Anda tidak boleh menyalahgunakan layanan, mencoba melewati kontrol akses, mengganggu ketersediaan atau keamanannya, melakukan rekayasa balik kecuali diizinkan hukum yang berlaku, atau menggunakannya untuk melanggar hak orang lain atau hukum yang berlaku.",
+    "en": "You must not misuse the service, attempt to bypass access controls, interfere with its availability or security, reverse engineer it except where applicable law permits, or use it to violate another person’s rights or applicable law."
+  },
+  "You retain your rights to CVs and other materials you provide. You confirm that you have the rights and permission needed to upload or submit that material. You give Landly permission to host, process, and transmit it only as reasonably needed to provide, secure, and maintain the features you use, as described in the Privacy Policy.": {
+    "id": "Anda tetap memegang hak atas CV dan materi lain yang Anda berikan. Anda menyatakan bahwa Anda memiliki hak dan izin yang diperlukan untuk mengunggah atau mengirimkan materi tersebut. Anda memberikan izin kepada Landly untuk menghosting, memproses, dan mengirimkannya hanya sebagaimana diperlukan untuk menyediakan, mengamankan, dan memelihara fitur yang Anda gunakan, sebagaimana dijelaskan dalam Kebijakan Privasi.",
+    "en": "You retain your rights to CVs and other materials you provide. You confirm that you have the rights and permission needed to upload or submit that material. You give Landly permission to host, process, and transmit it only as reasonably needed to provide, secure, and maintain the features you use, as described in the Privacy Policy."
+  },
+  "Your 20 most recent reviews, in one place.": {
+    "id": "20 ulasan terbaru Anda, dalam satu tempat.",
+    "en": "Your 20 most recent reviews, in one place."
+  },
+  "Your account": {
+    "id": "Akun Anda",
+    "en": "Your account"
+  },
+  "Your career workspace": {
+    "id": "Ruang kerja karier Anda",
+    "en": "Your career workspace"
+  },
+  "Your career, a little clearer": {
+    "id": "Karier Anda, sedikit lebih jelas",
+    "en": "Your career, a little clearer"
+  },
+  "Your CV is in the queue": {
+    "id": "CV Anda dalam antrean",
+    "en": "Your CV is in the queue"
+  },
+  "Your CV must be 10 MB or smaller.": {
+    "id": "CV Anda harus berukuran 10 MB atau lebih kecil.",
+    "en": "Your CV must be 10 MB or smaller."
+  },
+  "Your CV, with a fresh perspective.": {
+    "id": "CV Anda, dengan sudut pandang baru.",
+    "en": "Your CV, with a fresh perspective."
+  },
+  "Your CVs": {
+    "id": "CV Anda",
+    "en": "Your CVs"
+  },
+  "Your draft is ready to review": {
+    "id": "Draf Anda siap ditinjau",
+    "en": "Your draft is ready to review"
+  },
+  "Your feedback and next steps are ready to explore.": {
+    "id": "Umpan balik dan langkah selanjutnya Anda siap untuk dijelajahi.",
+    "en": "Your feedback and next steps are ready to explore."
+  },
+  "Your feedback will appear here once the review is complete.": {
+    "id": "Umpan balik Anda akan muncul di sini setelah peninjauan selesai.",
+    "en": "Your feedback will appear here once the review is complete."
+  },
+  "Your form is ready to edit and will save automatically. Missing information stays blank.": {
+    "id": "Formulir Anda siap diedit dan akan tersimpan otomatis. Informasi yang belum ada tetap dibiarkan kosong.",
+    "en": "Your form is ready to edit and will save automatically. Missing information stays blank."
+  },
+  "Your input is sent to our AI provider to prepare this draft. Only include information you want processed. Missing details are left empty; check the draft before using it.": {
+    "id": "Masukan Anda dikirim ke penyedia AI kami untuk menyiapkan draf ini. Hanya sertakan informasi yang ingin Anda proses. Detail yang kurang dibiarkan kosong; periksa draf sebelum menggunakannya.",
+    "en": "Your input is sent to our AI provider to prepare this draft. Only include information you want processed. Missing details are left empty; check the draft before using it."
+  },
+  "Your latest changes haven’t saved. Keep this page open and try again.": {
+    "id": "Perubahan terbaru Anda belum tersimpan. Biarkan halaman ini tetap terbuka dan coba lagi.",
+    "en": "Your latest changes haven’t saved. Keep this page open and try again."
+  },
+  "Your next opportunity starts with your CV": {
+    "id": "Peluang berikutnya Anda dimulai dari CV Anda",
+    "en": "Your next opportunity starts with your CV"
+  },
+  "Your password must be at least 12 characters.": {
+    "id": "Kata sandi Anda harus terdiri dari minimal 12 karakter.",
+    "en": "Your password must be at least 12 characters."
+  },
+  "Your previous CV": {
+    "id": "CV sebelumnya",
+    "en": "Your previous CV"
+  },
+  "Your review is being prepared": {
+    "id": "Ulasan Anda sedang disiapkan",
+    "en": "Your review is being prepared"
+  },
+  "Your review library": {
+    "id": "Pustaka ulasan Anda",
+    "en": "Your review library"
+  },
+  "Name is required": {
+    "id": "Nama wajib diisi",
+    "en": "Name is required"
+  },
+  "Please fill out this field.": {
+    "id": "Silakan isi kolom ini.",
+    "en": "Please fill out this field."
+  },
+  "Please enter a valid value.": {
+    "id": "Masukkan nilai yang valid.",
+    "en": "Please enter a valid value."
+  },
+  "Use at least {value0} characters.": {
+    "id": "Gunakan minimal {value0} karakter.",
+    "en": "Use at least {value0} characters."
+  },
+  "Close": {
+    "id": "Tutup",
+    "en": "Close"
+  },
+  "Auto-saved": {
+    "id": "Tersimpan otomatis",
+    "en": "Auto-saved"
+  },
+  "Title/Position": {
+    "id": "Jabatan/Posisi",
+    "en": "Title/Position"
+  },
+  "Company/Organization": {
+    "id": "Perusahaan/Organisasi",
+    "en": "Company/Organization"
+  },
+  "Date/Duration": {
+    "id": "Tanggal/Durasi",
+    "en": "Date/Duration"
+  },
+  "School/University": {
+    "id": "Sekolah/Universitas",
+    "en": "School/University"
+  },
+  "Title/Role": {
+    "id": "Jabatan/Peran",
+    "en": "Title/Role"
+  },
+  "Issuer/Organization": {
+    "id": "Penerbit/Organisasi",
+    "en": "Issuer/Organization"
+  },
+  "Subtitle/Type": {
+    "id": "Subjudul/Jenis",
+    "en": "Subtitle/Type"
+  },
+  "Venue/Journal": {
+    "id": "Media/Jurnal",
+    "en": "Venue/Journal"
+  },
+  "Provider/Platform": {
+    "id": "Penyedia/Platform",
+    "en": "Provider/Platform"
+  },
+  "Administrator access granted": {
+    "id": "Akses administrator diberikan",
+    "en": "Administrator access granted"
+  },
+  "Administrator access removed": {
+    "id": "Akses administrator dicabut",
+    "en": "Administrator access removed"
+  },
+  "ats_template": {
+    "id": "Template ATS",
+    "en": "ATS template"
+  },
+  "An unexpected error occurred. Please try again.": {
+    "id": "Terjadi kesalahan saat memproses permintaan. Silakan coba lagi.",
+    "en": "An unexpected error occurred. Please try again."
+  },
+  "Please sign in to continue.": {
+    "id": "Silakan masuk untuk melanjutkan.",
+    "en": "Please sign in to continue."
+  },
+  "You do not have permission to perform this action.": {
+    "id": "Anda tidak memiliki izin untuk melakukan tindakan ini.",
+    "en": "You do not have permission to perform this action."
+  },
+  "Please check your input and try again.": {
+    "id": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+    "en": "Please check your input and try again."
+  }
+}

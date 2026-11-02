@@ -218,6 +218,7 @@ export interface Resume {
 }
 
 export interface EvaluationRequest {
+  locale?: 'id' | 'en';
   jobDescriptionText?: string;
   cvDocumentId: string;
   jobDescriptionId?: string;
@@ -230,6 +231,7 @@ export interface CVMatcherRequest {
 }
 
 export interface EvaluationResult {
+  locale?: 'id' | 'en';
   criteria?: { name: string; score: number; evidence: string; suggestion: string }[];
   suggestedRoles?: string[];
   jobMatches?: JobListing[];

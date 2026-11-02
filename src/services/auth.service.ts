@@ -5,6 +5,7 @@ import AuthSession from '../models/authSession.model';
 import EmailToken, { EmailTokenPurpose } from '../models/emailToken.model';
 import User, { IUser } from '../models/user.model';
 import config from '../config/config';
+import type {Locale} from '../utils/locale';
 import { sendAuthEmail } from './email.service';
 
 const scrypt = promisify(scryptCallback);
@@ -41,7 +42,7 @@ export const promoteConfiguredAdmin = async (user: IUser): Promise<IUser> => {
   return user;
 };
 
-export const createEmailAction = async (user: IUser, purpose: EmailTokenPurpose): Promise<void> => {
+export const createEmailAction = async (user: IUser, purpose: EmailTokenPurpose, locale: Locale = 'en'): Promise<void> => {
   await EmailToken.deleteMany({ userId: user._id, purpose, usedAt: { $exists: false } });
   const rawToken = randomBytes(32).toString('base64url');
   await EmailToken.create({
@@ -52,7 +53,8 @@ export const createEmailAction = async (user: IUser, purpose: EmailTokenPurpose)
   });
   const url = new URL(purpose === 'verify-email' ? '/verify-email' : '/reset-password', config.auth.frontendUrl);
   url.searchParams.set('token', rawToken);
-  await sendAuthEmail({ email: user.email, displayName: user.displayName, purpose, url: url.toString() });
+  url.searchParams.set('lang', locale);
+  await sendAuthEmail({ locale, email: user.email, displayName: user.displayName, purpose, url: url.toString() });
 };
 
 export const consumeEmailAction = async (rawToken: string, purpose: EmailTokenPurpose) => {

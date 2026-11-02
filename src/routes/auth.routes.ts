@@ -14,6 +14,7 @@ const createAuthLimiter = (
     windowMs,
     max,
     message,
+    handler: (_req, res, _next, options) => res.status(options.statusCode).json({success:false,message}),
     skipSuccessfulRequests,
     standardHeaders: true,
     legacyHeaders: false,

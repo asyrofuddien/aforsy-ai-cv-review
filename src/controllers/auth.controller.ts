@@ -1,3 +1,4 @@
+import {requestLocale} from '../utils/locale';
 import { Request, Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { randomBytes, timingSafeEqual } from 'crypto';
@@ -59,7 +60,7 @@ export class AuthController {
     user.displayName = displayName;
     user.passwordHash = passwordHash;
     await user.save();
-    await createEmailAction(user, 'verify-email');
+    await createEmailAction(user, 'verify-email', requestLocale(req));
 
     res.status(202).json({ success: true, message: 'Check your email for a verification link.' });
   });
@@ -110,7 +111,7 @@ export class AuthController {
     const email = requireString(req.body.email, 'Email', 254).toLowerCase();
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
     const user = await User.findOne({ email });
-    if (user && !user.isEmailVerified && user.isActive) await createEmailAction(user, 'verify-email');
+    if (user && !user.isEmailVerified && user.isActive) await createEmailAction(user, 'verify-email', requestLocale(req));
     res.json({ success: true, message: 'If the account needs verification, a new link has been sent.' });
   });
 
@@ -118,7 +119,7 @@ export class AuthController {
     const email = requireString(req.body.email, 'Email', 254).toLowerCase();
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
     const user = await User.findOne({ email, isEmailVerified: true, isActive: true }).select('+passwordHash');
-    if (user?.passwordHash) await createEmailAction(user, 'reset-password');
+    if (user?.passwordHash) await createEmailAction(user, 'reset-password', requestLocale(req));
     res.json({ success: true, message: 'If the account exists, a password reset link has been sent.' });
   });
 

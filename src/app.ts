@@ -1,4 +1,5 @@
 /// <reference path="./types/auth.d.ts" />
+import {localeMiddleware} from './middlewares/locale.middleware';
 import express from 'express';
 import { requestLogging } from './middlewares/request-logging.middleware';
 import cors from 'cors';
@@ -14,6 +15,7 @@ const path = require('path');
 const app = express();
 
 app.use(requestLogging);
+app.use(localeMiddleware);
 
 // Security middlewares
 app.use(helmet());

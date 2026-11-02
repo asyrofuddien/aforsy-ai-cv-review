@@ -117,6 +117,7 @@ class QueueService {
         cvDocumentId: data.cvDocumentId,
         jobDescriptionId: data.jobDescriptionId,
         candidateName: data.candidateName,
+        locale: data.locale || 'en',
         evaluationMode: data.jobDescriptionId || data.jobDescriptionText ? 'job_specific' : 'general',
         userId,
         status: 'queued',

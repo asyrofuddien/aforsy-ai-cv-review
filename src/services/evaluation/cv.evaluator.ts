@@ -7,7 +7,7 @@ import appLogger from '../../utils/logger';
 const logger = appLogger.child({ scope: 'cv-review' });
 
 export class CVEvaluator {
-  async evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string) {
+  async evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string, locale: 'id' | 'en' = 'en') {
     try {
       logger.debug('📄 CV Evaluator: Starting evaluation');
 
@@ -28,6 +28,7 @@ export class CVEvaluator {
 
       // Evaluate CV
       const evaluation = await chainService.evaluateCV({ ...cvInfo, sourceText: cvDoc.content }, {
+        locale,
         mode: jobDesc || jobDescriptionText ? 'job_specific' : 'general',
         title: jobDesc?.title,
         company: jobDesc?.company,
