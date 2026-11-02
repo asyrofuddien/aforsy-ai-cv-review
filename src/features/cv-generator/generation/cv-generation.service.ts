@@ -14,9 +14,9 @@ const formattedDate = (): string => {
 const sanitizeFilename = (name: string): string => name.replace(/[^a-zA-Z0-9]/g, '_');
 
 export function createCvGenerationService(repository: typeof import('./cv-generation.repository').cvGenerationRepository) {
-  async function saveGeneratedCv(fileName: string, pdfBuffer: Buffer, html: string, ownerId: string, dateStr: string) {
+  async function saveGeneratedCv(fileName: string, pdfBuffer: Buffer, html: string, ownerId: string, dateStr: string, sourceData?: ResumeNew) {
     const generatedRecord = await repository.createGeneratedCv({
-      file_name: `${fileName}.pdf`, pdf_file: pdfBuffer.toString('base64'), html_file: '', userId: ownerId, html_text: html,
+      file_name: `${fileName}.pdf`, pdf_file: pdfBuffer.toString('base64'), html_file: '', userId: ownerId, html_text: html, source_data: sourceData, source_data_available: !!sourceData,
     }) as { id: string; html_file: string; save: () => Promise<unknown> };
     generatedRecord.html_file = `/api/cv-generator/${generatedRecord.id}/html`;
     await generatedRecord.save();
@@ -55,10 +55,11 @@ export function createCvGenerationService(repository: typeof import('./cv-genera
       if (parsedPdf.numpages < 1 || !extractedText.includes(data.personalInfo.name.trim())) {
         throw new Error('Generated PDF failed ATS text extraction validation');
       }
-      return saveGeneratedCv(fileName, pdfBuffer, rendered.html, ownerId, dateStr);
+      return saveGeneratedCv(fileName, pdfBuffer, rendered.html, ownerId, dateStr, data);
     },
     findAllForOwner: (ownerId: string) => repository.findAllForOwner(ownerId),
     findHtmlForOwner: (id: string, ownerId: string) => repository.findHtmlForOwner(id, ownerId),
+    findSourceForOwner: (id: string, ownerId: string) => repository.findSourceForOwner(id, ownerId),
     findActiveTemplates: () => repository.findActiveTemplates(),
     async getNewTemplateContent(templateId: string) {
       const content = await repository.findNewTemplateContent();

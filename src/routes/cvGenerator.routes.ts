@@ -57,11 +57,17 @@ router.post(
 router.get("/draft", generateCv.GetDraft);
 router.put("/draft", generateCv.SaveDraft);
 router.delete("/draft", generateCv.DeleteDraft);
+router.get("/drafts", generateCv.ListSavedDrafts);
+router.post("/drafts", generateCv.CreateSavedDraft);
+router.get("/drafts/:id", generateCv.GetSavedDraft);
+router.patch("/drafts/:id", generateCv.UpdateSavedDraft);
+router.delete("/drafts/:id", generateCv.DeleteSavedDraft);
 router.get("/templates/content", generateCv.GetNewTemplateContent);
 router.get("/templates", generateCv.ListAtsTemplates);
 router.post("/", generateCv.GenerateCv);
 router.post("/new", generateCv.GenerateCvNew);
 router.get("/get-all", generateCv.FindAllCv);
+router.get("/:id/source", generateCv.GetGeneratedSource);
 router.get("/:id/html", generateCv.GetGeneratedHtml);
 
 export default router;

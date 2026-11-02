@@ -5,10 +5,45 @@ import { Resume, ResumeNew } from '../types/evaluation.types';
 import { cvDraftService } from '../features/cv-generator/drafts/cv-draft.service';
 import { cvGenerationService } from '../features/cv-generator/generation/cv-generation.service';
 import { generatedCvResponse } from '../features/cv-generator/generation/cv-generation.response';
+import { savedCvDraftService } from '../features/cv-generator/drafts/saved-cv-draft.service';
 
 const logger = appLogger.child({ scope: 'cv-generator' });
 
 export class CVGeneratorController {
+  ListSavedDrafts = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const drafts = await savedCvDraftService.list(req.authUser!.userId.toString());
+    res.json({ success: true, data: drafts });
+  });
+
+  GetSavedDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const draft = await savedCvDraftService.get(req.authUser!.userId.toString(), req.params.id);
+    res.json({ success: true, data: draft });
+  });
+
+  CreateSavedDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || typeof req.body.data !== 'object' || req.body.data === null || Array.isArray(req.body.data) || JSON.stringify(req.body.data).length > 250_000) {
+      res.status(400).json({ success: false, message: 'Draft data must be an object no larger than 250 KB.' });
+      return;
+    }
+    const draft = await savedCvDraftService.create(req.authUser!.userId.toString(), req.body.name, req.body.data);
+    res.status(201).json({ success: true, data: draft });
+  });
+
+  UpdateSavedDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const data = req.body?.data;
+    if (data !== undefined && (typeof data !== 'object' || data === null || Array.isArray(data) || JSON.stringify(data).length > 250_000)) {
+      res.status(400).json({ success: false, message: 'Draft data must be an object no larger than 250 KB.' });
+      return;
+    }
+    const draft = await savedCvDraftService.update(req.authUser!.userId.toString(), req.params.id, { name: req.body?.name, data });
+    res.json({ success: true, data: draft });
+  });
+
+  DeleteSavedDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    await savedCvDraftService.delete(req.authUser!.userId.toString(), req.params.id);
+    res.json({ success: true, message: 'Draft deleted.' });
+  });
+
   GetDraft = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const draft = await cvDraftService.getDraft(req.authUser!.userId.toString());
     res.json({ success: true, data: draft?.data || null, updatedAt: draft?.updatedAt || null });
@@ -90,6 +125,15 @@ export class CVGeneratorController {
     }
     res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'; style-src 'unsafe-inline'; img-src data:");
     res.type('html').send(document.html_text || '');
+  });
+
+  GetGeneratedSource = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const document = await cvGenerationService.findSourceForOwner(req.params.id, req.authUser!.userId.toString()) as { source_data?: Record<string, unknown> } | null;
+    if (!document?.source_data) {
+      res.status(404).json({ success: false, message: 'Editable data is unavailable for this CV.' });
+      return;
+    }
+    res.json({ success: true, data: document.source_data });
   });
 
   ListAtsTemplates = asyncHandler(async (_req: Request, res: Response): Promise<void> => {

@@ -7,6 +7,8 @@ export interface ICvAts extends Document {
   html_file?: string;
   pdf_file?: string;
   html_text?: string;
+  source_data?: Record<string, unknown>;
+  source_data_available: boolean;
   file_name?: string;
   createdAt: Date;
 }
@@ -30,6 +32,8 @@ const CvAtsSchema = new Schema(
     html_text: {
       type: String,
     },
+    source_data: { type: Schema.Types.Mixed, select: false },
+    source_data_available: { type: Boolean, default: false },
     file_name: {
       type: String,
     },
