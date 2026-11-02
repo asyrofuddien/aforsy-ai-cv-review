@@ -128,18 +128,8 @@ class EvaluationService {
       logger.info('📄 Step 1: Evaluating CV', { mode: jobDesc ? 'job_specific' : 'general' });
       const cvResult = await cvEvaluator.evaluate(cvDocumentId, jobDescriptionId, jobDescriptionText);
 
-      // CV review always includes job discovery. A supplied description narrows
-      // role suggestions; with no description, roles come from the CV itself.
-      const cvDocument = await documentModel.findById(cvDocumentId);
-      if (!cvDocument?.content?.trim()) throw new Error('CV text is unavailable for job matching');
-      const matchProfile = await chainService.extractCVToJSON(cvDocument.content);
-      const roleSuggestion = jobDesc
-        ? { suggested_roles: [jobDesc.title], seniority: matchProfile.seniority || 'Mid-level' }
-        : await chainService.RoleSuggestion(jobDescriptionText
-          ? { ...matchProfile, target_job_description: jobDescriptionText }
-          : matchProfile);
-      const jobListings = await this.getJobListings(roleSuggestion.suggested_roles, roleSuggestion.seniority);
-      const jobMatches = await scrapingService.matchWithJobs(matchProfile, jobListings);
+      // Job discovery is paused while the feature is coming soon.
+      // CV review still supports an optional job description for its rubric.
 
       // Step 3: Generate final summary
       logger.info('📝 Step 3: Generating final summary');
@@ -153,8 +143,8 @@ class EvaluationService {
       const finalResult = {
         cvMatchRate: cvResult.matchRate,
         criteria: cvResult.evaluation.criteria,
-        jobMatches,
-        suggestedRoles: roleSuggestion.suggested_roles,
+        jobMatches: [],
+        suggestedRoles: [],
         cvFeedback: cvResult.evaluation.feedback,
         overallSummary: summary,
         recommendation,
