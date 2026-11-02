@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: CV Evaluation API - dev
+  title: Landly API
   description: |-
     Complete API testing collection for CV and Project evaluation service
 

@@ -1,4 +1,4 @@
-# CV Evaluation API
+# Landly API
 
 An AI-powered backend service for reviewing CV documents, with an optional comparison against a saved job description. Reviews run asynchronously using LLM technology and optional vector search.
 

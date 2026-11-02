@@ -57,7 +57,7 @@ router.get('/test', (req, res) => {
   }
 
   res.json({
-    message: 'CV Evaluation API - All Endpoints',
+    message: 'Landly API - All Endpoints',
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
     endpoints,
@@ -74,8 +74,8 @@ router.get('/test', (req, res) => {
 // Root API route
 router.get('/', (req, res) => {
   res.json({
-    name: 'CV Evaluation API',
-    description: 'AI-powered CV and project evaluation service',
+    name: 'Landly API',
+    description: 'AI-powered CV review and career tools',
     documentation: '/api/test',
     health: '/health',
     quickstart: {
@@ -440,7 +440,7 @@ router.get('/test/stats', async (req: Request, res: Response) => {
       success: true,
       timestamp: new Date(),
       productOverview: {
-        name: 'AFORSY AI CV Review System',
+        name: 'Landly',
         version: '1.0.0',
         totalCodes: codeCount,
         totalDocuments: docCount,
