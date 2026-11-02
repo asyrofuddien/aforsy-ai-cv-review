@@ -72,3 +72,33 @@ test('TXT upload is extracted and returned as a preview without a draft write', 
     assert.equal(result.data.personalInfo.name, 'Test Person');
   } finally { ai.completion = original; config.ai.apiKey = key; }
 });
+test('nullable optional CV fields and numeric years/GPA normalize without inventing facts',()=>{
+ const result=parseAiDraft(JSON.stringify({personalInfo:{name:'Graduate',contacts:null,summary:null},professional:null,education:[{title:'Education',items:[{degree:'Management',school:'Example',year:2024,gpa:3.75,details:null}]}],organisational:null,others:null}));
+ assert.equal(result.personalInfo.summary,'');assert.deepEqual(result.professional,[]);assert.equal(result.education[0].items[0].year,'2024');assert.equal(result.education[0].items[0].gpa,'3.75');
+});
+test('normalizes literal contact strings, a single bullet and skills represented as arrays',()=>{
+ const result=parseAiDraft(JSON.stringify({personalInfo:{name:'Graduate',contacts:['Jakarta']},professional:[{title:'Experience',items:[{title:'Intern',bullets:'Handled incoming requests.',tags:null}]}],others:[{title:'Skills',template:'skills',content:null,items:[{category:null,list:['Excel','Communication']}]},{title:'Notes',template:'text',content:'',items:[]}]}));
+ assert.deepEqual(result.personalInfo.contacts,[{label:'Jakarta'}]);assert.deepEqual(result.professional[0].items[0].bullets,['Handled incoming requests.']);assert.equal(result.others[0].items[0].list,'Excel, Communication');assert.equal(result.others[1].content,'');
+});
+test('unsupported objects and numbers in identity fields are still rejected',()=>{
+ for(const name of [42,{},['name']]) assert.throws(()=>parseAiDraft(JSON.stringify({...valid(),personalInfo:{name}})),error=>error.statusCode===502);
+});
+test('validation diagnostics expose schema paths and types without field contents or unknown key names',()=>{
+ try { parseAiDraft(JSON.stringify({...valid(),personalInfo:{name:{secret:'PRIVATE-CV-DATA'}},'PRIVATE-UNKNOWN-FIELD':true}));assert.fail('Expected validation failure'); }
+ catch(error){assert.equal(error.statusCode,502);const diagnostics=JSON.stringify(error.issues);assert.ok(diagnostics.includes('personalInfo.name'));assert.ok(!diagnostics.includes('PRIVATE-CV-DATA'));assert.ok(!diagnostics.includes('PRIVATE-UNKNOWN-FIELD'));}
+});
+test('invalid draft is corrected once using original source and validation paths',async()=>{
+ const original=ai.completion,key=config.ai.apiKey;let calls=0;
+ try {
+ config.ai.apiKey='test-only';ai.completion=async(prompt,options)=>{calls++;assert.deepEqual(JSON.parse(prompt),{source:'Original factual story'});if(calls===1)return JSON.stringify({...valid(),education:[{title:'Education',items:[{degree:{bad:true}}]}]});assert.match(options.systemPrompt,/format-correction attempt/);assert.match(options.systemPrompt,/education/);return JSON.stringify(valid());};
+ const result=await createAiDraft('Original factual story');assert.equal(calls,2);assert.equal(result.personalInfo.name,'Test Person');
+ }finally{ai.completion=original;config.ai.apiKey=key;}
+});
+test('automatic correction stops after two invalid responses, without mock data fallback',async()=>{
+ const original=ai.completion,key=config.ai.apiKey;let calls=0;
+ try{config.ai.apiKey='test-only';ai.completion=async()=>{calls++;return JSON.stringify({...valid(),userId:'invalid'});};await assert.rejects(createAiDraft('Original factual story'),error=>error.statusCode===502);assert.equal(calls,2);}finally{ai.completion=original;config.ai.apiKey=key;}
+});
+test('empty usable content does not trigger unnecessary provider retries',async()=>{
+ const original=ai.completion,key=config.ai.apiKey;let calls=0;
+ try{config.ai.apiKey='test-only';ai.completion=async()=>{calls++;return JSON.stringify({personalInfo:{},others:[{title:'Notes',template:'text',content:''}]});};await assert.rejects(createAiDraft('Original factual story'),error=>error.statusCode===422);assert.equal(calls,1);}finally{ai.completion=original;config.ai.apiKey=key;}
+});
