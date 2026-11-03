@@ -12,7 +12,20 @@ export const cvGenerationRepository = {
   },
   findActiveTemplate: (templateId: string) => getActiveAtsTemplate(templateId),
   createGeneratedCv: (record: Record<string, unknown>) => AtsPdf.create(record),
-  findAllForOwner: (ownerId: string) => AtsPdf.find({ userId: ownerId }).sort('-createdAt').select('-__v -code_id'),
+  findAllForOwner: async (ownerId: string, page: number, limit: number) => {
+    const filter = { userId: ownerId };
+    const [records, total] = await Promise.all([
+      AtsPdf.find(filter)
+        .sort('-createdAt')
+        .select('file_name html_file source_data_available createdAt')
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      AtsPdf.countDocuments(filter),
+    ]);
+    return { records, total };
+  },
+  findPdfForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('pdf_file'),
   findHtmlForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('html_text'),
   findSourceForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('source_data'),
   findActiveTemplates: () => AtsTemplate.find({ status: 'active' })

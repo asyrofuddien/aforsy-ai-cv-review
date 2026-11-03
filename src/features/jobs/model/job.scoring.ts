@@ -1,22 +1,20 @@
-import appLogger from '../../../utils/logger';
 import { CandidateForMatching, JobListing, ScoredJobListing } from './job.types';
 
-const logger = appLogger.child({ scope: 'job-scoring' });
 export type SkillMatcher = (cvSkills: string[], requirements: string[]) => Promise<number>;
 
 export async function calculateSkillMatch(cvSkills: string[], requirements: string[], matcher: SkillMatcher): Promise<number> {
-  try {
-    if (!cvSkills.length || !requirements.length) return 0;
-    const score = await matcher(cvSkills, requirements);
-    return Number.isFinite(score) ? score : 0;
-  } catch (error) {
-    logger.warn('Skill matching provider failed; using zero score', { error });
-    return 0;
+  if (!cvSkills.length || !requirements.length) return 0;
+  const score = await matcher(cvSkills, requirements);
+  if (!Number.isFinite(score)) {
+    throw new Error('Skill matching returned an invalid score.');
   }
+  return score;
 }
 
 export function validateScore(score: number): number {
-  if (typeof score !== 'number' || !Number.isFinite(score)) return 0;
+  if (typeof score !== 'number' || !Number.isFinite(score)) {
+    throw new Error('Job scoring returned an invalid score.');
+  }
   return Math.max(0, Math.min(100, Number(score.toFixed(2))));
 }
 
@@ -63,21 +61,16 @@ export async function matchJobs(
   calculateSkill: SkillMatcher,
 ): Promise<ScoredJobListing[]> {
   const scored = await Promise.all(jobs.map(async job => {
-    try {
-      const [skill, experience, responsibility] = await Promise.all([
-        calculateSkill(cv.skills || [], job.requirements),
-        Promise.resolve(calculateExperienceMatch(cv.seniority, job.seniority)),
-        Promise.resolve(calculateResponsibilityMatch(cv.work_experience, job.responsibilities)),
-      ]);
-      const validSkill = validateScore(skill);
-      const validExperience = validateScore(experience);
-      const validResponsibility = validateScore(responsibility);
-      const score = validateScore((validSkill + validExperience + validResponsibility) / 3);
-      return { ...job, skill_match: validSkill, experience_match: validExperience, responsibility_match: validResponsibility, score, grade: getGrade(score), explanation: generateExplanation(validSkill, validExperience, validResponsibility) };
-    } catch (error) {
-      logger.error('Job match scoring failed', { title: job.title, error });
-      return { ...job, skill_match: 0, experience_match: 0, responsibility_match: 0, score: 0, grade: 'F', explanation: 'Unable to calculate match score due to an error.' };
-    }
+    const [skill, experience, responsibility] = await Promise.all([
+      calculateSkill(cv.skills || [], job.requirements),
+      Promise.resolve(calculateExperienceMatch(cv.seniority, job.seniority)),
+      Promise.resolve(calculateResponsibilityMatch(cv.work_experience, job.responsibilities)),
+    ]);
+    const validSkill = validateScore(skill);
+    const validExperience = validateScore(experience);
+    const validResponsibility = validateScore(responsibility);
+    const score = validateScore((validSkill + validExperience + validResponsibility) / 3);
+    return { ...job, skill_match: validSkill, experience_match: validExperience, responsibility_match: validResponsibility, score, grade: getGrade(score), explanation: generateExplanation(validSkill, validExperience, validResponsibility) };
   }));
   return scored.sort((a, b) => b.score - a.score).slice(0, 5);
 }

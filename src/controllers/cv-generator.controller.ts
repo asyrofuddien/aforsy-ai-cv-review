@@ -1,6 +1,6 @@
 import appLogger from '../utils/logger';
 import { Request, Response, NextFunction } from 'express';
-import { asyncHandler } from '../middlewares/error.middleware';
+import { AppError, asyncHandler } from '../middlewares/error.middleware';
 import { Resume, ResumeNew } from '../types/evaluation.types';
 import { cvDraftService } from '../features/cv-generator/drafts/cv-draft.service';
 import { cvGenerationService } from '../features/cv-generator/generation/cv-generation.service';
@@ -8,6 +8,13 @@ import { generatedCvResponse } from '../features/cv-generator/generation/cv-gene
 import { savedCvDraftService } from '../features/cv-generator/drafts/saved-cv-draft.service';
 
 const logger = appLogger.child({ scope: 'cv-generator' });
+
+const parsePositiveInteger = (value: unknown, fallback: number, maximum: number): number | null => {
+  if (value === undefined) return fallback;
+  if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) return null;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed <= maximum ? parsed : null;
+};
 
 export class CVGeneratorController {
   ListSavedDrafts = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -108,13 +115,40 @@ export class CVGeneratorController {
     }
   });
 
-  FindAllCv = asyncHandler(async (req: Request, res: Response, _next: NextFunction): Promise<void> => {
-    const atsDatas = await cvGenerationService.findAllForOwner(req.authUser!.userId.toString());
-    res.status(201).json({
+  FindAllCv = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const page = parsePositiveInteger(req.query.page, 1, 10_000);
+    const limit = parsePositiveInteger(req.query.limit, 20, 100);
+    if (page === null || limit === null) {
+      res.status(400).json({ success: false, message: 'Page must be between 1 and 10000; limit must be between 1 and 100.' });
+      return;
+    }
+
+    const result = await cvGenerationService.findAllForOwner(req.authUser!.userId.toString(), page, limit);
+    res.status(200).json({
       success: true,
-      message: 'CV generated successfully',
-      data: atsDatas,
+      data: result.records,
+      pagination: {
+        page,
+        limit,
+        total: result.total,
+        totalPages: Math.ceil(result.total / limit),
+      },
     });
+  });
+
+  GetGeneratedPdf = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const document = await cvGenerationService.findPdfForOwner(req.params.id, req.authUser!.userId.toString()) as { pdf_file?: string } | null;
+    if (!document?.pdf_file) {
+      res.status(404).json({ success: false, message: 'Generated CV not found' });
+      return;
+    }
+
+    const pdfBuffer = Buffer.from(document.pdf_file, 'base64');
+    if (!pdfBuffer.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
+      throw new AppError('Generated CV PDF is invalid.', 500);
+    }
+    res.setHeader('Content-Disposition', 'inline; filename="generated-cv.pdf"');
+    res.type('application/pdf').send(pdfBuffer);
   });
 
   GetGeneratedHtml = asyncHandler(async (req: Request, res: Response): Promise<void> => {

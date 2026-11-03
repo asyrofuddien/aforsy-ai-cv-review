@@ -57,7 +57,8 @@ export function createCvGenerationService(repository: typeof import('./cv-genera
       }
       return saveGeneratedCv(fileName, pdfBuffer, rendered.html, ownerId, dateStr, data);
     },
-    findAllForOwner: (ownerId: string) => repository.findAllForOwner(ownerId),
+    findAllForOwner: (ownerId: string, page: number, limit: number) => repository.findAllForOwner(ownerId, page, limit),
+    findPdfForOwner: (id: string, ownerId: string) => repository.findPdfForOwner(id, ownerId),
     findHtmlForOwner: (id: string, ownerId: string) => repository.findHtmlForOwner(id, ownerId),
     findSourceForOwner: (id: string, ownerId: string) => repository.findSourceForOwner(id, ownerId),
     findActiveTemplates: () => repository.findActiveTemplates(),

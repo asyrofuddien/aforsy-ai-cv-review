@@ -14,6 +14,7 @@ async evaluateProject(projectContent: string, rubric: any): Promise<any> {
       const response = await openaiService.completion(PROJECT_PROMPTS.PROJECT_EVALUATION.user(projectContent, rubric), {
         systemPrompt: PROJECT_PROMPTS.PROJECT_EVALUATION.system,
         temperature: 0.3,
+        stage: 'project_evaluation',
       });
 
       const parsed = this.parseJSON(response, {

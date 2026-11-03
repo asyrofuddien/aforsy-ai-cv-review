@@ -18,6 +18,7 @@ async extractCVInfo(cvContent: string): Promise<CVExtractedInfo> {
         systemPrompt: REVIEW_PROMPTS.CV_EXTRACTION.system,
         temperature: 0.1, // Low temperature for consistent extraction
         maxTokens: 6000,
+        stage: 'cv_extraction',
       });
 
       const parsed = this.parseJSON(response, {
@@ -55,6 +56,7 @@ async evaluateCV(cvInfo: CVExtractedInfo & { sourceText?: string }, jobRequireme
           systemPrompt: REVIEW_PROMPTS.CV_EVALUATION.system + ` Write all human-readable text in ${outputLanguage(jobRequirements.locale === 'id' ? 'id' : 'en')}, except exact source quotes. Keep IDs, JSON keys and enums unchanged.`,
           temperature: 0.1,
           maxTokens: 8000,
+          stage: 'cv_evaluation',
         });
         try {
           const parsed = validateReviewAnalysis(this.parseJSON(response, null, true), source, jobSource);
@@ -80,6 +82,7 @@ async generateFinalSummary(cvEval: any, mode: 'general' | 'job_specific' = 'job_
         systemPrompt: (mode === 'general' ? 'You summarize CV document quality neutrally. Never provide hiring recommendations or job-fit judgments.' : REVIEW_PROMPTS.FINAL_SUMMARY.system) + ` Write all human-readable summaries and missing information in ${outputLanguage(locale)}. Keep JSON keys and recommendation enum values unchanged.`,
         temperature: 0.4,
         maxTokens: 1000,
+        stage: 'review_summary',
       });
 
       const parsed = this.parseJSON(response, {

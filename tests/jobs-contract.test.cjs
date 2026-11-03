@@ -110,3 +110,16 @@ test('scoring keeps grade boundaries, formula, score rounding and top-five order
   assert.equal(matched[0].score, 60);
   assert.equal(matched[0].grade, 'C');
 });
+
+test('scoring provider failures do not become zero-score mismatch results', async () => {
+  const jobs = [{ title: 'Engineer', requirements: ['TypeScript'], responsibilities: [] }];
+  const candidate = { skills: ['TypeScript'], seniority: 'Mid-level', work_experience: [] };
+  await assert.rejects(
+    scoring.matchJobs(candidate, jobs, async () => { throw new Error('provider failed'); }),
+    /provider failed/,
+  );
+  await assert.rejects(
+    scoring.matchJobs(candidate, jobs, async () => Number.NaN),
+    /invalid score/i,
+  );
+});

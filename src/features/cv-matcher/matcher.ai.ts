@@ -15,6 +15,7 @@ async extractCVToJSON(rawText: string): Promise<any> {
         systemPrompt: MATCHER_PROMPTS.EXTRACT_CV_STRUCTURED_JSON.system,
         temperature: 0.1, // Low temperature for consistent extraction
         maxTokens: 3500,
+        stage: 'cv_extraction',
       });
 
       const parsed = this.parseJSON(response, {
@@ -113,6 +114,7 @@ async RoleSuggestion(extractedCv: object): Promise<any> {
       const response = await openaiService.completion(MATCHER_PROMPTS.ROLE_SUGGESTION.user(extractedCv), {
         systemPrompt: MATCHER_PROMPTS.ROLE_SUGGESTION.system,
         temperature: 0.1,
+        stage: 'role_suggestion',
       });
 
       const parsed = this.parseJSON(response, {
@@ -147,6 +149,7 @@ async SummaryRecommendation(extractedCv: object, roleSuggestion: object, jobList
       const response = await openaiService.completion(MATCHER_PROMPTS.SUMMARY_RECOMENDATION.user(extractedCv, roleSuggestion, jobListed), {
         systemPrompt: MATCHER_PROMPTS.SUMMARY_RECOMENDATION.system,
         temperature: 0.1,
+        stage: 'matching_summary',
       });
 
       const parsed = this.parseJSON(response, {

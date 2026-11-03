@@ -67,6 +67,7 @@ router.get("/templates", generateCv.ListAtsTemplates);
 router.post("/", generateCv.GenerateCv);
 router.post("/new", generateCv.GenerateCvNew);
 router.get("/get-all", generateCv.FindAllCv);
+router.get("/:id/pdf", generateCv.GetGeneratedPdf);
 router.get("/:id/source", generateCv.GetGeneratedSource);
 router.get("/:id/html", generateCv.GetGeneratedHtml);
 

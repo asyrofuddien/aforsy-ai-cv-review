@@ -14,6 +14,10 @@ function processJob(job: Job<ReviewQueuePayload | MatcherQueuePayload>, type: "r
       ...("evaluationId" in job.data
         ? { evaluationId: String(job.data.evaluationId) }
         : {}),
+      ...("cvMatcherId" in job.data
+        ? { cvMatcherId: String(job.data.cvMatcherId) }
+        : {}),
+      attempt: String(job.attemptsMade + 1),
     },
     async () => {
       const started = performance.now();

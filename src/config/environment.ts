@@ -16,7 +16,7 @@ const schema = Joi.object({
   SUMOPOD_BASE_URL: validUrl.default('https://ai.sumopod.com/v1'),
   SUMOPOD_MODEL: Joi.string().trim().min(1).default('glm-5.3-flash'),
   LLM_TEMPERATURE: Joi.number().min(0).max(2).default(0.3),
-  LLM_MAX_RETRIES: Joi.number().integer().min(0).default(3),
+  LLM_MAX_RETRIES: Joi.number().integer().min(0).max(3).default(3),
   LLM_RETRY_DELAY: Joi.number().integer().min(0).default(1000),
   PINECONE_API_KEY: optionalSecret,
   PINECONE_ENVIRONMENT: optionalSecret,

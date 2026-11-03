@@ -6,7 +6,7 @@ const { AppError, asyncHandler } = loadTs('src/middlewares/error.middleware.ts',
 
 function fixture(failAt) {
   const files = new Map();
-  const calls = { closed: 0, created: [], draftWrites: 0 };
+  const calls = { closed: 0, created: [], draftWrites: 0, list: null };
   const fail = (step) => { if (failAt === step) throw new Error(`Synthetic ${step} failure`); };
   const page = {
     target: () => ({ createCDPSession: async () => ({ send: async () => {} }) }),
@@ -53,7 +53,13 @@ function fixture(failAt) {
       headingColor: id === 'modern' ? '#1e3a8a' : '#000000', accentColor: id === 'modern' ? '#2563eb' : id === 'compact' ? '#555555' : '#000000',
     } }; },
     createGeneratedCv: async record => { fail('create'); generatedRecords.push(record); return { ...record, id: 'synthetic-result', save: async () => { fail('save'); } }; },
-    findAllForOwner: async () => [], findHtmlForOwner: async (_id, userId) => userId === 'owner-a' ? { html_text: '<h1>Owner A</h1>' } : null,
+    findAllForOwner: async (ownerId, page, limit) => {
+      calls.list = { ownerId, page, limit };
+      return { records: [{ _id: 'cv-1', file_name: 'ATS_Owner_A.pdf' }], total: 21 };
+    },
+    findPdfForOwner: async (_id, userId) => userId === 'owner-a' ? { pdf_file: Buffer.from('%PDF-synthetic').toString('base64') } : null,
+    findHtmlForOwner: async (_id, userId) => userId === 'owner-a' ? { html_text: '<h1>Owner A</h1>' } : null,
+    findSourceForOwner: async (_id, userId) => userId === 'owner-a' ? { source_data: { personalInfo: { name: 'Owner A' } } } : null,
     findActiveTemplates: async () => [],
   };
   const generationRenderer = loadTs('src/features/cv-generator/generation/cv-generation.service.ts', {
@@ -70,6 +76,7 @@ function fixture(failAt) {
     '../utils/logger': logger,
     '../middlewares/error.middleware': { AppError, asyncHandler },
     '../features/cv-generator/drafts/cv-draft.service': { cvDraftService },
+    '../features/cv-generator/drafts/saved-cv-draft.service': { savedCvDraftService: {} },
     '../features/cv-generator/generation/cv-generation.service': { cvGenerationService },
     '../features/cv-generator/generation/cv-generation.response': { generatedCvResponse: result => ({ success: true, message: 'CV generated successfully', data: result }) },
   }).default;
@@ -135,6 +142,44 @@ test('generated HTML is not returned for a different owner', async () => {
   const { controller } = fixture();
   assert.equal((await invoke(controller.GetGeneratedHtml, request({}, 'owner-b'))).status, 404);
   assert.equal((await invoke(controller.GetGeneratedHtml, request())).body, '<h1>Owner A</h1>');
+});
+
+test('generated CV list returns paginated metadata without PDF or HTML payloads', async () => {
+  const { controller, calls } = fixture();
+  const req = request();
+  req.query = { page: '2', limit: '10' };
+  const res = await invoke(controller.FindAllCv, req);
+  assert.equal(res.status, 200);
+  assert.deepEqual(calls.list, { ownerId: 'owner-a', page: 2, limit: 10 });
+  assert.deepEqual(res.body.pagination, { page: 2, limit: 10, total: 21, totalPages: 3 });
+  assert.deepEqual(res.body.data, [{ _id: 'cv-1', file_name: 'ATS_Owner_A.pdf' }]);
+});
+
+test('generated PDF endpoint is owner-scoped and returns PDF bytes', async () => {
+  const { controller } = fixture();
+  assert.equal((await invoke(controller.GetGeneratedPdf, request({}, 'owner-b'))).status, 404);
+  const res = await invoke(controller.GetGeneratedPdf, request());
+  assert.equal(res.status, 200);
+  assert.ok(Buffer.isBuffer(res.body));
+  assert.equal(res.body.subarray(0, 5).toString(), '%PDF-');
+});
+
+test('editable source remains owner-scoped for CV recreation', async () => {
+  const { controller } = fixture();
+  assert.equal((await invoke(controller.GetGeneratedSource, request({}, 'owner-b'))).status, 404);
+  assert.deepEqual((await invoke(controller.GetGeneratedSource, request())).body.data, {
+    personalInfo: { name: 'Owner A' },
+  });
+});
+
+test('generated CV pagination rejects invalid or excessive limits', async () => {
+  const { controller, calls } = fixture();
+  for (const query of [{ page: '0' }, { page: '1.5' }, { page: '10001' }, { limit: '101' }]) {
+    const req = request();
+    req.query = query;
+    assert.equal((await invoke(controller.FindAllCv, req)).status, 400);
+  }
+  assert.equal(calls.list, null);
 });
 
 test('preview template endpoint returns the same new-template source used by generation', async () => {
