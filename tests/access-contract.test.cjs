@@ -75,7 +75,10 @@ function fixture() {
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
     '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },
-    './system.routes': loadTs('src/routes/system.routes.ts').default,
+    './system.routes': loadTs('src/routes/system.routes.ts', {
+      '../services/mongo-transaction-readiness': { probeMongoTransactions: async () => false },
+      '../middlewares/error.middleware': { asyncHandler },
+    }).default,
     './reporting.routes': express.Router().get('/recent-evaluations', (_req, res) => res.json({ success: true, evaluations: [result] })),
     '../models/document.model': {}, '../models/evaluation.model': model,
     '../models/jobDescription.model': {}, '../models/code.model': {}, '../models/cvMatcher.model': {},
@@ -104,6 +107,9 @@ async function withServer(t, run) {
 test('public API info stays public; product data requires an active unexpired account', async t => {
   await withServer(t, async (request, calls) => {
     assert.equal((await request('/test')).status, 200);
+    const transactionHealth = await request('/health/transactions');
+    assert.equal(transactionHealth.status, 503);
+    assert.equal(transactionHealth.body.status, 'unavailable');
     assert.equal((await request(`/evaluate/${resultId}`)).status, 401);
     assert.equal((await request(`/evaluate/${resultId}`, { owner: 'expired' })).status, 401);
     assert.equal((await request(`/evaluate/${resultId}`, { owner: 'inactive' })).status, 403);

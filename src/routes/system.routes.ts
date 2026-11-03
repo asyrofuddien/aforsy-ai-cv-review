@@ -1,5 +1,7 @@
-import { Router } from 'express';
+import { Request, Response, Router } from 'express';
 import config from '../config/config';
+import { probeMongoTransactions } from '../services/mongo-transaction-readiness';
+import { asyncHandler } from '../middlewares/error.middleware';
 
 const router = Router();
 
@@ -11,6 +13,14 @@ router.get('/health', (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+router.get('/health/transactions', asyncHandler(async (_req: Request, res: Response) => {
+  const available = await probeMongoTransactions();
+  res.status(available ? 200 : 503).json({
+    status: available ? 'available' : 'unavailable',
+    capability: 'mongodb-transactions',
+  });
+}));
 
 // Test route
 router.get('/test', (req, res) => {

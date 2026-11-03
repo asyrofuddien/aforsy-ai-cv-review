@@ -17,6 +17,7 @@
     "test:api": "./test-api.sh",
     "fix:paths": "ts-node scripts/fix-document-paths.ts",
     "migrate:legacy-ownership": "ts-node scripts/mark-legacy-records.ts",
+    "migrate:billing-indexes": "ts-node scripts/migrate-billing-indexes.ts",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint src scripts tests --ext .ts,.cjs"
   },
