@@ -10,6 +10,8 @@ export interface IBillingPackage extends mongoose.Document {
   version: number;
   nameId: string;
   nameEn: string;
+  descriptionId?: string;
+  descriptionEn?: string;
   currency: 'IDR';
   amountIdr: number;
   credits: number;
@@ -104,6 +106,8 @@ const BillingPackageSchema = new Schema({
   version: { ...positiveInteger, required: true },
   nameId: { type: String, required: true, maxlength: 120 },
   nameEn: { type: String, required: true, maxlength: 120 },
+  descriptionId: { type: String, trim: true, maxlength: 300, default: '' },
+  descriptionEn: { type: String, trim: true, maxlength: 300, default: '' },
   currency: { type: String, required: true, enum: ['IDR'], default: 'IDR' },
   amountIdr: { ...nonNegativeInteger, required: true },
   credits: { ...positiveInteger, required: true },
@@ -288,7 +292,7 @@ const PaymentOrderSchema = new Schema({
   checkoutReference: { type: String, select: false, maxlength: 500 },
   checkoutUrl: { type: String, maxlength: 2000 },
   providerExpiresAt: Date,
-  paymentStatus: { type: String, required: true, enum: ['pending', 'paid', 'failed', 'expired', 'refunded', 'disputed'], default: 'pending' },
+  paymentStatus: { type: String, required: true, enum: ['pending', 'paid', 'failed', 'expired', 'cancelled', 'refunded', 'disputed'], default: 'pending' },
   fulfillmentStatus: { type: String, required: true, enum: ['pending', 'granted', 'reconciliation_required'], default: 'pending' },
   confirmedPaidAmountIdr: { type: Number, min: 0, validate: Number.isInteger },
   paidAt: Date,

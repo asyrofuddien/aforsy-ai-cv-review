@@ -21,20 +21,24 @@ export async function processLynkInbox(inboxId: string): Promise<void> {
   if (!event || event.action !== 'SUCCESS' || event.code !== '0' || event.quantity !== 1 || event.totals.totalAddon !== 0 || event.totals.totalShipping !== 0 || event.totals.discount !== 0 || event.totals.totalItem !== event.priceIdr || event.totals.grandTotal !== event.priceIdr || event.totals.customerPay !== event.priceIdr) return logMismatch(inbox, 'LYNK_TOTALS_OR_STATUS_UNSUPPORTED');
   const pkg = await BillingPackage.findOne({ lynkProductId: event.productId }).lean();
   if (!pkg || pkg.amountIdr !== event.priceIdr) return logMismatch(inbox, 'LYNK_PRODUCT_OR_AMOUNT_MISMATCH');
-  const referencedOrder = await PaymentOrder.findOne({ publicOrderNumber: event.reference, buyerEmail: event.buyerEmail, 'packageSnapshot.sku': pkg.sku, 'packageSnapshot.version': pkg.version, paymentStatus: 'pending' });
-  const candidates = referencedOrder ? [referencedOrder] : await PaymentOrder.find({ buyerEmail: event.buyerEmail, 'packageSnapshot.sku': pkg.sku, 'packageSnapshot.version': pkg.version, paymentStatus: 'pending' }).sort({ createdAt: 1 }).limit(2);
+  const orderIdentity = { buyerEmail: event.buyerEmail, 'packageSnapshot.sku': pkg.sku, 'packageSnapshot.version': pkg.version };
+  const referencedOrder = await PaymentOrder.findOne({ publicOrderNumber: event.reference, ...orderIdentity, paymentStatus: 'pending' });
+  let candidates = referencedOrder ? [referencedOrder] : await PaymentOrder.find({ ...orderIdentity, paymentStatus: 'pending' }).sort({ createdAt: 1 }).limit(2);
+  // Lynk's fixed product checkout cannot carry Landly's local order ID. If the buyer pays
+  // after the local 30-minute window, still honor a uniquely identifiable verified payment.
+  if (!candidates.length) candidates = await PaymentOrder.find({ ...orderIdentity, paymentStatus: 'cancelled' }).sort({ createdAt: -1 }).limit(2);
   if (candidates.length !== 1) return logMismatch(inbox, candidates.length ? 'LYNK_ORDER_AMBIGUOUS' : 'LYNK_ORDER_NOT_FOUND');
   const order = candidates[0];
   const user = await User.findOne({ email: event.buyerEmail, isActive: true, isEmailVerified: true }).select('_id');
   if (!user) {
-    await PaymentOrder.updateOne({ _id: order._id, paymentStatus: 'pending' }, { $set: { paymentStatus: 'paid', confirmedPaidAmountIdr: event.amountIdr, paidAt: new Date(), providerTransactionId: event.reference, webhookFingerprint: event.fingerprint, fulfillmentStatus: 'pending', userId: null } });
+    await PaymentOrder.updateOne({ _id: order._id, paymentStatus: { $in: ['pending', 'cancelled'] } }, { $set: { paymentStatus: 'paid', confirmedPaidAmountIdr: event.amountIdr, paidAt: new Date(), providerTransactionId: event.reference, webhookFingerprint: event.fingerprint, fulfillmentStatus: 'pending', userId: null } });
     await WebhookInbox.updateOne({ _id: inbox._id }, { $set: { processState: 'processed', processedAt: new Date() } });
     return;
   }
   const session = await mongoose.startSession();
   try {
     await session.withTransaction(async () => {
-      const fresh = await PaymentOrder.findOne({ _id: order._id, paymentStatus: 'pending' }).session(session);
+      const fresh = await PaymentOrder.findOne({ _id: order._id, paymentStatus: { $in: ['pending', 'cancelled'] } }).session(session);
       if (!fresh) return;
       fresh.userId = user._id;
       fresh.paymentStatus = 'paid'; fresh.fulfillmentStatus = 'granted';

@@ -5,10 +5,10 @@ import { ActionCost, BillingPackage } from '../src/models/billing.models';
 const migrationTarget = 'staging';
 const termsVersion = '2026-11-03-v1';
 const packages = [
-  { sku: 'welcome.v1', nameId: 'Trial', nameEn: 'Welcome', currency: 'IDR', amountIdr: 0, credits: 4 },
-  { sku: 'credits_start_12_v1', nameId: 'Mulai', nameEn: 'Start', currency: 'IDR', amountIdr: 14000, credits: 12, lynkProductId: '6ad1db0038a13ff53eff8515-4775-5027640958-1792137984148', lynkCheckoutUrl: 'https://lynk.id/aforsy/z7yj7o2zwwpe' },
-  { sku: 'credits_focus_30_v1', nameId: 'Fokus', nameEn: 'Focus', currency: 'IDR', amountIdr: 30000, credits: 30, lynkProductId: '6ad1e2dabc6badce20ed87fc-4292-4743620738-1792139994332', lynkCheckoutUrl: 'https://lynk.id/aforsy/r9wz9xv8mkz7' },
-  { sku: 'credits_intensive_75_v1', nameId: 'Intensif', nameEn: 'Intensive', currency: 'IDR', amountIdr: 69000, credits: 75, lynkProductId: '6ad1e32b66c09012c4c00426-8245-4241599588-1792140075691', lynkCheckoutUrl: 'https://lynk.id/aforsy/y10x1n6j3r57' },
+  { sku: 'welcome.v1', nameId: 'Trial', nameEn: 'Welcome', descriptionId: 'Kredit sambutan satu kali untuk mencoba fitur AI Landly.', descriptionEn: 'A one-time welcome balance to try Landly AI features.', currency: 'IDR', amountIdr: 0, credits: 4 },
+  { sku: 'credits_start_12_v1', nameId: 'Mulai', nameEn: 'Start', descriptionId: '12 kredit untuk hingga 4 tinjauan CV atau 12 bantuan draft AI. Bisa dipadukan sesuai kebutuhan.', descriptionEn: '12 credits for up to 4 CV reviews or 12 AI draft assists. Mix them as you need.', currency: 'IDR', amountIdr: 14000, credits: 12, lynkProductId: '6ad1db0038a13ff53eff8515-4775-5027640958-1792137984148', lynkCheckoutUrl: 'https://lynk.id/aforsy/z7yj7o2zwwpe' },
+  { sku: 'credits_focus_30_v1', nameId: 'Fokus', nameEn: 'Focus', descriptionId: '30 kredit untuk mengerjakan beberapa CV dan draft untuk posisi yang berbeda.', descriptionEn: '30 credits to work on several CVs and drafts for different roles.', currency: 'IDR', amountIdr: 30000, credits: 30, lynkProductId: '6ad1e2dabc6badce20ed87fc-4292-4743620738-1792139994332', lynkCheckoutUrl: 'https://lynk.id/aforsy/r9wz9xv8mkz7' },
+  { sku: 'credits_intensive_75_v1', nameId: 'Intensif', nameEn: 'Intensive', descriptionId: '75 kredit untuk pencarian kerja yang lebih aktif dengan beragam versi CV.', descriptionEn: '75 credits for a more active job search with multiple CV versions.', currency: 'IDR', amountIdr: 69000, credits: 75, lynkProductId: '6ad1e32b66c09012c4c00426-8245-4241599588-1792140075691', lynkCheckoutUrl: 'https://lynk.id/aforsy/y10x1n6j3r57' },
 ] as const;
 const actionCosts = [
   { action: 'cv_review_bundle', version: 1, creditsRequired: 3 },

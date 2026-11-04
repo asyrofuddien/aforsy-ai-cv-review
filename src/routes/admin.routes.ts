@@ -3,6 +3,7 @@ import adminController from '../controllers/admin.controller';
 import { requireAdmin } from '../middlewares/auth.middleware';
 import { billingController } from '../features/billing/billing.controller';
 import { updateAffiliateConfig } from '../controllers/affiliate.controller';
+import { adminCatalogController } from '../features/billing/catalog.admin.controller';
 
 const router = Router();
 router.use(requireAdmin);
@@ -21,6 +22,10 @@ router.delete('/templates/:id', adminController.archiveTemplate);
 router.get('/audit', adminController.listAudit);
 router.post('/billing/users/:userId/goodwill', billingController.goodwill);
 router.get('/billing/payments', billingController.adminPayments);
+router.get('/billing/catalog', adminCatalogController.list);
+router.post('/billing/catalog', adminCatalogController.create);
+router.put('/billing/catalog/:id', adminCatalogController.update);
+router.delete('/billing/catalog/:id', adminCatalogController.archive);
 router.get('/billing/payments/:id', billingController.adminPaymentDetail);
 router.get('/billing/summary', billingController.adminSummary);
 router.get('/billing/refund-requests', billingController.adminRefundRequests);

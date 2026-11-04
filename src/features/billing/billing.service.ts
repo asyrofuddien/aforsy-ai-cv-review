@@ -198,7 +198,7 @@ export const billingService = {
         active: true,
         effectiveFrom: { $lte: now },
         $or: [{ effectiveUntil: null }, { effectiveUntil: { $gt: now } }],
-      }).select('sku version nameId nameEn currency amountIdr credits termsVersion lynkProductId').sort({ amountIdr: 1 }).lean(),
+      }).select('sku version nameId nameEn descriptionId descriptionEn currency amountIdr credits termsVersion lynkProductId').sort({ amountIdr: 1 }).lean(),
       ActionCost.find({ active: true }).select('action version creditsRequired').sort({ action: 1 }).lean(),
     ]);
     return {

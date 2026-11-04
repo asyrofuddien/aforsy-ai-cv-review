@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middlewares/error.middleware';
 import { billingService } from './billing.service';
-import { orderService } from './orders/order.service';
+import { orderService, expirePendingPaymentOrders } from './orders/order.service';
 import { PaymentOrder, RefundRequest, CreditLot, CreditReservation, BillingWallet, CreditLedger, OutboxEvent, AiOperation, WebhookInbox } from '../../models/billing.models';
 import User from '../../models/user.model';
 import AdminAuditLog from '../../models/adminAuditLog.model';
@@ -59,6 +59,7 @@ export const billingController = {
   }),
 
   payments: asyncHandler(async (req: Request, res: Response) => {
+    await expirePendingPaymentOrders();
     const page = parsePagination(req.query.page, 1, 10000), limit = parsePagination(req.query.limit, 20, 100);
     const filter = { userId: req.authUser!.userId };
     const [records, total] = await Promise.all([PaymentOrder.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).select('-checkoutReference -idempotencyKey -requestFingerprint -webhookFingerprint').lean(), PaymentOrder.countDocuments(filter)]);
@@ -66,13 +67,15 @@ export const billingController = {
   }),
 
   paymentDetail: asyncHandler(async (req: Request, res: Response) => {
+    await expirePendingPaymentOrders();
     const order = await PaymentOrder.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('-checkoutReference -idempotencyKey -requestFingerprint -webhookFingerprint').lean();
     if (!order) throw new AppError('Payment not found.', 404);
     res.json({ success: true, data: order });
   }),
 
   paymentReceipt: asyncHandler(async (req: Request, res: Response) => {
-    const order = await PaymentOrder.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('publicOrderNumber packageSnapshot termsVersion provider paymentStatus fulfillmentStatus confirmedPaidAmountIdr paidAt creditGrantedAt createdAt buyerEmail').lean();
+    await expirePendingPaymentOrders();
+    const order = await PaymentOrder.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('publicOrderNumber packageSnapshot termsVersion provider paymentStatus fulfillmentStatus confirmedPaidAmountIdr paidAt creditGrantedAt providerExpiresAt checkoutUrl createdAt buyerEmail').lean();
     if (!order) throw new AppError('Payment not found.', 404);
     res.json({ success: true, data: order });
   }),
@@ -102,6 +105,7 @@ export const billingController = {
   }),
 
   adminPayments: asyncHandler(async (req: Request, res: Response) => {
+    await expirePendingPaymentOrders();
     const page = parsePagination(req.query.page, 1, 10000), limit = parsePagination(req.query.limit, 50, 100);
     const filter: Record<string, unknown> = {};
     if (typeof req.query.status === 'string') filter.paymentStatus = req.query.status;
@@ -110,6 +114,7 @@ export const billingController = {
   }),
 
   adminPaymentDetail: asyncHandler(async (req: Request, res: Response) => {
+    await expirePendingPaymentOrders();
     if (!mongoose.isValidObjectId(req.params.id)) throw new AppError('Invalid payment ID.', 400);
     const order: any = await PaymentOrder.findById(req.params.id).select('-checkoutReference -idempotencyKey -requestFingerprint -webhookFingerprint').lean();
     if (!order) throw new AppError('Payment not found.', 404);
