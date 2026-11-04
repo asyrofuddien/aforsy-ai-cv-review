@@ -11,12 +11,14 @@ import { dashboardSummary } from '../controllers/dashboard.controller';
 import reportingRoutes from './reporting.routes';
 import systemRoutes from './system.routes';
 import documentRoutes from './document.routes';
+import billingRoutes from '../features/billing/billing.routes';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/', systemRoutes);
 router.use('/', documentRoutes);
+router.use('/billing', billingRoutes);
 
 // All product and account data routes below this point require an active session.
 router.use(authenticate);

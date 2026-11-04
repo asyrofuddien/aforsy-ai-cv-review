@@ -17,6 +17,7 @@ const testConfig = {
   upload: { uploadDir: 'uploads', maxFileSize: 10 * 1024 * 1024, allowedTypes: [] },
   cors: { allowedOrigins: [] },
   auth: { frontendUrl: 'http://localhost:3000' },
+  billing: { trialEnabled: false, adminGrantsEnabled: false },
   logging: { level: 'error', directory: 'logs' },
   shutdown: { gracePeriodMs: 30000, forcePeriodMs: 3000 },
   puppeteer: { executablePath: undefined },

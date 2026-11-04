@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import adminController from '../controllers/admin.controller';
 import { requireAdmin } from '../middlewares/auth.middleware';
+import { billingController } from '../features/billing/billing.controller';
 
 const router = Router();
 router.use(requireAdmin);
@@ -17,5 +18,6 @@ router.post('/templates', adminController.createTemplate);
 router.patch('/templates/:id', adminController.updateTemplate);
 router.delete('/templates/:id', adminController.archiveTemplate);
 router.get('/audit', adminController.listAudit);
+router.post('/billing/users/:userId/goodwill', billingController.goodwill);
 
 export default router;

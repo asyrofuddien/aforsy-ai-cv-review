@@ -66,13 +66,28 @@ function fixture() {
   const adminController = new Proxy({}, { get: (_target, key) => key === '__esModule' ? false : (_req, res) => res.json({ success: true }) });
   const adminRoutes = loadTs('src/routes/admin.routes.ts', {
     '../controllers/admin.controller': adminController,
+    '../features/billing/billing.controller': { billingController: { goodwill: (_req, res) => res.status(201).json({ success: true }) } },
     '../middlewares/auth.middleware': { requireAdmin },
+  }).default;
+  const billingServiceStub = {
+    getActiveCatalog: async () => ({ packages: [], actionCosts: [] }),
+    getWallet: async () => ({ wallet: { availableCredits: 0, reservedCredits: 0, billingRiskHold: false, version: 0 }, lots: {}, ledger: {}, consistent: true }),
+    listLedger: async () => ({ records: [], total: 0, page: 1, limit: 20, totalPages: 0 }),
+  };
+  const billingControllerReal = loadTs('src/features/billing/billing.controller.ts', {
+    '../../middlewares/error.middleware': { AppError, asyncHandler },
+    './billing.service': { billingService: billingServiceStub },
+  });
+  const billingRoutes = loadTs('src/features/billing/billing.routes.ts', {
+    '../../middlewares/auth.middleware': { authenticate },
+    './billing.controller': billingControllerReal,
   }).default;
   const routes = loadTs('src/routes/index.ts', {
     './auth.routes': express.Router(), './upload.routes': express.Router(),
     './document.routes': express.Router(),
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
+    '../features/billing/billing.routes': { __esModule: true, default: billingRoutes },
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
     '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },
     './system.routes': loadTs('src/routes/system.routes.ts', {
@@ -189,4 +204,35 @@ test('dashboard summary scopes user metrics and aggregates globally for admins',
   seen.length = 0;
   await invoke(controller, { authUser: { userId: 'admin', role: 'admin' } });
   assert.deepEqual(seen.slice(0, 4), [{}, {}, {}, {}]);
+});
+
+test('billing catalog is public; wallet and ledger require an active authenticated account', async t => {
+  await withServer(t, async request => {
+    // Catalog is public
+    assert.equal((await request('/billing/catalog')).status, 200);
+
+    // Wallet requires auth
+    assert.equal((await request('/billing/wallet')).status, 401);
+    assert.equal((await request('/billing/wallet', { owner: 'expired' })).status, 401);
+    assert.equal((await request('/billing/wallet', { owner: 'inactive' })).status, 403);
+    assert.equal((await request('/billing/wallet', { owner: 'owner-a' })).status, 200);
+
+    // Ledger requires auth
+    assert.equal((await request('/billing/ledger')).status, 401);
+    assert.equal((await request('/billing/ledger', { owner: 'owner-a' })).status, 200);
+  });
+});
+
+test('admin goodwill endpoint requires admin role and rejects non-admins', async t => {
+  await withServer(t, async request => {
+    const body = { credits: 1, caseReference: 'CASE-001', reason: 'Integration contract test reason text' };
+    const userId = 'owner-a';
+    // No auth
+    assert.equal((await request(`/admin/billing/users/${userId}/goodwill`, { method: 'POST', body })).status, 401);
+    // Non-admin
+    assert.equal((await request(`/admin/billing/users/${userId}/goodwill`, { method: 'POST', owner: 'owner-a', body, csrf: 'synthetic-csrf' })).status, 403);
+    // Admin can reach the endpoint (stub returns 201)
+    const res = await request(`/admin/billing/users/${userId}/goodwill`, { method: 'POST', owner: 'admin', body, csrf: 'synthetic-csrf' });
+    assert.equal(res.status, 201);
+  });
 });

@@ -18,6 +18,8 @@
     "fix:paths": "ts-node scripts/fix-document-paths.ts",
     "migrate:legacy-ownership": "ts-node scripts/mark-legacy-records.ts",
     "migrate:billing-indexes": "ts-node scripts/migrate-billing-indexes.ts",
+    "seed:billing-catalog": "ts-node scripts/seed-billing-catalog.ts",
+    "backfill:welcome-trial": "ts-node scripts/backfill-welcome-trial.ts",
     "typecheck": "tsc --noEmit --incremental false",
     "lint": "eslint src scripts tests --ext .ts,.cjs"
   },

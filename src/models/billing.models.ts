@@ -5,13 +5,100 @@ const nonNegativeInteger = { type: Number, min: 0, validate: Number.isInteger };
 const positiveInteger = { type: Number, min: 1, validate: Number.isInteger };
 const timestamps = { timestamps: true, autoIndex: false, strict: 'throw' as const };
 
+export interface IBillingPackage extends mongoose.Document {
+  sku: string;
+  version: number;
+  nameId: string;
+  nameEn: string;
+  currency: 'IDR';
+  amountIdr: number;
+  credits: number;
+  active: boolean;
+  effectiveFrom: Date;
+  effectiveUntil?: Date;
+  termsVersion: string;
+}
+
+export interface IActionCost extends mongoose.Document {
+  action: 'cv_review_bundle' | 'ai_draft';
+  version: number;
+  creditsRequired: number;
+  active: boolean;
+}
+
+export interface IBillingWallet extends mongoose.Document {
+  userId: mongoose.Types.ObjectId;
+  availableCredits: number;
+  reservedCredits: number;
+  version: number;
+  billingRiskHold: boolean;
+}
+
+export interface ICreditLot extends mongoose.Document {
+  createdAt: Date;
+  userId: mongoose.Types.ObjectId;
+  sourceType: 'trial' | 'purchase' | 'goodwill' | 'internal';
+  sourceId: string;
+  grantKey: string;
+  granted: number;
+  available: number;
+  reserved: number;
+  consumed: number;
+  revoked: number;
+  expiresAt: Date | null;
+}
+
+export interface ICreditReservation extends mongoose.Document {
+  userId: mongoose.Types.ObjectId;
+  kind: 'ai_operation' | 'money_refund';
+  referenceId: mongoose.Types.ObjectId;
+  reservationKey: string;
+  totalCredits: number;
+  allocations: Array<{ lotId: mongoose.Types.ObjectId; credits: number }>;
+  status: 'held' | 'captured' | 'released' | 'revoked';
+}
+
+export interface ICreditLedger extends mongoose.Document {
+  userId: mongoose.Types.ObjectId;
+  eventKey: string;
+  eventType: string;
+  deltaAvailable: number;
+  deltaReserved: number;
+  deltaConsumed: number;
+  deltaRevoked: number;
+  creditsGrantedDelta: number;
+  reasonCode: string;
+  actorType: 'system' | 'user' | 'admin';
+  actorId?: mongoose.Types.ObjectId;
+  policyVersion: string;
+  createdAt: Date;
+}
+
+export interface IAiOperation extends mongoose.Document {
+  userId: mongoose.Types.ObjectId;
+  action: 'cv_review_bundle' | 'ai_draft';
+  status: 'queued' | 'running' | 'completed' | 'completed_partial' | 'failed' | 'cancelled';
+  billingMode: 'credits' | 'sponsored';
+  costSnapshot: Record<string, unknown>;
+  reservationId?: mongoose.Types.ObjectId;
+  locale: string;
+  inputFingerprint: string;
+  inputSnapshotRef: string;
+  clientIntentKey?: string;
+  attemptCount: number;
+  maxAttempts: number;
+  stateVersion: number;
+  failureCode?: string;
+  completedAt?: Date;
+}
+
 const BillingPackageSchema = new Schema({
   sku: { type: String, required: true, trim: true, maxlength: 80 },
   version: { ...positiveInteger, required: true },
   nameId: { type: String, required: true, maxlength: 120 },
   nameEn: { type: String, required: true, maxlength: 120 },
   currency: { type: String, required: true, enum: ['IDR'], default: 'IDR' },
-  amountIdr: { ...positiveInteger, required: true },
+  amountIdr: { ...nonNegativeInteger, required: true },
   credits: { ...positiveInteger, required: true },
   active: { type: Boolean, required: true, default: false },
   effectiveFrom: { type: Date, required: true },
@@ -19,6 +106,10 @@ const BillingPackageSchema = new Schema({
   termsVersion: { type: String, required: true, maxlength: 80 },
 }, timestamps);
 BillingPackageSchema.index({ sku: 1, version: 1 }, { unique: true, name: 'sku_version_unique' });
+BillingPackageSchema.index(
+  { sku: 1 },
+  { unique: true, name: 'sku_active_unique', partialFilterExpression: { active: true } },
+);
 BillingPackageSchema.index({ active: 1, effectiveFrom: 1 }, { name: 'active_effective_from' });
 
 const ActionCostSchema = new Schema({
@@ -28,7 +119,10 @@ const ActionCostSchema = new Schema({
   active: { type: Boolean, required: true, default: false },
 }, timestamps);
 ActionCostSchema.index({ action: 1, version: 1 }, { unique: true, name: 'action_version_unique' });
-ActionCostSchema.index({ action: 1, active: 1 }, { name: 'action_active' });
+ActionCostSchema.index(
+  { action: 1 },
+  { unique: true, name: 'action_active_unique', partialFilterExpression: { active: true } },
+);
 
 const BillingWalletSchema = new Schema({
   userId: { type: objectId, ref: 'User', required: true },
@@ -279,9 +373,24 @@ const models = [
   ['RefundRequest', RefundRequestSchema, 'refund_requests'],
 ] as const;
 
-export const billingModels = models.map(([name, schema, collection]) =>
+const registeredModels = models.map(([name, schema, collection]) =>
   mongoose.models[name] || mongoose.model(name, schema, collection),
 );
+
+export const BillingPackage = registeredModels[0] as mongoose.Model<IBillingPackage>;
+export const ActionCost = registeredModels[1] as mongoose.Model<IActionCost>;
+export const BillingWallet = registeredModels[2] as mongoose.Model<IBillingWallet>;
+export const CreditLot = registeredModels[3] as mongoose.Model<ICreditLot>;
+export const CreditReservation = registeredModels[4] as mongoose.Model<ICreditReservation>;
+export const CreditLedger = registeredModels[5] as mongoose.Model<ICreditLedger>;
+export const AiOperation = registeredModels[6] as mongoose.Model<IAiOperation>;
+export const AiOperationResult = registeredModels[7];
+export const PaymentOrder = registeredModels[8];
+export const WebhookInbox = registeredModels[9];
+export const OutboxEvent = registeredModels[10];
+export const IdempotencyRecord = registeredModels[11];
+export const RefundRequest = registeredModels[12];
+export const billingModels = registeredModels;
 
 export const billingModelIndexPlan = models.map(([name, schema, collection]) => ({
   model: name,

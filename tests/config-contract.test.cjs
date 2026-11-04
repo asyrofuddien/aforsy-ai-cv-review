@@ -9,6 +9,8 @@ test('environment schema applies development defaults and normalizes numeric val
   assert.equal(config.PORT, 3001);
   assert.equal(config.PORT, 3001);
   assert.equal(config.EMAIL_PROVIDER, 'smtp');
+  assert.equal(config.CREDIT_TRIAL_ENABLED, false);
+  assert.equal(config.CREDIT_ADMIN_GRANTS_ENABLED, false);
   assert.equal(config.SMTP_HOST, 'localhost');
   assert.equal(config.SMTP_PORT, 1025);
   assert.deepEqual(config.CORS_ORIGINS, ' https://app.example,https://admin.example ');

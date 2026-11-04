@@ -26,6 +26,10 @@ export default {
     maxRetries: env.LLM_MAX_RETRIES as number,
     retryDelay: env.LLM_RETRY_DELAY as number,
   },
+  billing: {
+    trialEnabled: env.CREDIT_TRIAL_ENABLED as boolean,
+    adminGrantsEnabled: env.CREDIT_ADMIN_GRANTS_ENABLED as boolean,
+  },
   pinecone: {
     apiKey: env.PINECONE_API_KEY as string,
     environment: env.PINECONE_ENVIRONMENT as string,

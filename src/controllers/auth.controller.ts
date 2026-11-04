@@ -17,6 +17,7 @@ import {
   verifyPassword,
 } from '../services/auth.service';
 import { googleStart as startGoogleOAuth, googleCallback as finishGoogleOAuth } from '../features/auth/google-oauth.controller';
+import { billingService } from '../features/billing/billing.service';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -66,6 +67,7 @@ export class AuthController {
     if (!user.isEmailVerified) throw new AppError('Verify your email before signing in', 403);
     if (!user.isActive) throw new AppError('This account is unavailable', 403);
     await promoteConfiguredAdmin(user);
+    await billingService.grantWelcomeTrial(user.id);
     res.status(200).json({ success: true, data: await newSession(user, req, res) });
   });
 
@@ -95,6 +97,7 @@ export class AuthController {
     user.isEmailVerified = true;
     await promoteConfiguredAdmin(user);
     await user.save();
+    await billingService.grantWelcomeTrial(user.id);
     res.json({ success: true, message: 'Email verified. You can sign in now.' });
   });
 

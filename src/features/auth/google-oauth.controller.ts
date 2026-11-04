@@ -5,6 +5,7 @@ import User, { IUser } from '../../models/user.model';
 import config from '../../config/config';
 import { AppError } from '../../middlewares/error.middleware';
 import { getCookie, issueSession, promoteConfiguredAdmin } from './auth.service';
+import { billingService } from '../billing/billing.service';
 
 const googleClient = new OAuth2Client(config.auth.googleClientId, config.auth.googleClientSecret, config.auth.googleCallbackUrl);
 const frontend = () => config.auth.frontendUrl.replace(/\/$/, '');
@@ -53,6 +54,7 @@ export async function googleCallback(req: Request, res: Response) {
   user.isEmailVerified = true;
   await promoteConfiguredAdmin(user);
   await user.save();
+  await billingService.grantWelcomeTrial(user.id);
   await issueSession(user, req, res);
   res.redirect(`${frontend()}/auth/callback`);
 }

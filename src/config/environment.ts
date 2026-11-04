@@ -18,6 +18,8 @@ const schema = Joi.object({
   LLM_TEMPERATURE: Joi.number().min(0).max(2).default(0.3),
   LLM_MAX_RETRIES: Joi.number().integer().min(0).max(3).default(3),
   LLM_RETRY_DELAY: Joi.number().integer().min(0).default(1000),
+  CREDIT_TRIAL_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  CREDIT_ADMIN_GRANTS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
   PINECONE_API_KEY: optionalSecret,
   PINECONE_ENVIRONMENT: optionalSecret,
   PINECONE_INDEX_NAME: Joi.string().trim().min(1).default('cv-evaluation'),

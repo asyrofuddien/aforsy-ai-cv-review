@@ -12,6 +12,8 @@ test('billing models define the planned unique and recovery indexes', () => {
   ]));
 
   assert.ok(indexes.get('billing_wallets').includes('user_unique'));
+  assert.ok(indexes.get('billing_packages').includes('sku_active_unique'));
+  assert.ok(indexes.get('action_costs').includes('action_active_unique'));
   assert.ok(indexes.get('credit_lots').includes('grant_key_unique'));
   assert.ok(indexes.get('credit_reservations').includes('reservation_key_unique'));
   assert.ok(indexes.get('credit_ledger').includes('event_key_unique'));
@@ -36,7 +38,7 @@ test('credit lot schema rejects negative, fractional, and unbalanced amounts', a
   await assert.rejects(create({ available: 1.5 }).validate());
 });
 
-test('wallet and package amounts require non-negative integer credits and positive integer prices', async () => {
+test('wallet and package amounts require integer values and allow the approved free trial', async () => {
   const BillingWallet = mongoose.model('BillingWallet');
   const BillingPackage = mongoose.model('BillingPackage');
   const wallet = new BillingWallet({
@@ -46,9 +48,14 @@ test('wallet and package amounts require non-negative integer credits and positi
     sku: 'fixture', version: 1, nameId: 'Fixture', nameEn: 'Fixture', currency: 'IDR',
     amountIdr: 1000.5, credits: 3, effectiveFrom: new Date(), termsVersion: 'v1',
   });
+  const trialPackage = new BillingPackage({
+    sku: 'welcome.v1', version: 1, nameId: 'Trial', nameEn: 'Welcome', currency: 'IDR',
+    amountIdr: 0, credits: 4, effectiveFrom: new Date(), termsVersion: 'v1',
+  });
 
   await assert.rejects(wallet.validate(), /minimum allowed value/);
   await assert.rejects(billingPackage.validate(), /amountIdr/);
+  await assert.doesNotReject(trialPackage.validate());
 });
 
 test('credit ledger rejects updates and deletions at the model boundary', async () => {
@@ -103,6 +110,23 @@ test('optional replica-set transaction test requires an isolated test database',
   const rerun = migration();
   assert.equal(rerun.status, 0, rerun.stderr);
   assert.match(rerun.stdout, /already-applied/);
+  const stagingEnv = {
+    ...process.env,
+    NODE_ENV: 'development',
+    MONGODB_URI: uri,
+    BILLING_MIGRATION_TARGET: 'staging',
+    CREDIT_TRIAL_ENABLED: 'true',
+  };
+  const seedCatalog = () => spawnSync(process.execPath, [
+    require.resolve('ts-node/dist/bin.js'), 'scripts/seed-billing-catalog.ts', '--apply',
+  ], {
+    cwd: require('node:path').resolve(__dirname, '..'),
+    encoding: 'utf8',
+    env: stagingEnv,
+  });
+  const seededCatalog = seedCatalog();
+  assert.equal(seededCatalog.status, 0, seededCatalog.stderr);
+  assert.equal(seedCatalog().status, 0);
 
   const { probeMongoTransactions } = loadTs('src/services/mongo-transaction-readiness.ts', {
     '../middlewares/error.middleware': { AppError: class AppError extends Error {} },
@@ -116,6 +140,11 @@ test('optional replica-set transaction test requires an isolated test database',
   const session = await mongoose.startSession();
   const uniqueUserId = new mongoose.Types.ObjectId();
   const uniqueEventKey = `m2-test-event-${suffix}`;
+  let billingTestUserId;
+  let backfillTestUserId;
+  let auditCollection;
+  const actionCostVersion = Date.now();
+  let priorActiveCostIds = [];
   try {
     const wallet = { userId: uniqueUserId, availableCredits: 1, reservedCredits: 0, version: 0, billingRiskHold: false };
     await db.collection('billing_wallets').insertOne(wallet);
@@ -151,6 +180,131 @@ test('optional replica-set transaction test requires an isolated test database',
     for (const collection of collections) {
       assert.equal(await db.collection(collection).countDocuments({ probe: suffix }), 1);
     }
+
+    const User = loadTs('src/models/user.model.ts').default;
+    const ActionCost = mongoose.model('ActionCost');
+    const testUser = await User.create({
+      email: `billing-${suffix}@example.test`,
+      displayName: 'Billing integration test',
+      role: 'admin',
+      isEmailVerified: true,
+      isActive: true,
+    });
+    billingTestUserId = testUser._id;
+    priorActiveCostIds = (await ActionCost.find({ action: 'cv_review_bundle', active: true }).select('_id').lean())
+      .map(cost => cost._id);
+    await ActionCost.updateMany({ action: 'cv_review_bundle', active: true }, { $set: { active: false } });
+    await ActionCost.create({
+      action: 'cv_review_bundle',
+      version: actionCostVersion,
+      creditsRequired: 3,
+      active: true,
+    });
+    const billingModels = loadTs('src/models/billing.models.ts');
+    const auditModel = loadTs('src/models/adminAuditLog.model.ts').default;
+    class TestAppError extends Error {
+      constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+      }
+    }
+    const { billingService } = loadTs('src/features/billing/billing.service.ts', {
+      '../../config/config': { billing: { trialEnabled: true, adminGrantsEnabled: true } },
+      '../../middlewares/error.middleware': { AppError: TestAppError },
+      '../../models/adminAuditLog.model': auditModel,
+      '../../models/user.model': User,
+      '../../models/billing.models': billingModels,
+    });
+    const [firstTrial, concurrentTrial] = await Promise.all([
+      billingService.grantWelcomeTrial(testUser.id),
+      billingService.grantWelcomeTrial(testUser.id),
+    ]);
+    const repeatedTrial = await billingService.grantWelcomeTrial(testUser.id);
+    assert.deepEqual([firstTrial.granted, concurrentTrial.granted].sort(), [false, true]);
+    assert.equal(repeatedTrial.granted, false);
+
+    const goodwillInput = {
+      actorId: testUser.id,
+      userId: testUser.id,
+      credits: 2,
+      caseReference: `TEST-${suffix}`,
+      reason: 'Integration test support credit',
+      idempotencyKey: `goodwill-${suffix}`,
+    };
+    assert.equal((await billingService.grantGoodwill(goodwillInput)).granted, true);
+    assert.equal((await billingService.grantGoodwill(goodwillInput)).granted, false);
+    auditCollection = mongoose.model('AdminAuditLog').collection.name;
+    assert.equal(await mongoose.model('AdminAuditLog').countDocuments({ actorUserId: billingTestUserId }), 1);
+
+    const operationInput = {
+      userId: testUser.id,
+      action: 'cv_review_bundle',
+      locale: 'en',
+      inputFingerprint: require('node:crypto').createHash('sha256').update(suffix).digest('hex'),
+      inputSnapshotRef: `test:${suffix}`,
+      idempotencyKey: `operation-${suffix}`,
+    };
+    const [held, repeatedHold] = await Promise.all([
+      billingService.createCreditOperation(operationInput),
+      billingService.createCreditOperation(operationInput),
+    ]);
+    assert.deepEqual([held.reused, repeatedHold.reused].sort(), [false, true]);
+    await assert.rejects(
+      billingService.createCreditOperation({
+        ...operationInput,
+        inputFingerprint: require('node:crypto').createHash('sha256').update(`different:${suffix}`).digest('hex'),
+      }),
+      error => error.statusCode === 409,
+    );
+    assert.equal((await billingService.getWallet(testUser.id)).wallet.availableCredits, 3);
+    assert.equal((await billingService.getWallet(testUser.id)).wallet.reservedCredits, 3);
+    assert.equal((await billingService.settleCreditOperation(held.operation.id, 'capture')).settled, true);
+    assert.equal((await billingService.settleCreditOperation(held.operation.id, 'capture')).settled, false);
+    assert.equal((await billingService.getWallet(testUser.id)).consistent, true);
+
+    const releasable = await billingService.createCreditOperation({
+      ...operationInput,
+      idempotencyKey: `release-${suffix}`,
+      inputFingerprint: require('node:crypto').createHash('sha256').update(`release:${suffix}`).digest('hex'),
+    });
+    assert.equal((await billingService.settleCreditOperation(releasable.operation.id, 'release')).settled, true);
+    assert.equal((await billingService.getWallet(testUser.id)).wallet.availableCredits, 3);
+    assert.equal((await billingService.getWallet(testUser.id)).wallet.reservedCredits, 0);
+    assert.equal((await billingService.getWallet(testUser.id)).consistent, true);
+
+    const backfillUser = await User.create({
+      email: `billing-backfill-${suffix}@example.test`,
+      displayName: 'Billing backfill test',
+      isEmailVerified: true,
+      isActive: true,
+    });
+    backfillTestUserId = backfillUser._id;
+    const previewBackfill = spawnSync(process.execPath, [
+      require.resolve('ts-node/dist/bin.js'), 'scripts/backfill-welcome-trial.ts',
+    ], {
+      cwd: require('node:path').resolve(__dirname, '..'),
+      encoding: 'utf8',
+      env: stagingEnv,
+    });
+    assert.equal(previewBackfill.status, 0, previewBackfill.stderr);
+    const preview = JSON.parse(previewBackfill.stdout);
+    assert.deepEqual(
+      [preview.eligibleAccounts, preview.alreadyGranted, preview.pending],
+      [2, 1, 1],
+    );
+    assert.doesNotMatch(previewBackfill.stdout, /billing-|@example\.test/);
+    const backfill = () => spawnSync(process.execPath, [
+      require.resolve('ts-node/dist/bin.js'), 'scripts/backfill-welcome-trial.ts', '--apply',
+    ], {
+      cwd: require('node:path').resolve(__dirname, '..'),
+      encoding: 'utf8',
+      env: stagingEnv,
+    });
+    const appliedBackfill = backfill();
+    assert.equal(appliedBackfill.status, 0, appliedBackfill.stderr);
+    assert.equal(JSON.parse(appliedBackfill.stdout).granted, 1);
+    assert.equal((await billingService.getWallet(backfillUser.id)).wallet.availableCredits, 4);
+    assert.equal(JSON.parse(backfill().stdout).processed, 0);
   } finally {
     await session.endSession();
     await db.collection('billing_wallets').deleteOne({ userId: uniqueUserId });
@@ -159,6 +313,25 @@ test('optional replica-set transaction test requires an isolated test database',
       await db.dropCollection(collection).catch(error => {
         if (error.codeName !== 'NamespaceNotFound') throw error;
       });
+    }
+    if (billingTestUserId || backfillTestUserId) {
+      const userIds = [billingTestUserId, backfillTestUserId].filter(Boolean);
+      for (const collection of [
+        'billing_wallets', 'credit_lots', 'credit_reservations', 'credit_ledger',
+        'ai_operations', 'idempotency_records',
+      ]) {
+        await db.collection(collection).deleteMany({ userId: { $in: userIds } });
+      }
+      if (auditCollection) await db.collection(auditCollection).deleteMany({ actorUserId: { $in: userIds } });
+      await db.collection('users').deleteMany({ _id: { $in: userIds } });
+      await db.collection('billing_backfill_checkpoints').deleteOne({ checkpointKey: 'welcome.v1_trial_backfill_v1' });
+      await db.collection('action_costs').deleteOne({ action: 'cv_review_bundle', version: actionCostVersion });
+      if (priorActiveCostIds.length) {
+        await db.collection('action_costs').updateMany(
+          { _id: { $in: priorActiveCostIds } },
+          { $set: { active: true } },
+        );
+      }
     }
     await mongoose.disconnect();
   }
