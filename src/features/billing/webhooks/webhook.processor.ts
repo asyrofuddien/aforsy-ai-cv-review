@@ -7,7 +7,7 @@ import config from '../../../config/config';
 
 const logMismatch = async (inbox: any, reason: string) => {
   await WebhookInbox.updateOne({ _id: inbox._id }, { $set: { processState: 'rejected', processedAt: new Date() } });
-  await AdminAuditLog.create({ action: 'billing.webhook.reconciliation_required', targetType: 'payment_order', targetId: String(inbox.orderReference || inbox._id), details: { reasonCode: reason, provider: 'lynk', eventIdentity: inbox.eventIdentity } });
+  await AdminAuditLog.create({ actorType: 'system', action: 'billing.webhook.reconciliation_required', targetType: 'payment_order', targetId: String(inbox.orderReference || inbox._id), details: { reasonCode: reason, provider: 'lynk', eventIdentity: inbox.eventIdentity } });
 };
 
 export async function processLynkInbox(inboxId: string): Promise<void> {

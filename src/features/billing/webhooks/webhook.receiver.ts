@@ -22,7 +22,7 @@ export const receiveLynkWebhook = asyncHandler(async (req: Request, res: Respons
     const existing = await WebhookInbox.findOne({ provider: 'lynk', eventIdentity: parsed.eventId });
     if (existing && existing.rawPayloadHash !== rawPayloadHash) {
       await WebhookInbox.updateOne({ _id: existing._id }, { $set: { processState: 'rejected' } });
-      await AdminAuditLog.create({ action: 'billing.webhook.identity_conflict', targetType: 'payment_order', targetId: String(existing.orderReference || existing._id), details: { provider: 'lynk', eventIdentity: parsed.eventId, priorPayloadHash: existing.rawPayloadHash, conflictingPayloadHash: rawPayloadHash } });
+      await AdminAuditLog.create({ actorType: 'system', action: 'billing.webhook.identity_conflict', targetType: 'payment_order', targetId: String(existing.orderReference || existing._id), details: { provider: 'lynk', eventIdentity: parsed.eventId, priorPayloadHash: existing.rawPayloadHash, conflictingPayloadHash: rawPayloadHash } });
     }
   }
   res.status(200).json({ success: true, received: true });

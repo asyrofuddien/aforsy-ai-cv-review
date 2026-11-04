@@ -1,7 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
 const AdminAuditLogSchema = new Schema({
-  actorUserId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+  actorUserId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
+  actorType: { type: String, enum: ['user', 'system'], required: true, default: 'user' },
   action: { type: String, required: true, maxlength: 80, index: true },
   targetType: {
     type: String,
