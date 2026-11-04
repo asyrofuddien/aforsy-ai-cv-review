@@ -12,6 +12,7 @@ import queueService from './services/queue.service';
 import { startWorker } from './workers/evaluation.worker';
 import { outboxDispatcher } from './workers/outbox.dispatcher';
 import { aiResultCleanupWorker } from './workers/cleanup.worker';
+import { localBillingReconciler } from './workers/reconciler.worker';
 
 const logger = appLogger.child({ scope: 'server' });
 
@@ -26,7 +27,7 @@ const runtime = createBootstrap<Server>({
   connectDatabase: connectDB,
   initializeVectorDB,
   startWorkers: startWorker,
-  closeWorkers: async force => { await outboxDispatcher.stop(); await aiResultCleanupWorker.stop(); await queueService.close(force); },
+  closeWorkers: async force => { await outboxDispatcher.stop(); await localBillingReconciler.stop(); await aiResultCleanupWorker.stop(); await queueService.close(force); },
   closeVectorDB,
   disconnectDatabase: disconnectDB,
   logger,

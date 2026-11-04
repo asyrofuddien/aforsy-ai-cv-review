@@ -17,6 +17,8 @@ export interface IBillingPackage extends mongoose.Document {
   effectiveFrom: Date;
   effectiveUntil?: Date;
   termsVersion: string;
+  lynkProductId?: string;
+  lynkCheckoutUrl?: string;
 }
 
 export interface IActionCost extends mongoose.Document {
@@ -109,6 +111,8 @@ const BillingPackageSchema = new Schema({
   effectiveFrom: { type: Date, required: true },
   effectiveUntil: Date,
   termsVersion: { type: String, required: true, maxlength: 80 },
+  lynkProductId: { type: String, maxlength: 180 },
+  lynkCheckoutUrl: { type: String, maxlength: 2000, match: /^https:\/\/lynk\.id\// },
 }, timestamps);
 BillingPackageSchema.index({ sku: 1, version: 1 }, { unique: true, name: 'sku_version_unique' });
 BillingPackageSchema.index(
@@ -116,6 +120,7 @@ BillingPackageSchema.index(
   { unique: true, name: 'sku_active_unique', partialFilterExpression: { active: true } },
 );
 BillingPackageSchema.index({ active: 1, effectiveFrom: 1 }, { name: 'active_effective_from' });
+BillingPackageSchema.index({ lynkProductId: 1 }, { unique: true, partialFilterExpression: { lynkProductId: { $type: 'string' } }, name: 'lynk_product_unique' });
 
 const ActionCostSchema = new Schema({
   action: { type: String, required: true, enum: ['cv_review_bundle', 'ai_draft'] },
@@ -268,7 +273,10 @@ AiOperationResultSchema.index({ userId: 1, createdAt: -1 }, { name: 'user_create
 AiOperationResultSchema.index({ state: 1, expiresAt: 1 }, { name: 'state_expires_at' });
 
 const PaymentOrderSchema = new Schema({
-  userId: { type: objectId, ref: 'User', required: true },
+  userId: { type: objectId, ref: 'User' },
+  buyerEmail: { type: String, required: true, lowercase: true, trim: true, maxlength: 254 },
+  idempotencyKey: { type: String, required: true, maxlength: 180 },
+  requestFingerprint: { type: String, required: true, minlength: 64, maxlength: 64 },
   publicOrderNumber: { type: String, required: true, maxlength: 100 },
   packageSnapshot: { type: Schema.Types.Mixed, required: true },
   termsVersion: { type: String, required: true, maxlength: 80 },
@@ -287,6 +295,7 @@ const PaymentOrderSchema = new Schema({
   creditGrantedAt: Date,
   returnIntentId: { type: String, maxlength: 180 },
   riskState: { type: String, maxlength: 80 },
+  webhookFingerprint: { type: String, minlength: 64, maxlength: 64 },
 }, timestamps);
 PaymentOrderSchema.index({ publicOrderNumber: 1 }, { unique: true, name: 'public_order_number_unique' });
 PaymentOrderSchema.index(
@@ -298,6 +307,8 @@ PaymentOrderSchema.index(
   { unique: true, name: 'provider_transaction_unique', partialFilterExpression: { providerTransactionId: { $type: 'string' } } },
 );
 PaymentOrderSchema.index({ userId: 1, createdAt: -1 }, { name: 'user_created_at' });
+PaymentOrderSchema.index({ userId: 1, idempotencyKey: 1 }, { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } }, name: 'user_idempotency_unique' });
+PaymentOrderSchema.index({ buyerEmail: 1, paymentStatus: 1, fulfillmentStatus: 1 }, { name: 'email_claim_lookup' });
 PaymentOrderSchema.index({ paymentStatus: 1, updatedAt: 1 }, { name: 'payment_status_updated_at' });
 
 const WebhookInboxSchema = new Schema({

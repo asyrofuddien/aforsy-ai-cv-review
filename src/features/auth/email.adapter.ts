@@ -178,3 +178,22 @@ export const sendReviewCompleteEmail = async (input: ReviewCompleteEmail): Promi
   await transporter.sendMail({ from: config.auth.emailFrom, to: input.email, subject, text, html });
   logger.info('Review completion email sent', { provider: 'smtp' });
 };
+
+export const sendPurchaseReceiptEmail = async (input: { email: string; displayName: string; orderNumber: string; packageName: string; amountIdr: number; credits: number; locale?: Locale }): Promise<void> => {
+  const id = input.locale === 'id';
+  const subject = id ? 'Pembayaran kredit Landly diterima' : 'Landly credit purchase receipt';
+  const text = id
+    ? `Halo ${input.displayName}, pembayaran ${input.orderNumber} diterima. Paket ${input.packageName}: ${input.credits} kredit, Rp${input.amountIdr.toLocaleString('id-ID')}.`
+    : `Hi ${input.displayName}, payment ${input.orderNumber} was received. ${input.packageName}: ${input.credits} credits, IDR ${input.amountIdr.toLocaleString('en-US')}.`;
+  const html = `<!doctype html><html lang="${id ? 'id' : 'en'}"><body style="margin:0;padding:32px 16px;background:#f1f7fc;color:#334155;font-family:Arial,sans-serif"><table role="presentation" style="max-width:600px;margin:auto;background:#fff;border:1px solid #e2eaf1;border-radius:18px;padding:36px"><tr><td><div style="color:#334155;font-size:25px;font-weight:700">Landly<span style="color:#1e9df1">.</span></div><div style="height:4px;background:#1e9df1;margin:20px 0"></div><p style="color:#1689d7;font-weight:700">${id ? 'PEMBAYARAN DITERIMA' : 'PAYMENT RECEIVED'}</p><h1>${id ? 'Kredit sudah ditambahkan' : 'Credits have been added'}</h1><p>${id ? 'Halo' : 'Hi'} ${escapeHtml(input.displayName)}, ${id ? 'pembayaran Anda sudah kami terima.' : 'we have received your payment.'}</p><p><strong>${escapeHtml(input.packageName)}</strong><br/>${input.credits} ${id ? 'kredit' : 'credits'} · ${id ? 'Rp' : 'IDR '}${input.amountIdr.toLocaleString(id ? 'id-ID' : 'en-US')}<br/>${id ? 'Nomor pesanan' : 'Order'}: ${escapeHtml(input.orderNumber)}</p><p style="color:#64748b;font-size:13px">${id ? 'Simpan email ini sebagai bukti pembayaran.' : 'Keep this email as your payment receipt.'}</p></td></tr></table></body></html>`;
+  if (config.auth.emailProvider === 'resend') {
+    if (!config.auth.resendApiKey) throw new Error('RESEND_API_KEY is required when EMAIL_PROVIDER=resend');
+    const response = await fetch(`${config.auth.resendApiUrl}/emails`, { method: 'POST', headers: { Authorization: `Bearer ${config.auth.resendApiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: config.auth.emailFrom, to: [input.email], subject, text, html }), signal: AbortSignal.timeout(15_000) });
+    if (!response.ok) throw new Error(`Resend purchase receipt failed (${response.status})`);
+    return;
+  }
+  if (config.auth.emailProvider !== 'smtp') throw new Error(`Unsupported EMAIL_PROVIDER: ${config.auth.emailProvider}`);
+  if (!config.auth.smtpHost) { if (config.nodeEnv === 'production') throw new Error('Email delivery is not configured'); logger.warn('Purchase receipt not delivered: development SMTP is not configured'); return; }
+  const transporter = nodemailer.createTransport({ host: config.auth.smtpHost, port: config.auth.smtpPort, secure: config.auth.smtpSecure, auth: config.auth.smtpUser ? { user: config.auth.smtpUser, pass: config.auth.smtpPassword } : undefined });
+  await transporter.sendMail({ from: config.auth.emailFrom, to: input.email, subject, text, html });
+};

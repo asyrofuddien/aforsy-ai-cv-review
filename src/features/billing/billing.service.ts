@@ -100,7 +100,7 @@ async function ensureWallet(userId: mongoose.Types.ObjectId, session: mongoose.C
   );
 }
 
-async function grantInTransaction(input: {
+export async function grantInTransaction(input: {
   userId: mongoose.Types.ObjectId;
   amount: number;
   sourceType: GrantSource;
@@ -188,13 +188,17 @@ async function grantInTransaction(input: {
 }
 
 export const billingService = {
+  async grantPurchaseInTransaction(input: { userId: mongoose.Types.ObjectId; amount: number; sourceId: string; grantKey: string; session: mongoose.ClientSession }) {
+    return grantInTransaction({ ...input, sourceType: 'purchase', actorType: 'system', reasonCode: 'lynk_purchase' });
+  },
+
   async getActiveCatalog(now = new Date()) {
     const [packages, actionCosts] = await Promise.all([
       BillingPackage.find({
         active: true,
         effectiveFrom: { $lte: now },
         $or: [{ effectiveUntil: null }, { effectiveUntil: { $gt: now } }],
-      }).select('sku version nameId nameEn currency amountIdr credits termsVersion').sort({ amountIdr: 1 }).lean(),
+      }).select('sku version nameId nameEn currency amountIdr credits termsVersion lynkProductId').sort({ amountIdr: 1 }).lean(),
       ActionCost.find({ active: true }).select('action version creditsRequired').sort({ action: 1 }).lean(),
     ]);
     return { packages, actionCosts };

@@ -13,6 +13,7 @@ import { createAiDraft } from "../services/cv-draft-ai.service";
 import { outboxDispatcher } from "./outbox.dispatcher";
 import config from "../config/config";
 import { randomUUID } from "crypto";
+import { localBillingReconciler } from './reconciler.worker';
 
 const logger = appLogger.child({ scope: "worker" });
 function processJob(job: Job<ReviewQueuePayload | MatcherQueuePayload>, type: "review" | "cv-matcher") {
@@ -108,6 +109,7 @@ export const startWorker = (): void => {
   );
   queueService.initializeAiOperationWorker(processDurableOperation);
   outboxDispatcher.start(config.billing.reconcileIntervalMs);
+  localBillingReconciler.start(config.billing.reconcileIntervalMs);
   aiResultCleanupWorker.start();
   logger.info("Workers ready", { queues: ["review", "cv-matcher", "ai-operation"] });
 };

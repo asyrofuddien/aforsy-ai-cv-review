@@ -19,5 +19,8 @@ router.patch('/templates/:id', adminController.updateTemplate);
 router.delete('/templates/:id', adminController.archiveTemplate);
 router.get('/audit', adminController.listAudit);
 router.post('/billing/users/:userId/goodwill', billingController.goodwill);
+router.get('/billing/payments', billingController.adminPayments);
+router.get('/billing/refund-requests', billingController.adminRefundRequests);
+router.post('/billing/payments/:orderId/refund-requests', billingController.refundRequest);
 
 export default router;

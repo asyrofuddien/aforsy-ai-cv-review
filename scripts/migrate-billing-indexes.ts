@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import config from '../src/config/config';
 import { billingModelIndexPlan } from '../src/models/billing.models';
 
-const migrationKey = '20261103_billing_indexes_v2';
+const migrationKey = '20261104_billing_payment_indexes_v3';
 const apply = process.argv.includes('--apply');
 const databaseName = new URL(config.database.mongoUri).pathname.slice(1);
 type MongoIndexDirection = 1 | -1 | '2d' | '2dsphere' | 'geoHaystack' | 'hashed' | 'text';

@@ -6,9 +6,9 @@ const migrationTarget = 'staging';
 const termsVersion = '2026-11-03-v1';
 const packages = [
   { sku: 'welcome.v1', nameId: 'Trial', nameEn: 'Welcome', currency: 'IDR', amountIdr: 0, credits: 4 },
-  { sku: 'credits_start_12_v1', nameId: 'Mulai', nameEn: 'Start', currency: 'IDR', amountIdr: 14000, credits: 12 },
-  { sku: 'credits_focus_30_v1', nameId: 'Fokus', nameEn: 'Focus', currency: 'IDR', amountIdr: 30000, credits: 30 },
-  { sku: 'credits_intensive_75_v1', nameId: 'Intensif', nameEn: 'Intensive', currency: 'IDR', amountIdr: 69000, credits: 75 },
+  { sku: 'credits_start_12_v1', nameId: 'Mulai', nameEn: 'Start', currency: 'IDR', amountIdr: 14000, credits: 12, lynkProductId: '6ad1db0038a13ff53eff8515-4775-5027640958-1792137984148', lynkCheckoutUrl: 'https://lynk.id/aforsy/z7yj7o2zwwpe' },
+  { sku: 'credits_focus_30_v1', nameId: 'Fokus', nameEn: 'Focus', currency: 'IDR', amountIdr: 30000, credits: 30, lynkProductId: '6ad1e2dabc6badce20ed87fc-4292-4743620738-1792139994332', lynkCheckoutUrl: 'https://lynk.id/aforsy/r9wz9xv8mkz7' },
+  { sku: 'credits_intensive_75_v1', nameId: 'Intensif', nameEn: 'Intensive', currency: 'IDR', amountIdr: 69000, credits: 75, lynkProductId: '6ad1e32b66c09012c4c00426-8245-4241599588-1792140075691', lynkCheckoutUrl: 'https://lynk.id/aforsy/y10x1n6j3r57' },
 ] as const;
 const actionCosts = [
   { action: 'cv_review_bundle', version: 1, creditsRequired: 3 },
@@ -48,7 +48,19 @@ async function main(): Promise<void> {
         )) {
           throw new Error(`Catalog item ${item.sku} version 1 differs from the approved snapshot.`);
         }
-        if (existing) continue;
+        if (existing) {
+          if (item.sku !== 'welcome.v1') {
+            if ((existing.lynkProductId && existing.lynkProductId !== (item as any).lynkProductId) || (existing.lynkCheckoutUrl && existing.lynkCheckoutUrl !== (item as any).lynkCheckoutUrl)) {
+              throw new Error(`Catalog item ${item.sku} already has a different Lynk mapping.`);
+            }
+            if (!existing.lynkProductId || !existing.lynkCheckoutUrl) {
+              existing.lynkProductId = (item as any).lynkProductId;
+              existing.lynkCheckoutUrl = (item as any).lynkCheckoutUrl;
+              await existing.save({ session });
+            }
+          }
+          continue;
+        }
         const activeVersion = await BillingPackage.findOne({ sku: item.sku, active: true }).session(session);
         if (activeVersion) throw new Error(`Catalog item ${item.sku} already has an active version.`);
         await BillingPackage.create([{

@@ -66,7 +66,7 @@ function fixture() {
   const adminController = new Proxy({}, { get: (_target, key) => key === '__esModule' ? false : (_req, res) => res.json({ success: true }) });
   const adminRoutes = loadTs('src/routes/admin.routes.ts', {
     '../controllers/admin.controller': adminController,
-    '../features/billing/billing.controller': { billingController: { goodwill: (_req, res) => res.status(201).json({ success: true }) } },
+    '../features/billing/billing.controller': { billingController: new Proxy({ goodwill: (_req, res) => res.status(201).json({ success: true }) }, { get: (target, key) => target[key] || ((_req, res) => res.json({ success: true })) }) },
     '../middlewares/auth.middleware': { requireAdmin },
   }).default;
   const billingServiceStub = {
@@ -77,10 +77,14 @@ function fixture() {
   const billingControllerReal = loadTs('src/features/billing/billing.controller.ts', {
     '../../middlewares/error.middleware': { AppError, asyncHandler },
     './billing.service': { billingService: billingServiceStub },
+    './orders/order.service': { orderService: {} },
+    '../../models/billing.models': { PaymentOrder: {}, RefundRequest: {}, CreditLot: {}, CreditReservation: {}, BillingWallet: {}, CreditLedger: {}, OutboxEvent: {} },
+    '../../models/user.model': {}, '../../models/adminAuditLog.model': {},
+    '../../utils/locale': { requestLocale: () => 'en' },
   });
   const billingRoutes = loadTs('src/features/billing/billing.routes.ts', {
     '../../middlewares/auth.middleware': { authenticate },
-    './billing.controller': billingControllerReal,
+    './billing.controller': { billingController: new Proxy(billingControllerReal.billingController, { get: (target, key) => target[key] || ((_req, res) => res.json({ success: true })) }) },
   }).default;
   const routes = loadTs('src/routes/index.ts', {
     './auth.routes': express.Router(), './upload.routes': express.Router(),
@@ -88,6 +92,7 @@ function fixture() {
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../features/billing/billing.routes': { __esModule: true, default: billingRoutes },
+    '../features/billing/webhooks/webhook.receiver': { receiveLynkWebhook: (_req, res) => res.json({ success: true }) },
     '../features/ai-operations/operation.routes': express.Router(),
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
     '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },

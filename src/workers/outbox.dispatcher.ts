@@ -4,6 +4,8 @@ import { AiOperation, OutboxEvent } from '../models/billing.models';
 import { operationService } from '../features/ai-operations/operation.service';
 import queueService from '../services/queue.service';
 import appLogger from '../utils/logger';
+import { processReceivedLynk } from '../features/billing/webhooks/webhook.processor';
+import { deliverBillingEmail } from '../features/billing/notifications/email.sender';
 
 const logger = appLogger.child({ scope: 'outbox-dispatcher' });
 const MAX_ATTEMPTS = 8;
@@ -84,11 +86,12 @@ export class OutboxDispatcher {
     this.running = true;
     try {
       if (!(await this.acquireSchedulerLease())) return;
+      await processReceivedLynk(25);
       await this.recoverExpiredOperations();
       for (let count = 0; count < 25 && !this.stopping; count += 1) {
         const now = new Date();
         const event = await OutboxEvent.findOneAndUpdate({
-          type: { $in: ['ai-operation.enqueue', 'ai-operation.retry'] },
+          type: { $in: ['ai-operation.enqueue', 'ai-operation.retry', 'email.purchase_receipt', 'email.result_ready'] },
           $or: [
             { state: 'pending', nextAttemptAt: { $lte: now } },
             { state: 'processing', lockedUntil: { $lte: now } },
@@ -99,6 +102,11 @@ export class OutboxDispatcher {
         }, { sort: { createdAt: 1 }, new: true }).select('+payload');
         if (!event) break;
         try {
+          if (event.type.startsWith('email.')) {
+            await deliverBillingEmail(event);
+            await OutboxEvent.updateOne({ _id: event._id, state: 'processing' }, { $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 } });
+            continue;
+          }
           const operationId = String((event.payload as any)?.operationId || event.entityId);
           const operation = await AiOperation.findById(operationId).select('maxAttempts status').lean();
           if (!operation || operation.status !== 'queued') {
