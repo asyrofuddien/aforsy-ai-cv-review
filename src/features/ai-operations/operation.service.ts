@@ -290,7 +290,7 @@ class OperationServiceImpl implements OperationService {
    * REQ-M4-001 AC7: returns billing summary for the 202 response.
    */
   async createAndReserve(input: CreateOperationInput): Promise<OperationCreatedResult> {
-    const { operation, reservation, reused } = await inTransaction(async session => {
+    const create = async (session: mongoose.ClientSession) => {
       const created = await billingService.createCreditOperation({
         userId: input.userId, action: input.action, locale: input.locale,
         inputFingerprint: input.inputFingerprint, inputSnapshotRef: input.inputSnapshotRef,
@@ -304,10 +304,14 @@ class OperationServiceImpl implements OperationService {
           if (!mongoose.isValidObjectId(cvDocumentId)) throw new AppError('A valid CV source is required.', 400);
           const evaluation = await Evaluation.create([{
             cvDocumentId: new mongoose.Types.ObjectId(cvDocumentId), userId: new mongoose.Types.ObjectId(input.userId),
-            candidateName: snapshot.candidateName, jobDescriptionId: snapshot.jobDescriptionId ? new mongoose.Types.ObjectId(String(snapshot.jobDescriptionId)) : undefined,
-            locale: input.locale, evaluationMode: snapshot.jobDescriptionId || snapshot.jobDescriptionText ? 'job_specific' : 'general', status: 'queued',
+            candidateName: snapshot.candidateName,
+            jobDescriptionId: snapshot.jobDescriptionId ? new mongoose.Types.ObjectId(String(snapshot.jobDescriptionId)) : undefined,
+            locale: input.locale,
+            evaluationMode: snapshot.jobDescriptionId || snapshot.jobDescriptionText ? 'job_specific' : 'general',
+            status: 'queued',
           }], { session }).then(([createdEvaluation]) => createdEvaluation);
           update.resourceId = evaluation._id;
+          created.operation.resourceId = evaluation._id;
         }
         await AiOperation.updateOne({ _id: created.operation._id }, { $set: update }, { session });
         await OutboxEvent.create([{
@@ -318,7 +322,23 @@ class OperationServiceImpl implements OperationService {
         }], { session });
       }
       return created;
-    });
+    };
+
+    let created: Awaited<ReturnType<typeof billingService.createCreditOperation>>;
+    try {
+      created = await inTransaction(create);
+    } catch (error: any) {
+      if (error?.code !== 11000) throw error;
+      // A competing request may commit the unique idempotency key first.
+      // Resolve that race as a replay after the failed transaction is closed.
+      created = await billingService.createCreditOperation({
+        userId: input.userId, action: input.action, locale: input.locale,
+        inputFingerprint: input.inputFingerprint, inputSnapshotRef: input.inputSnapshotRef,
+        idempotencyKey: input.idempotencyKey, maxAttempts: input.maxAttempts,
+      });
+      if (!created.reused) throw error;
+    }
+    const { operation, reservation, reused } = created;
     const wallet = (await billingService.getWallet(input.userId)).wallet;
     return {
       operation: operation as IAiOperation & { id: string }, reused,

@@ -444,7 +444,27 @@ export const billingService = {
       await operation.save({ session });
       return { operation, reservation, reused: false };
     };
-    return input.session ? work(input.session) : inTransaction(work);
+    if (input.session) return work(input.session);
+    try {
+      return await inTransaction(work);
+    } catch (error: any) {
+      if (error?.code !== 11000) throw error;
+      // A concurrent request can win the unique idempotency insert after this
+      // transaction's initial lookup. Resolve that race as an idempotent replay.
+      const existing: any = await IdempotencyRecord.findOne({ userId, scope: 'ai_operation', key: input.idempotencyKey }).lean();
+      if (!existing) throw error;
+      if (existing.requestFingerprint !== input.inputFingerprint) {
+        throw new AppError('Idempotency key was already used with different input.', 409);
+      }
+      const [operation, reservation] = await Promise.all([
+        AiOperation.findById(existing.resourceId),
+        CreditReservation.findOne({ referenceId: existing.resourceId }),
+      ]);
+      if (!operation || !reservation || operation.action !== input.action) {
+        throw new AppError('Operation billing record requires reconciliation.', 503);
+      }
+      return { operation, reservation, reused: true };
+    }
   },
 
   async settleCreditOperation(operationId: string, outcome: 'capture' | 'release', failureCode = 'technical_failure', externalSession?: mongoose.ClientSession) {

@@ -7,7 +7,7 @@ const testConfig = {
   port: 3000,
   host: '127.0.0.1',
   nodeEnv: 'test',
-  database: { mongoUri: 'mongodb://localhost/test', redisUrl: 'redis://localhost:6379' },
+  database: { mongoUri: process.env.MONGODB_TEST_URI || 'mongodb://localhost/test', redisUrl: process.env.REDIS_TEST_URL || 'redis://localhost:6379' },
   queue: { concurrency: 2, cvMatcherConcurrency: 10 },
   jobs: {
     provider: 'rapidapi', fallback: 'aggregate', rapidApiKey: '', rapidApiHost: 'jobs-api14.p.rapidapi.com',

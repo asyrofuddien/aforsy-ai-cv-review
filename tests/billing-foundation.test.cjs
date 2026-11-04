@@ -142,6 +142,8 @@ test('optional replica-set transaction test requires an isolated test database',
   const uniqueEventKey = `m2-test-event-${suffix}`;
   let billingTestUserId;
   let backfillTestUserId;
+  let durableOperationIds = [];
+  let durableEvaluationIds = [];
   let auditCollection;
   const actionCostVersion = Date.now();
   let priorActiveCostIds = [];
@@ -272,6 +274,40 @@ test('optional replica-set transaction test requires an isolated test database',
     assert.equal((await billingService.getWallet(testUser.id)).wallet.reservedCredits, 0);
     assert.equal((await billingService.getWallet(testUser.id)).consistent, true);
 
+    const evaluationModel = loadTs('src/models/evaluation.model.ts').default;
+    const { operationService } = loadTs('src/features/ai-operations/operation.service.ts', {
+      '../../middlewares/error.middleware': { AppError: TestAppError },
+      '../../models/billing.models': billingModels,
+      '../billing/billing.service': { billingService },
+      '../../models/evaluation.model': evaluationModel,
+    });
+    const cvDocumentId = new mongoose.Types.ObjectId();
+    const durableKey = `durable-${suffix}`;
+    const durableInput = {
+      userId: testUser.id, action: 'cv_review_bundle', locale: 'en',
+      inputFingerprint: require('node:crypto').createHash('sha256').update(`durable:${suffix}`).digest('hex'),
+      inputSnapshotRef: `document:${cvDocumentId}`, idempotencyKey: durableKey,
+      inputSnapshot: { cvDocumentId: String(cvDocumentId), candidateName: 'Integration Candidate' },
+    };
+    const durableResults = await Promise.all([
+      operationService.createAndReserve(durableInput),
+      operationService.createAndReserve(durableInput),
+    ]);
+    assert.deepEqual(durableResults.map(item => item.reused).sort(), [false, true]);
+    const durableOperationId = durableResults[0].operation._id;
+    durableOperationIds = [durableOperationId];
+    const durableOperation = await mongoose.model('AiOperation').findById(durableOperationId).lean();
+    assert.ok(durableOperation.resourceId, 'review operation should link the review resource');
+    durableEvaluationIds = [durableOperation.resourceId];
+    assert.equal(await mongoose.model('AiOperation').countDocuments({ userId: testUser._id, clientIntentKey: durableKey }), 1);
+    assert.equal(await mongoose.model('CreditReservation').countDocuments({ referenceId: durableOperationId }), 1);
+    assert.equal(await mongoose.model('OutboxEvent').countDocuments({ entityId: durableOperationId, type: 'ai-operation.enqueue' }), 1);
+    await assert.rejects(operationService.createAndReserve({
+      ...durableInput,
+      inputFingerprint: require('node:crypto').createHash('sha256').update(`different:${suffix}`).digest('hex'),
+    }), error => error.statusCode === 409);
+    assert.equal(await mongoose.model('AiOperation').countDocuments({ userId: testUser._id, clientIntentKey: durableKey }), 1);
+
     const backfillUser = await User.create({
       email: `billing-backfill-${suffix}@example.test`,
       displayName: 'Billing backfill test',
@@ -318,9 +354,14 @@ test('optional replica-set transaction test requires an isolated test database',
       const userIds = [billingTestUserId, backfillTestUserId].filter(Boolean);
       for (const collection of [
         'billing_wallets', 'credit_lots', 'credit_reservations', 'credit_ledger',
-        'ai_operations', 'idempotency_records',
+        'ai_operations', 'idempotency_records', 'evaluations',
       ]) {
         await db.collection(collection).deleteMany({ userId: { $in: userIds } });
+      }
+      if (durableOperationIds.length) {
+        await db.collection('evaluations').deleteMany({ _id: { $in: durableEvaluationIds } });
+        await db.collection('outbox_events').deleteMany({ entityId: { $in: durableOperationIds } });
+        await db.collection('ai_operation_results').deleteMany({ operationId: { $in: durableOperationIds } });
       }
       if (auditCollection) await db.collection(auditCollection).deleteMany({ actorUserId: { $in: userIds } });
       await db.collection('users').deleteMany({ _id: { $in: userIds } });
