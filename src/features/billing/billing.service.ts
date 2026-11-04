@@ -327,6 +327,7 @@ export const billingService = {
     inputSnapshotRef: string;
     idempotencyKey: string;
     maxAttempts?: number;
+    session?: mongoose.ClientSession;
   }) {
     const userId = objectId(input.userId);
     validateIdempotencyKey(input.idempotencyKey);
@@ -338,7 +339,7 @@ export const billingService = {
     if (input.maxAttempts !== undefined && (!Number.isInteger(input.maxAttempts) || input.maxAttempts < 1 || input.maxAttempts > 5)) {
       throw new AppError('maxAttempts must be between 1 and 5.', 400);
     }
-    return inTransaction(async session => {
+    const work = async (session: mongoose.ClientSession) => {
       const existing = await IdempotencyRecord.findOne({
         userId,
         scope: 'ai_operation',
@@ -442,13 +443,14 @@ export const billingService = {
       operation.reservationId = reservation._id;
       await operation.save({ session });
       return { operation, reservation, reused: false };
-    });
+    };
+    return input.session ? work(input.session) : inTransaction(work);
   },
 
-  async settleCreditOperation(operationId: string, outcome: 'capture' | 'release', failureCode = 'technical_failure') {
+  async settleCreditOperation(operationId: string, outcome: 'capture' | 'release', failureCode = 'technical_failure', externalSession?: mongoose.ClientSession) {
     if (!/^[a-z0-9_:-]{1,80}$/i.test(failureCode)) throw new AppError('Invalid failure code.', 400);
     const id = objectId(operationId);
-    return inTransaction(async session => {
+    const work = async (session: mongoose.ClientSession) => {
       const operation = await AiOperation.findById(id).session(session);
       if (!operation) throw new AppError('AI operation not found.', 404);
       const reservation = await CreditReservation.findOne({ referenceId: id }).session(session);
@@ -512,7 +514,8 @@ export const billingService = {
         { session },
       );
       return { operationId: operation.id, status: operation.status, settled: true };
-    });
+    };
+    return externalSession ? work(externalSession) : inTransaction(work);
   },
 };
 

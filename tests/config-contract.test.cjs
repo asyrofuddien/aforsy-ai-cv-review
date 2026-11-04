@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { loadTs } = require('./helpers/load-ts.cjs');
 
-const { parseEnvironment } = loadTs('src/config/environment.ts');
+const { parseEnvironment, validateBillingStartup } = loadTs('src/config/environment.ts');
 
 test('environment schema applies development defaults and normalizes numeric values', () => {
   const config = parseEnvironment({ SMTP_PORT: '1025', CORS_ORIGINS: ' https://app.example,https://admin.example ' });
@@ -40,4 +40,12 @@ test('invalid environment configuration reports key names without leaking values
       return true;
     },
   );
+});
+
+
+test('billing mode rejects invalid values and live mode without merchant key', () => {
+  assert.throws(() => parseEnvironment({ BILLING_MODE: 'production' }), /BILLING_MODE/);
+  assert.throws(() => validateBillingStartup({ BILLING_MODE: 'live', LYNK_MERCHANT_KEY: '' }), /LYNK_MERCHANT_KEY/);
+  assert.doesNotThrow(() => validateBillingStartup({ BILLING_MODE: 'live', LYNK_MERCHANT_KEY: 'configured-secret' }));
+  assert.doesNotThrow(() => validateBillingStartup({ BILLING_MODE: 'disabled' }));
 });

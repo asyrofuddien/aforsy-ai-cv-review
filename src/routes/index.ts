@@ -12,6 +12,7 @@ import reportingRoutes from './reporting.routes';
 import systemRoutes from './system.routes';
 import documentRoutes from './document.routes';
 import billingRoutes from '../features/billing/billing.routes';
+import aiOperationRoutes from '../features/ai-operations/operation.routes';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/test', requireAdmin);
 router.use('/admin', adminRoutes);
 
 // Product routes use the authenticated user as the owner of all created data.
+router.use('/ai/operations', aiOperationRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/job-descriptions', jobDescriptionRoutes);

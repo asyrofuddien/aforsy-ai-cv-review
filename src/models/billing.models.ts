@@ -81,9 +81,14 @@ export interface IAiOperation extends mongoose.Document {
   billingMode: 'credits' | 'sponsored';
   costSnapshot: Record<string, unknown>;
   reservationId?: mongoose.Types.ObjectId;
+  resourceId?: mongoose.Types.ObjectId;
+  resultId?: mongoose.Types.ObjectId;
+  leaseUntil?: Date;
+  workerToken?: string;
   locale: string;
   inputFingerprint: string;
   inputSnapshotRef: string;
+  inputSnapshot?: Record<string, unknown>;
   clientIntentKey?: string;
   attemptCount: number;
   maxAttempts: number;
@@ -229,6 +234,7 @@ const AiOperationSchema = new Schema({
   locale: { type: String, required: true, maxlength: 16 },
   inputFingerprint: { type: String, required: true, minlength: 64, maxlength: 64 },
   inputSnapshotRef: { type: String, required: true, maxlength: 180 },
+  inputSnapshot: { type: Schema.Types.Mixed, select: false },
   clientIntentKey: { type: String, maxlength: 180 },
   stageStates: { type: Schema.Types.Mixed, default: {} },
   attemptCount: { ...nonNegativeInteger, required: true, default: 0 },

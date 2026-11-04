@@ -13,6 +13,8 @@ class QueueService {
   private queueEvents: QueueEvents | null = null;
   private cvMatcherQueue: Queue | null = null;
   private cvMatcherQueueEvents: QueueEvents | null = null;
+  private aiOperationQueue: Queue | null = null;
+  private aiOperationWorker: Worker | null = null;
   private worker: Worker | null = null;
   private cvMatcherWorker: Worker | null = null;
   private closed = false;
@@ -31,6 +33,7 @@ class QueueService {
     this.queueEvents = new QueueEvents('evaluation-queue', { connection });
     this.cvMatcherQueue = new Queue('cv-matcher-queue', { connection, defaultJobOptions });
     this.cvMatcherQueueEvents = new QueueEvents('cv-matcher-queue', { connection });
+    this.aiOperationQueue = new Queue('ai-operation-queue', { connection, defaultJobOptions });
     this.setupQueueEvents();
   }
 
@@ -110,6 +113,30 @@ class QueueService {
       logger.error('Failed to add evaluation job:', error);
       throw error;
     }
+  }
+
+  async addDurableOperationJob(operationId: string, attempts = 3): Promise<void> {
+    this.ensureQueues();
+    const existing = await this.aiOperationQueue!.getJob(operationId);
+    if (existing) {
+      const state = await existing.getState();
+      if (['waiting', 'active', 'delayed', 'waiting-children'].includes(state)) return;
+      await existing.remove();
+    }
+    const job = await this.aiOperationQueue!.add('run-operation', { operationId }, { jobId: operationId, attempts, backoff: { type: 'exponential', delay: 5000 } });
+    if (!job.id) throw new Error('Failed to enqueue durable AI operation');
+  }
+
+  initializeAiOperationWorker(processor: (_job: Job<{ operationId: string }>) => Promise<unknown>) {
+    this.ensureQueues();
+    if (this.aiOperationWorker) throw new Error('AI operation worker is already initialized');
+    const connection = this.parseRedisUrl(config.database.redisUrl);
+    this.aiOperationWorker = new Worker('ai-operation-queue', processor, {
+      connection, concurrency: config.queue.concurrency, lockDuration: 120_000,
+    });
+    this.aiOperationWorker.on('failed', (job, error) => logger.error('Durable operation job failed', {
+      operationId: job?.data.operationId, attempt: job?.attemptsMade, error,
+    }));
   }
 
   initializeEvaluationWorker(processor: (_job: Job<ReviewQueuePayload>) => Promise<unknown>) {
@@ -198,9 +225,9 @@ class QueueService {
   }
 
   async close(force = false) {
-    const workers = [this.worker, this.cvMatcherWorker].filter((worker): worker is Worker => worker !== null);
+    const workers = [this.worker, this.cvMatcherWorker, this.aiOperationWorker].filter((worker): worker is Worker => worker !== null);
     const workerResults = await Promise.allSettled(workers.map(worker => worker.close(force)));
-    const resources = [this.queueEvents, this.cvMatcherQueueEvents, this.evaluationQueue, this.cvMatcherQueue].filter((resource): resource is Queue | QueueEvents => resource !== null);
+    const resources = [this.queueEvents, this.cvMatcherQueueEvents, this.evaluationQueue, this.cvMatcherQueue, this.aiOperationQueue].filter((resource): resource is Queue | QueueEvents => resource !== null);
     const resourceResults = await Promise.allSettled(resources.map(resource => resource.close()));
     const failures = [...workerResults, ...resourceResults].filter(result => result.status === 'rejected');
     if (failures.length) {
@@ -211,6 +238,8 @@ class QueueService {
     this.closed = true;
     this.worker = null;
     this.cvMatcherWorker = null;
+    this.aiOperationWorker = null;
+    this.aiOperationQueue = null;
     this.queueEvents = null;
     this.cvMatcherQueueEvents = null;
     this.evaluationQueue = null;

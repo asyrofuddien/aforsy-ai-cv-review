@@ -5,6 +5,14 @@ import { matcherWorkflow } from "../features/cv-matcher";
 import appLogger from "../utils/logger";
 import { logContext } from "../utils/log-context";
 import { MatcherQueuePayload, ReviewQueuePayload } from "../features/queue/queue.types";
+import { operationService } from "../features/ai-operations/operation.service";
+import { AiOperation } from "../models/billing.models";
+import { aiResultCleanupWorker } from "./cleanup.worker";
+import Evaluation from "../models/evaluation.model";
+import { createAiDraft } from "../services/cv-draft-ai.service";
+import { outboxDispatcher } from "./outbox.dispatcher";
+import config from "../config/config";
+import { randomUUID } from "crypto";
 
 const logger = appLogger.child({ scope: "worker" });
 function processJob(job: Job<ReviewQueuePayload | MatcherQueuePayload>, type: "review" | "cv-matcher") {
@@ -35,10 +43,71 @@ function processJob(job: Job<ReviewQueuePayload | MatcherQueuePayload>, type: "r
     },
   );
 }
+async function processDurableOperation(job: Job<{ operationId: string }>) {
+  const operationId = job.data.operationId;
+  const workerToken = randomUUID();
+  let operation;
+  try {
+    operation = await operationService.claimLease(operationId, workerToken);
+  } catch (error: any) {
+    if (error?.statusCode === 409 || error?.status === 409) {
+      logger.info("Durable operation skipped because another worker owns it", { operationId });
+      return;
+    }
+    throw error;
+  }
+  const heartbeatTimer = setInterval(() => {
+    void operationService.heartbeat(operationId, workerToken).catch(error => logger.warn("Operation heartbeat failed", { operationId, error }));
+  }, 30_000);
+  heartbeatTimer.unref();
+  try {
+    const op = await AiOperation.findById(operationId).select("+inputSnapshot resourceId action locale maxAttempts attemptCount").lean();
+    if (!op) throw new Error("AI operation source is unavailable");
+    const snapshot = (op.inputSnapshot || {}) as Record<string, any>;
+    if (op.action === "ai_draft") {
+      const draft = await createAiDraft(String(snapshot.source || ""), snapshot.reviewGuidance);
+      await operationService.saveResultAndCapture(operationId, draft, workerToken);
+      return { status: "completed" };
+    }
+    const evaluationId = String(op.resourceId || "");
+    if (!evaluationId) throw new Error("Review record is unavailable");
+    const reviewResult = await reviewWorkflow.process({
+      evaluationId,
+      cvDocumentId: String(snapshot.cvDocumentId),
+      jobDescriptionId: snapshot.jobDescriptionId ? String(snapshot.jobDescriptionId) : undefined,
+      jobDescriptionText: snapshot.jobDescriptionText ? String(snapshot.jobDescriptionText) : undefined,
+      candidateName: snapshot.candidateName ? String(snapshot.candidateName) : undefined,
+      locale: op.locale === "id" ? "id" : "en",
+      attempt: op.attemptCount,
+      maxAttempts: op.maxAttempts,
+    });
+    const evaluation = await Evaluation.findById(evaluationId).select("status result").lean();
+    if (!evaluation || evaluation.status !== "completed" || !evaluation.result) throw new Error("Review did not produce a completed result");
+    if (evaluation.result.jobMatchingStatus === "failed") {
+      await operationService.savePartialAndRelease(operationId, "matching_failed_final", { evaluationId }, workerToken);
+      return { status: "completed_partial" };
+    }
+    await operationService.saveResultAndCapture(operationId, { evaluationId }, workerToken);
+    return { status: "completed", hadReviewResult: Boolean(reviewResult) };
+  } catch (error) {
+    if (job.attemptsMade + 1 >= Number(job.opts.attempts || 1)) {
+      await operationService.releaseTerminal(operationId, "operation_failed_final", workerToken);
+    } else {
+      await operationService.retryLease(operationId, workerToken);
+    }
+    throw error;
+  } finally {
+    clearInterval(heartbeatTimer);
+  }
+}
+
 export const startWorker = (): void => {
   queueService.initializeEvaluationWorker((job) => processJob(job, "review"));
   queueService.initializeCVMatcherWorker((job) =>
     processJob(job, "cv-matcher"),
   );
-  logger.info("Workers ready", { queues: ["review", "cv-matcher"] });
+  queueService.initializeAiOperationWorker(processDurableOperation);
+  outboxDispatcher.start(config.billing.reconcileIntervalMs);
+  aiResultCleanupWorker.start();
+  logger.info("Workers ready", { queues: ["review", "cv-matcher", "ai-operation"] });
 };

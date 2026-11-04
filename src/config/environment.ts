@@ -20,6 +20,13 @@ const schema = Joi.object({
   LLM_RETRY_DELAY: Joi.number().integer().min(0).default(1000),
   CREDIT_TRIAL_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
   CREDIT_ADMIN_GRANTS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  BILLING_MODE: Joi.string().valid('disabled', 'sandbox', 'live').default('disabled'),
+  BILLING_CHECKOUT_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  PAID_AI_ENFORCEMENT_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  LYNK_MERCHANT_KEY: Joi.string().allow('').optional(),
+  BILLING_CATALOG_VERSION: Joi.string().trim().min(1).default('catalog.v1'),
+  AI_COST_POLICY_VERSION: Joi.string().trim().min(1).default('actions.v1'),
+  BILLING_RECONCILE_INTERVAL_MS: positiveInteger(60000),
   PINECONE_API_KEY: optionalSecret,
   PINECONE_ENVIRONMENT: optionalSecret,
   PINECONE_INDEX_NAME: Joi.string().trim().min(1).default('cv-evaluation'),
@@ -80,4 +87,10 @@ export function parseEnvironment(input: NodeJS.ProcessEnv): Record<string, unkno
       ? (nodeEnv === 'development' ? 'http://localhost:3000,http://127.0.0.1:3000' : '')
       : value.CORS_ORIGINS,
   };
+}
+
+export function validateBillingStartup(input: Record<string, unknown>): void {
+  if (input.BILLING_MODE === 'live' && !(typeof input.LYNK_MERCHANT_KEY === 'string' && input.LYNK_MERCHANT_KEY.trim())) {
+    throw new Error('LYNK_MERCHANT_KEY must be set when BILLING_MODE=live');
+  }
 }

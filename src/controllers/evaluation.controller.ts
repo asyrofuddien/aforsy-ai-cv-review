@@ -8,6 +8,8 @@ import { ERROR_MESSAGES } from '../utils/constants';
 import appLogger from '../utils/logger';
 import cvMatcherModel from '../models/cvMatcher.model';
 import Document from '../models/document.model';
+import { createHash } from 'crypto';
+import config from '../config/config';
 
 const logger = appLogger.child({ scope: 'review-api' });
 
@@ -24,7 +26,21 @@ export class EvaluationController {
         throw new AppError('Job description not found', 404);
       }
 
-      // Add to queue
+      if (config.billing.paidAiEnforcement) {
+        const idempotencyKey = String(req.header('Idempotency-Key') || '');
+        const locale = requestLocale(req);
+        const snapshot = { cvDocumentId: String(cvDocument._id), jobDescriptionId: jobDescriptionId || undefined, candidateName, jobDescriptionText };
+        const fingerprint = createHash('sha256').update(JSON.stringify({ ...snapshot, locale })).digest('hex');
+        const { operationService } = require('../features/ai-operations/operation.service');
+        const created = await operationService.createAndReserve({
+          userId: req.authUser!.userId, action: 'cv_review_bundle', locale, inputFingerprint: fingerprint,
+          inputSnapshotRef: `document:${cvDocument.id}`, idempotencyKey, inputSnapshot: snapshot,
+        });
+        res.status(202).json({ operationId: String(created.operation._id), id: String(created.operation.resourceId || created.operation._id), status: created.operation.status, billing: created.billing, wallet: created.wallet });
+        return;
+      }
+
+      // Legacy flow stays active until paid AI enforcement is enabled.
       const job = await queueService.addEvaluationJob(
         {
           cvDocumentId,

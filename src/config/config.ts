@@ -29,6 +29,14 @@ export default {
   billing: {
     trialEnabled: env.CREDIT_TRIAL_ENABLED as boolean,
     adminGrantsEnabled: env.CREDIT_ADMIN_GRANTS_ENABLED as boolean,
+    mode: env.BILLING_MODE as 'disabled' | 'sandbox' | 'live',
+    checkoutEnabled: env.BILLING_CHECKOUT_ENABLED as boolean,
+    paidAiEnforcement: env.PAID_AI_ENFORCEMENT_ENABLED as boolean,
+    // LYNK_MERCHANT_KEY is a secret — never log or include in responses.
+    lynkMerchantKey: (env.LYNK_MERCHANT_KEY as string | undefined) || undefined,
+    catalogVersion: env.BILLING_CATALOG_VERSION as string,
+    aiCostPolicyVersion: env.AI_COST_POLICY_VERSION as string,
+    reconcileIntervalMs: env.BILLING_RECONCILE_INTERVAL_MS as number,
   },
   pinecone: {
     apiKey: env.PINECONE_API_KEY as string,

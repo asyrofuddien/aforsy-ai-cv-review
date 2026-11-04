@@ -6,6 +6,9 @@ import { asyncHandler, AppError } from "../middlewares/error.middleware";
 import Document from "../models/document.model";
 import Evaluation from "../models/evaluation.model";
 import { createAiDraft } from "../services/cv-draft-ai.service";
+import { createHash } from "crypto";
+import config from "../config/config";
+import { requestLocale } from "../utils/locale";
 
 export const importAiDraft = asyncHandler(
   async (req: Request, res: Response) => {
@@ -93,6 +96,18 @@ export const importAiDraft = asyncHandler(
         "Please shorten the source to 40,000 characters or fewer.",
         400,
       );
+    if (config.billing.paidAiEnforcement) {
+      const locale = requestLocale(req);
+      const inputFingerprint = createHash("sha256").update(JSON.stringify({ source, reviewGuidance, locale })).digest("hex");
+      const { operationService } = require("../features/ai-operations/operation.service");
+      const created = await operationService.createAndReserve({
+        userId: req.authUser!.userId, action: "ai_draft", locale, inputFingerprint,
+        inputSnapshotRef: req.body?.evaluationId ? `evaluation:${req.body.evaluationId}` : `draft-source:${inputFingerprint.slice(0, 24)}`,
+        idempotencyKey: String(req.header("Idempotency-Key") || ""), inputSnapshot: { source, reviewGuidance },
+      });
+      res.status(202).json({ success: true, operationId: String(created.operation._id), status: created.operation.status, billing: created.billing, wallet: created.wallet });
+      return;
+    }
     const draft = await createAiDraft(source, reviewGuidance);
     res.json({ success: true, data: draft });
   },

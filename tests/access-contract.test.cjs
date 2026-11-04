@@ -88,6 +88,7 @@ function fixture() {
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../features/billing/billing.routes': { __esModule: true, default: billingRoutes },
+    '../features/ai-operations/operation.routes': express.Router(),
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
     '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },
     './system.routes': loadTs('src/routes/system.routes.ts', {
