@@ -24,12 +24,15 @@ async function main(): Promise<void> {
     console.log(JSON.stringify(report, null, 2));
     return;
   }
-  if (
-    config.nodeEnv === 'production' ||
-    process.env.BILLING_MIGRATION_TARGET !== migrationTarget ||
-    !/(?:^|[-_])staging(?:$|[-_])/i.test(databaseName)
-  ) {
-    throw new Error('Catalog apply is restricted to an explicitly selected staging MongoDB database.');
+  const stagingTarget = config.nodeEnv !== 'production' &&
+    process.env.BILLING_MIGRATION_TARGET === migrationTarget &&
+    /(?:^|[-_])staging(?:$|[-_])/i.test(databaseName);
+  const productionTarget = config.nodeEnv === 'production' &&
+    databaseName === 'cv-evaluation' &&
+    process.env.BILLING_MIGRATION_TARGET === 'production' &&
+    process.env.BILLING_PRODUCTION_CONFIRM === databaseName;
+  if (!stagingTarget && !productionTarget) {
+    throw new Error('Catalog apply requires the staging guard or explicit production target and database-name confirmation.');
   }
 
   await mongoose.connect(config.database.mongoUri);

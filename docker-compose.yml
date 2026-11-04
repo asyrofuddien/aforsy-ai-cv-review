@@ -13,6 +13,7 @@ services:
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
+      - ./deploy/secrets/mongodb-keyfile:/etc/mongo-keyfile:ro
     networks:
       - cv-network
     healthcheck:
@@ -20,7 +21,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    command: mongod --auth
+    command: mongod --auth --replSet rs0 --keyFile /etc/mongo-keyfile --bind_ip_all
 
   # Redis Cache
   redis:

@@ -33,12 +33,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (
-    config.nodeEnv === 'production' ||
-    process.env.BILLING_MIGRATION_TARGET !== 'staging' ||
-    !/(?:^|[-_])staging(?:$|[-_])/i.test(databaseName)
-  ) {
-    throw new Error('Apply is restricted to an explicitly selected staging MongoDB database.');
+  const stagingTarget = config.nodeEnv !== 'production' &&
+    process.env.BILLING_MIGRATION_TARGET === 'staging' &&
+    /(?:^|[-_])staging(?:$|[-_])/i.test(databaseName);
+  const productionTarget = config.nodeEnv === 'production' &&
+    databaseName === 'cv-evaluation' &&
+    process.env.BILLING_MIGRATION_TARGET === 'production' &&
+    process.env.BILLING_PRODUCTION_CONFIRM === databaseName;
+  if (!stagingTarget && !productionTarget) {
+    throw new Error('Apply requires the staging guard or explicit production target and database-name confirmation.');
   }
 
   await mongoose.connect(config.database.mongoUri);
