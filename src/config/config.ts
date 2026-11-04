@@ -28,6 +28,7 @@ export default {
   },
   billing: {
     trialEnabled: env.CREDIT_TRIAL_ENABLED as boolean,
+    adminTestPaymentsEnabled: env.BILLING_ADMIN_TEST_PAYMENTS_ENABLED as boolean,
     adminGrantsEnabled: env.CREDIT_ADMIN_GRANTS_ENABLED as boolean,
     mode: env.BILLING_MODE as 'disabled' | 'sandbox' | 'live',
     checkoutEnabled: env.BILLING_CHECKOUT_ENABLED as boolean,

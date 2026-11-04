@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import config from '../../config/config';
 import { asyncHandler, AppError } from '../../middlewares/error.middleware';
 import { billingService } from './billing.service';
 import { orderService, expirePendingPaymentOrders } from './orders/order.service';
@@ -75,7 +76,7 @@ export const billingController = {
 
   paymentReceipt: asyncHandler(async (req: Request, res: Response) => {
     await expirePendingPaymentOrders();
-    const order = await PaymentOrder.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('publicOrderNumber packageSnapshot termsVersion provider paymentStatus fulfillmentStatus confirmedPaidAmountIdr paidAt creditGrantedAt providerExpiresAt checkoutUrl createdAt buyerEmail').lean();
+    const order = await PaymentOrder.findOne({ _id: req.params.id, userId: req.authUser!.userId }).select('publicOrderNumber packageSnapshot termsVersion provider paymentStatus fulfillmentStatus confirmedPaidAmountIdr paidAt creditGrantedAt providerExpiresAt checkoutUrl createdAt buyerEmail isTestPayment').lean();
     if (!order) throw new AppError('Payment not found.', 404);
     res.json({ success: true, data: order });
   }),
@@ -110,7 +111,7 @@ export const billingController = {
     const filter: Record<string, unknown> = {};
     if (typeof req.query.status === 'string') filter.paymentStatus = req.query.status;
     const [records, total] = await Promise.all([PaymentOrder.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).select('-checkoutReference -idempotencyKey -requestFingerprint -webhookFingerprint').lean(), PaymentOrder.countDocuments(filter)]);
-    res.json({ success: true, data: { records, total, page, limit } });
+    res.json({ success: true, data: { records, total, page, limit, testPaymentsEnabled: config.billing.adminTestPaymentsEnabled } });
   }),
 
   adminPaymentDetail: asyncHandler(async (req: Request, res: Response) => {
@@ -167,7 +168,7 @@ export const billingController = {
     const orderId = req.params.orderId;
     if (!mongoose.isValidObjectId(orderId)) throw new AppError('Invalid payment ID.', 400);
     const order = await PaymentOrder.findById(orderId);
-    if (!order?.userId || order.paymentStatus !== 'paid' || order.fulfillmentStatus !== 'granted') throw new AppError('Only fulfilled paid orders can be reviewed for refund.', 409);
+    if (!order?.userId || order.isTestPayment || order.paymentStatus !== 'paid' || order.fulfillmentStatus !== 'granted') throw new AppError('Only fulfilled paid orders can be reviewed for refund.', 409);
     const reasonCode = typeof req.body.reasonCode === 'string' && /^[a-z0-9_:-]{3,80}$/.test(req.body.reasonCode) ? req.body.reasonCode : '';
     if (!reasonCode) throw new AppError('A valid refund reason code is required.', 400);
     const prior = await RefundRequest.findOne({ orderId: order._id, state: { $nin: ['rejected'] } });

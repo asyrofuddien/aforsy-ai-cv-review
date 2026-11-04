@@ -11,7 +11,7 @@ export async function deliverBillingEmail(event: any): Promise<void> {
     const user = await User.findById(order.userId).select('email displayName').lean() as any;
     if (!user) return;
     const snapshot = order.packageSnapshot as any;
-    await sendPurchaseReceiptEmail({ email: user.email, displayName: user.displayName || user.email, orderNumber: order.publicOrderNumber, packageName: snapshot.nameId || snapshot.nameEn, amountIdr: order.confirmedPaidAmountIdr || snapshot.amountIdr, credits: snapshot.credits, locale: order.locale === 'id' ? 'id' : 'en' });
+    await sendPurchaseReceiptEmail({ email: user.email, displayName: user.displayName || user.email, orderNumber: order.publicOrderNumber, packageName: snapshot.nameId || snapshot.nameEn, isTestPayment: order.isTestPayment, amountIdr: order.confirmedPaidAmountIdr ?? snapshot.amountIdr, credits: snapshot.credits, locale: order.locale === 'id' ? 'id' : 'en' });
     return;
   }
   if (event.type === 'email.result_ready') {

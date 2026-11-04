@@ -296,6 +296,7 @@ const PaymentOrderSchema = new Schema({
   checkoutReference: { type: String, select: false, maxlength: 500 },
   checkoutUrl: { type: String, maxlength: 2000 },
   providerExpiresAt: Date,
+  isTestPayment: { type: Boolean, default: false },
   paymentStatus: { type: String, required: true, enum: ['pending', 'paid', 'failed', 'expired', 'cancelled', 'refunded', 'disputed'], default: 'pending' },
   fulfillmentStatus: { type: String, required: true, enum: ['pending', 'granted', 'reconciliation_required'], default: 'pending' },
   confirmedPaidAmountIdr: { type: Number, min: 0, validate: Number.isInteger },

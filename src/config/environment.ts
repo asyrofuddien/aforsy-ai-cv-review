@@ -19,6 +19,7 @@ const schema = Joi.object({
   LLM_MAX_RETRIES: Joi.number().integer().min(0).max(3).default(3),
   LLM_RETRY_DELAY: Joi.number().integer().min(0).default(1000),
   CREDIT_TRIAL_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
+  BILLING_ADMIN_TEST_PAYMENTS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
   CREDIT_ADMIN_GRANTS_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),
   BILLING_MODE: Joi.string().valid('disabled', 'sandbox', 'live').default('disabled'),
   BILLING_CHECKOUT_ENABLED: Joi.boolean().truthy('true').falsy('false').default(false),

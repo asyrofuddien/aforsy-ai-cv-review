@@ -7,7 +7,7 @@ const cvId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
 const resultId = 'bbbbbbbbbbbbbbbbbbbbbbbb';
 
 function fixture() {
-  const calls = { enqueued: [], revoked: [], matchingRetries: [] };
+  const calls = { enqueued: [], revoked: [], matchingRetries: [], testPayments: [] };
   const authService = loadTs('src/services/auth.service.ts', {
     '../models/authSession.model': {}, '../models/emailToken.model': {}, '../models/user.model': {},
     '../config/config': { auth: {} }, './email.service': { sendAuthEmail: async () => {} },
@@ -74,6 +74,7 @@ function fixture() {
   const adminController = new Proxy({}, { get: (_target, key) => key === '__esModule' ? false : (_req, res) => res.json({ success: true }) });
   const adminRoutes = loadTs('src/routes/admin.routes.ts', {
     '../controllers/admin.controller': adminController,
+    '../features/billing/testing/admin-test-payment.controller': { markAdminTestPayment: (req, res) => { calls.testPayments.push(req.authUser.userId); res.json({ success: true }); } },
     '../controllers/affiliate.controller': { updateAffiliateConfig: (_req, res) => res.json({ success: true }) },
     '../features/billing/catalog.admin.controller': { adminCatalogController: adminController },
     '../features/billing/billing.controller': { billingController: new Proxy({ goodwill: (_req, res) => res.status(201).json({ success: true }) }, { get: (target, key) => target[key] || ((_req, res) => res.json({ success: true })) }) },
@@ -270,5 +271,18 @@ test('matching retry requires a session, CSRF and review ownership before reserv
     assert.equal(calls.matchingRetries[0].action, 'job_match_retry');
     assert.equal(calls.matchingRetries[0].inputSnapshot.evaluationId, resultId);
     assert.equal(calls.matchingRetries[0].idempotencyKey, 'matching-retry-test');
+  });
+});
+
+
+test('temporary paid simulation requires administrator role and CSRF', async t => {
+  await withServer(t, async (request, calls) => {
+    const path = '/admin/billing/payments/aaaaaaaaaaaaaaaaaaaaaaaa/test-paid';
+    assert.equal((await request(path, { method: 'POST' })).status, 401);
+    assert.equal((await request(path, { method: 'POST', owner: 'owner-a', csrf: 'synthetic-csrf' })).status, 403);
+    assert.equal((await request(path, { method: 'POST', owner: 'admin' })).status, 403);
+    assert.equal(calls.testPayments.length, 0);
+    assert.equal((await request(path, { method: 'POST', owner: 'admin', csrf: 'synthetic-csrf' })).status, 200);
+    assert.deepEqual(calls.testPayments, ['admin']);
   });
 });

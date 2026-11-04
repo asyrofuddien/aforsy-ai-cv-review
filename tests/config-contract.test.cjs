@@ -11,6 +11,7 @@ test('environment schema applies development defaults and normalizes numeric val
   assert.equal(config.EMAIL_PROVIDER, 'smtp');
   assert.equal(config.CREDIT_TRIAL_ENABLED, false);
   assert.equal(config.CREDIT_ADMIN_GRANTS_ENABLED, false);
+  assert.equal(config.BILLING_ADMIN_TEST_PAYMENTS_ENABLED, false);
   assert.equal(config.SMTP_HOST, 'localhost');
   assert.equal(config.SMTP_PORT, 1025);
   assert.deepEqual(config.CORS_ORIGINS, ' https://app.example,https://admin.example ');
@@ -25,6 +26,7 @@ test('environment schema uses safe production defaults and accepts existing prov
     GREENHOUSE_BOARDS: 'example,another-board',
   });
   assert.equal(config.EMAIL_PROVIDER, 'resend');
+  assert.equal(config.BILLING_ADMIN_TEST_PAYMENTS_ENABLED, false);
   assert.equal(config.SMTP_HOST, '');
   assert.equal(config.RAPIDAPI_MAX_PAGES, 3);
   assert.equal(config.GREENHOUSE_BOARDS, 'example,another-board');
