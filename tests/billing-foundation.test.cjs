@@ -89,7 +89,7 @@ test('billing index migration defaults to dry-run and never connects to MongoDB'
   assert.ok(report.indexes.length > 10);
 });
 
-test('optional replica-set transaction test requires an isolated test database', {
+test('replica-set billing and durable operation properties run only on an isolated test database', {
   skip: !process.env.MONGODB_TEST_URI,
 }, async () => {
   const uri = process.env.MONGODB_TEST_URI;
@@ -308,6 +308,79 @@ test('optional replica-set transaction test requires an isolated test database',
     }), error => error.statusCode === 409);
     assert.equal(await mongoose.model('AiOperation').countDocuments({ userId: testUser._id, clientIntentKey: durableKey }), 1);
 
+    const workerTokens = [`worker-a-${suffix}`, `worker-b-${suffix}`];
+    const claims = await Promise.allSettled(workerTokens.map(token => operationService.claimLease(String(durableOperationId), token)));
+    assert.equal(claims.filter(result => result.status === 'fulfilled').length, 1, 'only one concurrent worker may claim a lease');
+    const winningToken = workerTokens[claims.findIndex(result => result.status === 'fulfilled')];
+    const losingToken = workerTokens[1 - claims.findIndex(result => result.status === 'fulfilled')];
+    await operationService.heartbeat(String(durableOperationId), winningToken);
+    await assert.rejects(operationService.heartbeat(String(durableOperationId), losingToken), error => error.statusCode === 409);
+
+    await operationService.saveResultAndCapture(String(durableOperationId), { evaluationId: String(durableOperation.resourceId) }, winningToken);
+    const capturesAfterFirstFinalize = await mongoose.model('CreditLedger').countDocuments({ operationId: durableOperationId, eventType: 'capture_ai' });
+    await operationService.saveResultAndCapture(String(durableOperationId), { evaluationId: String(durableOperation.resourceId) }, winningToken);
+    assert.equal(await mongoose.model('CreditLedger').countDocuments({ operationId: durableOperationId, eventType: 'capture_ai' }), capturesAfterFirstFinalize, 'replay must not write additional capture ledger entries');
+    const completedOperation = await mongoose.model('AiOperation').findById(durableOperationId).lean();
+    assert.equal(completedOperation.status, 'completed');
+
+    const operationController = loadTs('src/features/ai-operations/operation.controller.ts', {
+      '../../middlewares/error.middleware': { AppError: TestAppError, asyncHandler: handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next) },
+      '../../models/billing.models': billingModels,
+    });
+    const { invoke } = require('./helpers/load-ts.cjs');
+    const ownedResult = await invoke(operationController.getOperationResult, { params: { id: String(durableOperationId) }, authUser: { userId: testUser.id } });
+    assert.equal(ownedResult.status, 200);
+    await assert.rejects(invoke(operationController.getOperationResult, { params: { id: String(durableOperationId) }, authUser: { userId: new mongoose.Types.ObjectId().toString() } }), error => error.statusCode === 403);
+
+    const notificationModel = loadTs('src/models/userNotification.model.ts').default;
+    const { runAiResultCleanup } = loadTs('src/workers/cleanup.worker.ts', {
+      '../models/billing.models': billingModels,
+      '../models/userNotification.model': notificationModel,
+      '../utils/logger': logger,
+    });
+    const operationResult = await mongoose.model('AiOperationResult').findOne({ operationId: durableOperationId });
+    const reminderNow = new Date();
+    await mongoose.model('AiOperationResult').updateOne({ _id: operationResult._id }, { $set: { expiresAt: new Date(reminderNow.getTime() + 6 * 86400000) }, $unset: { reminderSentAt: 1 } });
+    await runAiResultCleanup(reminderNow);
+    await runAiResultCleanup(reminderNow);
+    const expiryEventKey = `ai-result-expiry:${durableOperationId}`;
+    assert.equal(await mongoose.model('OutboxEvent').countDocuments({ eventKey: `${expiryEventKey}:email` }), 1);
+    assert.equal(await notificationModel.countDocuments({ eventKey: expiryEventKey }), 1);
+    await mongoose.model('AiOperationResult').updateOne({ _id: operationResult._id }, { $set: { expiresAt: new Date(reminderNow.getTime() - 1) } });
+    await runAiResultCleanup(reminderNow);
+    await runAiResultCleanup(reminderNow);
+    const expiredResult = await mongoose.model('AiOperationResult').findById(operationResult._id).select('+resultData').lean();
+    assert.equal(expiredResult.state, 'expired');
+    assert.equal(expiredResult.resultData, undefined, 'expired result payload should be removed but metadata retained');
+
+    const extraCredit = {
+      actorId: testUser.id, userId: testUser.id, credits: 3,
+      caseReference: `M4-LEASE-${suffix}`, reason: 'M4 release integration fixture',
+      idempotencyKey: `m4-release-grant-${suffix}`,
+    };
+    await billingService.grantGoodwill(extraCredit);
+    const releaseOperation = await operationService.createAndReserve({
+      ...durableInput,
+      inputFingerprint: require('node:crypto').createHash('sha256').update(`release-operation:${suffix}`).digest('hex'),
+      inputSnapshotRef: `document:release:${cvDocumentId}`,
+      idempotencyKey: `durable-release-${suffix}`,
+    });
+    durableOperationIds.push(releaseOperation.operation._id);
+    durableEvaluationIds.push(releaseOperation.operation.resourceId);
+    const releaseToken = `release-worker-${suffix}`;
+    const walletBeforeRelease = (await billingService.getWallet(testUser.id)).wallet;
+    await operationService.claimLease(String(releaseOperation.operation._id), releaseToken);
+    await operationService.releaseTerminal(String(releaseOperation.operation._id), 'test_failure', releaseToken);
+    const releaseLedgerCount = await mongoose.model('CreditLedger').countDocuments({ operationId: releaseOperation.operation._id, eventType: 'release_ai' });
+    await operationService.releaseTerminal(String(releaseOperation.operation._id), 'test_failure', releaseToken);
+    assert.equal(await mongoose.model('CreditLedger').countDocuments({ operationId: releaseOperation.operation._id, eventType: 'release_ai' }), releaseLedgerCount);
+    const finalWallet = await billingService.getWallet(testUser.id);
+    assert.equal(finalWallet.wallet.availableCredits, walletBeforeRelease.availableCredits + 3);
+    assert.equal(finalWallet.wallet.reservedCredits, walletBeforeRelease.reservedCredits - 3);
+    assert.ok(finalWallet.wallet.availableCredits >= 0);
+    assert.ok(finalWallet.wallet.reservedCredits >= 0);
+    assert.equal(finalWallet.consistent, true);
+
     const backfillUser = await User.create({
       email: `billing-backfill-${suffix}@example.test`,
       displayName: 'Billing backfill test',
@@ -362,6 +435,7 @@ test('optional replica-set transaction test requires an isolated test database',
         await db.collection('evaluations').deleteMany({ _id: { $in: durableEvaluationIds } });
         await db.collection('outbox_events').deleteMany({ entityId: { $in: durableOperationIds } });
         await db.collection('ai_operation_results').deleteMany({ operationId: { $in: durableOperationIds } });
+        await db.collection('user_notifications').deleteMany({ entityId: { $in: durableOperationIds } });
       }
       if (auditCollection) await db.collection(auditCollection).deleteMany({ actorUserId: { $in: userIds } });
       await db.collection('users').deleteMany({ _id: { $in: userIds } });
