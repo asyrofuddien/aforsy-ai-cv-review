@@ -11,8 +11,8 @@ if [[ ! -s "$KEY_FILE" ]]; then
   openssl rand -base64 756 > "$KEY_FILE"
 fi
 
-mongo_uid="$(docker run --rm --entrypoint sh mongo:7.0-jammy -c 'id -u mongodb')"
-mongo_gid="$(docker run --rm --entrypoint sh mongo:7.0-jammy -c 'id -g mongodb')"
-chown "$mongo_uid:$mongo_gid" "$KEY_FILE"
-chmod 400 "$KEY_FILE"
+docker run --rm \
+  --mount "type=bind,src=$SECRET_DIR,dst=/secrets" \
+  --entrypoint sh mongo:7.0-jammy \
+  -c 'chown 999:999 /secrets/mongodb-keyfile && chmod 400 /secrets/mongodb-keyfile'
 echo 'MongoDB replica-set keyfile is present with restricted permissions.'
