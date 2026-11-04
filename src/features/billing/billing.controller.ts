@@ -2,11 +2,13 @@ import { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../../middlewares/error.middleware';
 import { billingService } from './billing.service';
 import { orderService } from './orders/order.service';
-import { PaymentOrder, RefundRequest, CreditLot, CreditReservation, BillingWallet, CreditLedger, OutboxEvent } from '../../models/billing.models';
+import { PaymentOrder, RefundRequest, CreditLot, CreditReservation, BillingWallet, CreditLedger, OutboxEvent, AiOperation, WebhookInbox } from '../../models/billing.models';
 import User from '../../models/user.model';
 import AdminAuditLog from '../../models/adminAuditLog.model';
 import mongoose from 'mongoose';
 import { requestLocale } from '../../utils/locale';
+import AiUsage from '../../models/aiUsage.model';
+import Evaluation from '../../models/evaluation.model';
 
 const parsePagination = (value: unknown, fallback: number, maximum: number): number => {
   if (value === undefined) return fallback;
@@ -107,10 +109,53 @@ export const billingController = {
     res.json({ success: true, data: { records, total, page, limit } });
   }),
 
+  adminPaymentDetail: asyncHandler(async (req: Request, res: Response) => {
+    if (!mongoose.isValidObjectId(req.params.id)) throw new AppError('Invalid payment ID.', 400);
+    const order: any = await PaymentOrder.findById(req.params.id).select('-checkoutReference -idempotencyKey -requestFingerprint -webhookFingerprint').lean();
+    if (!order) throw new AppError('Payment not found.', 404);
+    const refs = [order.publicOrderNumber, order.providerTransactionId].filter(Boolean);
+    const [webhooks, grant] = await Promise.all([
+      WebhookInbox.find({ provider: order.provider, $or: [{ orderReference: { $in: refs } }, { eventIdentity: order.providerTransactionId }] }).sort({ receivedAt: 1 }).select('eventIdentity orderReference signatureStatus processState rawPayloadHash receivedAt processedAt retryCount').lean(),
+      CreditLedger.findOne({ eventKey: `grant:order:${order._id}` }).select('eventType deltaAvailable createdAt').lean(),
+    ]);
+    res.json({ success: true, data: { order, webhooks, grant } });
+  }),
+
   adminRefundRequests: asyncHandler(async (req: Request, res: Response) => {
     const page = parsePagination(req.query.page, 1, 10000), limit = parsePagination(req.query.limit, 50, 100);
     const [records, total] = await Promise.all([RefundRequest.find({}).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(), RefundRequest.countDocuments({})]);
     res.json({ success: true, data: { records, total, page, limit } });
+  }),
+
+  adminSummary: asyncHandler(async (_req: Request, res: Response) => {
+    const since = new Date(Date.now() - 30 * 86400_000);
+    const [operationRows, provider, matchRows, pendingPayments, rejectedWebhooks] = await Promise.all([
+      AiOperation.aggregate([{ $match: { createdAt: { $gte: since } } }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      AiUsage.aggregate([{ $match: { createdAt: { $gte: since } } }, { $group: { _id: null, calls: { $sum: 1 }, unknownUsage: { $sum: { $cond: [{ $eq: ['$usageAvailability', 'unknown'] }, 1, 0] } }, retries: { $sum: { $cond: [{ $gt: ['$attempt', 1] }, 1, 0] } } } }]),
+      Evaluation.aggregate([
+        { $match: { createdAt: { $gte: since }, status: 'completed' } },
+        { $group: { _id: null,
+          completed: { $sum: { $cond: [{ $eq: ['$result.jobMatchingStatus', 'completed'] }, 1, 0] } },
+          failed: { $sum: { $cond: [{ $eq: ['$result.jobMatchingStatus', 'failed'] }, 1, 0] } },
+          unavailable: { $sum: { $cond: [{ $in: ['$result.jobMatchingStatus', [null, 'not_run']] }, 1, 0] } },
+          noMatch: { $sum: { $cond: [{ $and: [
+            { $eq: ['$result.jobMatchingStatus', 'completed'] },
+            { $eq: [{ $size: { $ifNull: ['$result.jobMatches', []] } }, 0] },
+          ] }, 1, 0] } },
+        } },
+      ]),
+      PaymentOrder.countDocuments({ paymentStatus: 'pending' }), WebhookInbox.countDocuments({ processState: 'rejected' }),
+    ]);
+    const operations = Object.fromEntries(operationRows.map((row: any) => [row._id, row.count]));
+    const match = matchRows[0] || { completed: 0, failed: 0, unavailable: 0, noMatch: 0 };
+    const providerStats = provider[0] ? provider[0] : null;
+    res.json({ success: true, data: {
+      periodDays: 30,
+      operations: { queued: operations.queued || 0, running: operations.running || 0, completed: operations.completed || 0, completedPartial: operations.completed_partial || 0, failed: operations.failed || 0 },
+      provider: providerStats ? { calls: providerStats.calls, usageUnknown: providerStats.unknownUsage, retries: providerStats.retries } : { calls: null, usageUnknown: null, retries: null },
+      matching: { completed: match.completed || 0, withMatches: Math.max(0, (match.completed || 0) - (match.noMatch || 0)), noMatch: match.noMatch || 0, failed: match.failed || 0, unavailable: match.unavailable || 0 },
+      payments: { pending: pendingPayments, rejectedWebhooks },
+    } });
   }),
 
   refundRequest: asyncHandler(async (req: Request, res: Response) => {

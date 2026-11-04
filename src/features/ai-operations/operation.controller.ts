@@ -4,6 +4,7 @@ import { AiOperation, AiOperationResult, CreditReservation } from '../../models/
 
 const safeOperation = (op: any, reservation?: any) => ({
   id: String(op._id), action: op.action, status: op.status, locale: op.locale,
+  resourceId: op.resourceId ? String(op.resourceId) : undefined,
   billing: { status: reservation?.status || 'unknown', credits: reservation?.totalCredits ?? 0 },
   failureCode: op.failureCode, createdAt: op.createdAt, completedAt: op.completedAt,
   resultAvailable: Boolean(op.resultId),

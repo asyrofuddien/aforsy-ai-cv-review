@@ -201,7 +201,12 @@ export const billingService = {
       }).select('sku version nameId nameEn currency amountIdr credits termsVersion lynkProductId').sort({ amountIdr: 1 }).lean(),
       ActionCost.find({ active: true }).select('action version creditsRequired').sort({ action: 1 }).lean(),
     ]);
-    return { packages, actionCosts };
+    return {
+      packages,
+      actionCosts,
+      trialCredits: config.billing.trialEnabled ? TRIAL_CREDITS : 0,
+      checkoutAvailable: config.billing.checkoutEnabled && config.billing.mode === 'live',
+    };
   },
 
   async getWallet(userId: string) {

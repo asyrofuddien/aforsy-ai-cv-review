@@ -5,7 +5,7 @@ const AdminAuditLogSchema = new Schema({
   action: { type: String, required: true, maxlength: 80, index: true },
   targetType: {
     type: String,
-    enum: ['user', 'ats_template', 'evaluation', 'cv_matcher', 'billing_wallet', 'payment_order', 'refund_request', 'billing_catalog'],
+    enum: ['user', 'ats_template', 'evaluation', 'cv_matcher', 'billing_wallet', 'payment_order', 'refund_request', 'billing_catalog', 'affiliate_config'],
     required: true,
     index: true,
   },

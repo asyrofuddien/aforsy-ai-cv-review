@@ -15,11 +15,13 @@ import billingRoutes from '../features/billing/billing.routes';
 import aiOperationRoutes from '../features/ai-operations/operation.routes';
 import rateLimit from 'express-rate-limit';
 import { receiveLynkWebhook } from '../features/billing/webhooks/webhook.receiver';
+import { getAffiliateConfig } from '../controllers/affiliate.controller';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.post('/webhooks/lynk/receive', rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false }), receiveLynkWebhook);
+router.get('/affiliate/config', getAffiliateConfig);
 router.use('/', systemRoutes);
 router.use('/', documentRoutes);
 router.use('/billing', billingRoutes);
