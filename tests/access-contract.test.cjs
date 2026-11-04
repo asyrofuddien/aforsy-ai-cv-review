@@ -7,7 +7,7 @@ const cvId = 'aaaaaaaaaaaaaaaaaaaaaaaa';
 const resultId = 'bbbbbbbbbbbbbbbbbbbbbbbb';
 
 function fixture() {
-  const calls = { enqueued: [], revoked: [] };
+  const calls = { enqueued: [], revoked: [], matchingRetries: [] };
   const authService = loadTs('src/services/auth.service.ts', {
     '../models/authSession.model': {}, '../models/emailToken.model': {}, '../models/user.model': {},
     '../config/config': { auth: {} }, './email.service': { sendAuthEmail: async () => {} },
@@ -41,7 +41,7 @@ function fixture() {
     },
     '../models/user.model': { findById: async id => users.find(u => u.id === id) },
   });
-  const result = { id: resultId, _id: resultId, userId: 'owner-a', candidateName: 'Synthetic A', status: 'completed', result: { cvMatchRate: 65, mode: 'general', cvFeedback: 'Synthetic feedback' } };
+  const result = { id: resultId, _id: resultId, userId: 'owner-a', cvDocumentId: cvId, candidateName: 'Synthetic A', status: 'completed', result: { jobMatchingStatus: 'failed', cvMatchRate: 65, mode: 'general', cvFeedback: 'Synthetic feedback' } };
   const model = {
     findOne: async query => Object.entries(query).every(([key, value]) => result[key] === value) ? result : null,
     find: query => ({ sort() { return this; }, skip() { return this; }, limit() { return this; }, select: async () => query.userId === 'owner-a' ? [result] : [] }),
@@ -55,17 +55,27 @@ function fixture() {
     '../utils/constants': { ERROR_MESSAGES: { EVALUATION_NOT_FOUND: 'Not found' } },
     '../middlewares/error.middleware': { AppError, asyncHandler },
     '../services/queue.service': queue,
+    '../models/billing.models': { AiOperation: { findOne: () => ({ select() { return this; }, lean: async () => null }) }, CreditReservation: {} },
     '../models/jobDescription.model': { exists: async () => true },
     '../models/evaluation.model': model, '../models/cvMatcher.model': { aggregate: async () => [{ _id: 'queued', count: 2 }] },
     '../models/document.model': { findOne: async query => query._id === cvId && query.userId === 'owner-a' ? { id: cvId } : null },
   }).default;
+  const matchingRetry = loadTs('src/features/review/matching-retry.controller.ts', {
+    '../../middlewares/error.middleware': { AppError, asyncHandler },
+    '../../models/evaluation.model': { findOne: query => ({ select: () => model.findOne(query) }) },
+    '../../models/document.model': { exists: async query => query._id === cvId && query.userId === 'owner-a' },
+    '../ai-operations/operation.service': { operationService: { createAndReserve: async input => { calls.matchingRetries.push(input); return { operation: { _id: 'retry-operation', status: 'queued' }, billing: { status: 'held', credits: 1 }, wallet: { availableCredits: 0, reservedCredits: 1 } }; } } },
+  });
   const evaluationRoutes = loadTs('src/routes/evaluation.routes.ts', {
     '../controllers/evaluation.controller': controller,
+    '../features/review/matching-retry.controller': matchingRetry,
     '../middlewares/validation.middleware': validation,
   }).default;
   const adminController = new Proxy({}, { get: (_target, key) => key === '__esModule' ? false : (_req, res) => res.json({ success: true }) });
   const adminRoutes = loadTs('src/routes/admin.routes.ts', {
     '../controllers/admin.controller': adminController,
+    '../controllers/affiliate.controller': { updateAffiliateConfig: (_req, res) => res.json({ success: true }) },
+    '../features/billing/catalog.admin.controller': { adminCatalogController: adminController },
     '../features/billing/billing.controller': { billingController: new Proxy({ goodwill: (_req, res) => res.status(201).json({ success: true }) }, { get: (target, key) => target[key] || ((_req, res) => res.json({ success: true })) }) },
     '../middlewares/auth.middleware': { requireAdmin },
   }).default;
@@ -80,6 +90,7 @@ function fixture() {
     './orders/order.service': { orderService: {} },
     '../../models/billing.models': { PaymentOrder: {}, RefundRequest: {}, CreditLot: {}, CreditReservation: {}, BillingWallet: {}, CreditLedger: {}, OutboxEvent: {} },
     '../../models/user.model': {}, '../../models/adminAuditLog.model': {},
+    '../../models/aiUsage.model': {}, '../../models/evaluation.model': {},
     '../../utils/locale': { requestLocale: () => 'en' },
   });
   const billingRoutes = loadTs('src/features/billing/billing.routes.ts', {
@@ -92,6 +103,7 @@ function fixture() {
     './evaluation.routes': evaluationRoutes, './jobDescription.routes': express.Router(),
     '../routes/cvGenerator.routes': express.Router(), './admin.routes': adminRoutes,
     '../features/billing/billing.routes': { __esModule: true, default: billingRoutes },
+    '../controllers/affiliate.controller': { getAffiliateConfig: (_req, res) => res.json({ success: true, data: { status: 'coming_soon' } }) },
     '../features/billing/webhooks/webhook.receiver': { receiveLynkWebhook: (_req, res) => res.json({ success: true }) },
     '../features/ai-operations/operation.routes': express.Router(),
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
@@ -115,9 +127,9 @@ async function withServer(t, run) {
   const server = setup.app.listen(0, '127.0.0.1');
   await new Promise(resolve => server.once('listening', resolve));
   t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
-  const request = async (path, { owner, method = 'GET', body, csrf } = {}) => {
+  const request = async (path, { owner, method = 'GET', body, csrf, headers = {} } = {}) => {
     const res = await fetch(`http://127.0.0.1:${server.address().port}/api${path}`, {
-      method, headers: { ...(owner ? { cookie: `landly_session=${owner}` } : {}), ...(csrf ? { 'x-csrf-token': csrf } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
+      method, headers: { ...headers, ...(owner ? { cookie: `landly_session=${owner}` } : {}), ...(csrf ? { 'x-csrf-token': csrf } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
     return { status: res.status, body: await res.json() };
@@ -240,5 +252,23 @@ test('admin goodwill endpoint requires admin role and rejects non-admins', async
     // Admin can reach the endpoint (stub returns 201)
     const res = await request(`/admin/billing/users/${userId}/goodwill`, { method: 'POST', owner: 'admin', body, csrf: 'synthetic-csrf' });
     assert.equal(res.status, 201);
+  });
+});
+
+
+test('matching retry requires a session, CSRF and review ownership before reserving one credit', async t => {
+  await withServer(t, async (request, calls) => {
+    const path = `/evaluate/${resultId}/retry-matching`;
+    assert.equal((await request(path, { method: 'POST' })).status, 401);
+    assert.equal((await request(path, { method: 'POST', owner: 'owner-a' })).status, 403);
+    assert.equal((await request(path, { method: 'POST', owner: 'owner-b', csrf: 'synthetic-csrf' })).status, 404);
+    assert.equal(calls.matchingRetries.length, 0);
+    const response = await request(path, { method: 'POST', owner: 'owner-a', csrf: 'synthetic-csrf', headers: { 'Idempotency-Key': 'matching-retry-test' } });
+    assert.equal(response.status, 202);
+    assert.equal(response.body.billing.credits, 1);
+    assert.equal(calls.matchingRetries.length, 1);
+    assert.equal(calls.matchingRetries[0].action, 'job_match_retry');
+    assert.equal(calls.matchingRetries[0].inputSnapshot.evaluationId, resultId);
+    assert.equal(calls.matchingRetries[0].idempotencyKey, 'matching-retry-test');
   });
 });

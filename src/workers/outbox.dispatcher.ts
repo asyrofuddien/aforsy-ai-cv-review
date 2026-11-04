@@ -121,6 +121,9 @@ export class OutboxDispatcher {
           const attempts = event.attempts;
           const terminal = attempts >= MAX_ATTEMPTS;
           const delayMs = Math.min(15 * 60_000, 1_000 * (2 ** Math.min(attempts, 10)));
+          if (terminal && !event.type.startsWith('email.')) {
+            await operationService.releaseTerminal(String((event.payload as any)?.operationId || event.entityId), 'enqueue_failed_final');
+          }
           await OutboxEvent.updateOne({ _id: event._id, state: 'processing' }, {
             $set: terminal
               ? { state: 'failed' }

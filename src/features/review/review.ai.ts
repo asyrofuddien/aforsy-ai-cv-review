@@ -50,15 +50,16 @@ async evaluateCV(cvInfo: CVExtractedInfo & { sourceText?: string }, jobRequireme
         : '';
       const prompt = REVIEW_PROMPTS.CV_EVALUATION.user(source, jobSource, jobRequirements.mode);
       for (let attempt = 1; attempt <= 2; attempt++) {
-        const response = await openaiService.completion(prompt + (attempt > 1
-          ? '\nYour previous response failed validation. Rebuild the complete JSON from the original sources. Include exactly six unique criterion IDs and every required field. Copy evidence verbatim; do not paraphrase quotes. Use empty evidence only with not_visible/not_assessable. Keep requirementMatches empty in general mode.'
-          : ''), {
-          systemPrompt: REVIEW_PROMPTS.CV_EVALUATION.system + ` Write all human-readable text in ${outputLanguage(jobRequirements.locale === 'id' ? 'id' : 'en')}, except exact source quotes. Keep IDs, JSON keys and enums unchanged.`,
-          temperature: 0.1,
-          maxTokens: 8000,
-          stage: 'cv_evaluation',
-        });
         try {
+          const response = await openaiService.completion(prompt + (attempt > 1
+            ? '\nYour previous response failed validation or was truncated. Retry the complete review. Keep every explanation to one short sentence, omit optional example revisions, include exactly six unique criterion IDs, and preserve exact evidence quotes.'
+            : ''), {
+            systemPrompt: REVIEW_PROMPTS.CV_EVALUATION.system + ` Write all human-readable text in ${outputLanguage(jobRequirements.locale === 'id' ? 'id' : 'en')}, except exact source quotes. Keep IDs, JSON keys and enums unchanged.`,
+            temperature: 0.1,
+            maxTokens: attempt === 1 ? 12000 : 16000,
+            stage: 'cv_evaluation',
+            rejectTruncated: true,
+          });
           const parsed = validateReviewAnalysis(this.parseJSON(response, null, true), source, jobSource);
           logger.debug('Chain: CV evaluation completed');
           return parsed;

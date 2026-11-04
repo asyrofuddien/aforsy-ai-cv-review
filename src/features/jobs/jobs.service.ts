@@ -143,6 +143,9 @@ export class JobsService {
       });
       throw new Error('Job matching could not run because every search failed.');
     }
+    if (status === 'partial' && jobs.length === 0) {
+      throw new Error('Job matching could not finish because job search or detail retrieval failed.');
+    }
     logger.info('Job provider search batch completed', {
       roleCount: roles.length,
       completedSearches: searchSucceeded,

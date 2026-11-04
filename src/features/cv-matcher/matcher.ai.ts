@@ -115,18 +115,17 @@ async RoleSuggestion(extractedCv: object): Promise<any> {
         systemPrompt: MATCHER_PROMPTS.ROLE_SUGGESTION.system,
         temperature: 0.1,
         stage: 'role_suggestion',
+        maxTokens: 4000,
+        rejectTruncated: true,
       });
 
-      const parsed = this.parseJSON(response, {
-        suggested_roles: ['Software Engineer', 'Backend Developer', 'Full Stack Developer'],
-        seniority: 'Mid-level',
-      });
+      const parsed = this.parseJSON(response, null, true);
 
       // Validate suggested_roles
-      if (!parsed.suggested_roles || parsed.suggested_roles.length === 0) {
-        parsed.suggested_roles = ['Software Engineer', 'Backend Developer', 'Full Stack Developer'];
-        logger.warn('No roles suggested, using defaults');
+      if (!parsed || !Array.isArray(parsed.suggested_roles) || parsed.suggested_roles.length === 0 || parsed.suggested_roles.some((role: unknown) => typeof role !== 'string' || !role.trim())) {
+        throw new Error('AI did not return valid job roles for this CV.');
       }
+      parsed.suggested_roles = [...new Set(parsed.suggested_roles.map((role: string) => role.trim()))].slice(0, 3);
 
       // Validate seniority
       const validSeniorities = ['Entry-level', 'Junior', 'Mid-level', 'Senior', 'Lead', 'Principal'];

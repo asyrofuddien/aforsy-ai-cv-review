@@ -20,8 +20,8 @@ export const reviewRepository = {
     { _id: id, status: { $in: retrying ? ['queued', 'failed', 'processing'] : ['queued', 'failed'] } },
     { status: 'processing' },
   ),
-  complete: (id: string, candidateName: string | undefined, result: ReviewResult) =>
-    Evaluation.findOneAndUpdate({ _id: id, status: 'processing' }, { status: 'completed', candidateName, result }, { omitUndefined: true }),
+  complete: (id: string, candidateName: string | undefined, result: ReviewResult, matchingProfile?: unknown) =>
+    Evaluation.findOneAndUpdate({ _id: id, status: 'processing' }, { status: 'completed', candidateName, result, matchingProfile }, { omitUndefined: true }),
   fail: (id: string, message: string) => Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),
   retry: (id: string) => Evaluation.findByIdAndUpdate(id, { status: 'queued', $unset: { error: 1 } }),
 };

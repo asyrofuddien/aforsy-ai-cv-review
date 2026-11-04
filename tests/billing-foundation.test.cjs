@@ -211,6 +211,7 @@ test('replica-set billing and durable operation properties run only on an isolat
       }
     }
     const { billingService } = loadTs('src/features/billing/billing.service.ts', {
+      './credit-settlement': loadTs('src/features/billing/credit-settlement.ts'),
       '../../config/config': { billing: { trialEnabled: true, adminGrantsEnabled: true } },
       '../../middlewares/error.middleware': { AppError: TestAppError },
       '../../models/adminAuditLog.model': auditModel,

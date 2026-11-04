@@ -168,3 +168,9 @@ test('healthy zero results and provider outage receive distinct coverage statuse
   ]);
   metricContext = undefined;
 });
+
+test('technical failures retrieving every listing are not billed as a successful zero-match search', async () => {
+  const provider = { search: async () => ({ data: [{ id: 'unavailable-job' }] }), getDetails: async () => { throw new Error('detail service down'); } };
+  const service = new JobsService(provider);
+  await assert.rejects(service.findJobs({ suggested_roles: ['Analyst'], seniority: 'Mid-level' }), /could not finish/);
+});

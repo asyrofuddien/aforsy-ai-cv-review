@@ -5,7 +5,7 @@ export interface ReviewWorkflowDependencies {
   repository: {
     markProcessing(id: string, retrying: boolean): Promise<unknown>;
     findJobDescription(id: string): Promise<ReviewDescription | null>;
-    complete(id: string, candidateName: string | undefined, result: ReviewResult): Promise<unknown>;
+    complete(id: string, candidateName: string | undefined, result: ReviewResult, matchingProfile?: unknown): Promise<unknown>;
     fail(id: string, message: string): Promise<unknown>;
     retry?(id: string): Promise<unknown>;
   };
@@ -87,7 +87,7 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
         }
         const candidateName = result.extractedInfo?.name && !['Unknown', 'Unknown Candidate'].includes(result.extractedInfo.name)
           ? result.extractedInfo.name : undefined;
-        const completed = await runStage(logger, 'save completed review and job matches', () => repository.complete(payload.evaluationId, candidateName, response));
+        const completed = await runStage(logger, 'save completed review and job matches', () => repository.complete(payload.evaluationId, candidateName, response, result.extractedInfo));
         if (completed && notifyCompleted) {
           try {
             await runStage(logger, 'send review completion email', () => notifyCompleted(payload.evaluationId, candidateName));

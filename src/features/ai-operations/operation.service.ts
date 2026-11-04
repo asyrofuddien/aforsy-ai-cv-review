@@ -2,7 +2,7 @@
  * Operation Service — AI operation lifecycle management.
  *
  * This module is the single point of truth for creating, leasing, and settling
- * AI operations (cv_review_bundle and ai_draft). It coordinates with the billing
+ * AI operations (cv_review_bundle, ai_draft and job_match_retry). It coordinates with the billing
  * service (reserve/capture/release) and writes OutboxEvents for downstream work.
  *
  * IMPORTANT: None of these methods are exposed as HTTP endpoints. They are called
@@ -44,7 +44,7 @@ export interface CreateOperationInput {
   userId: string;
 
   /** Which AI action to run. Drives cost lookup in ActionCost collection. */
-  action: 'cv_review_bundle' | 'ai_draft';
+  action: 'cv_review_bundle' | 'ai_draft' | 'job_match_retry';
 
   /**
    * Content locale ('id' | 'en'). Passed through to AiOperation and
@@ -188,13 +188,13 @@ export interface OperationService {
   saveResultAndCapture(operationId: string, resultData: unknown, workerToken?: string): Promise<void>;
 
   /**
-   * Persist a partial review result, release all reserved credits, and emit
+   * Persist a partial review result, capture the review cost, release one matching credit, and emit
    * an outbox notification — within a single MongoDB transaction (REQ-M4-004 AC2).
    *
    * Use case: CV review succeeded but job matching failed terminally after all
    * retries. The operation is marked 'completed_partial'; the user gets the
-   * review result but no matching output. Credits are fully released (3 credits
-   * back to available) because matching was a technical failure (REQ-M4-004 AC6).
+   * review result but no matching output. Two credits are captured and one matching
+   * credit is returned to available balance (owner policy updated 4 November 2026).
    *
    * Idempotent: if already 'completed_partial', returns without side-effects
    * (REQ-M4-004 AC5).
@@ -205,7 +205,7 @@ export interface OperationService {
    *
    * Called from: evaluation.worker (matching stage terminal failure).
    */
-  savePartialAndRelease(
+  savePartialAndSettle(
     operationId: string,
     failureCode: string,
     partialResult?: unknown,
@@ -277,7 +277,7 @@ function toObjectId(id: string): mongoose.Types.ObjectId {
  *   - claimLease:       task 4.2
  *   - heartbeat:        task 4.2
  *   - saveResultAndCapture: task 5.1
- *   - savePartialAndRelease: task 6.1
+ *   - savePartialAndSettle: task 6.1
  *   - releaseTerminal:  task 6.1
  */
 class OperationServiceImpl implements OperationService {
@@ -310,6 +310,20 @@ class OperationServiceImpl implements OperationService {
             evaluationMode: snapshot.jobDescriptionId || snapshot.jobDescriptionText ? 'job_specific' : 'general',
             status: 'queued',
           }], { session }).then(([createdEvaluation]) => createdEvaluation);
+          update.resourceId = evaluation._id;
+          created.operation.resourceId = evaluation._id;
+        }
+        if (input.action === 'job_match_retry') {
+          const evaluationId = String(snapshot.evaluationId || '');
+          if (!mongoose.isValidObjectId(evaluationId)) throw new AppError('A valid review is required.', 400);
+          if (created.reservation.totalCredits !== 1) throw new AppError('Job matching retry must cost exactly one credit.', 503);
+          const unsettled = await AiOperation.exists({ resourceId: evaluationId, action: 'cv_review_bundle', status: { $in: ['queued', 'running'] } }).session(session);
+          if (unsettled) throw new AppError('Your review is still being finalized. Please try again shortly.', 409);
+          const evaluation = await Evaluation.findOneAndUpdate({
+            _id: evaluationId, userId: input.userId, status: 'completed',
+            'result.jobMatchingStatus': 'failed', matchingRetryOperationId: null,
+          }, { $set: { matchingRetryOperationId: created.operation._id, lastMatchingRetryOperationId: created.operation._id } }, { new: true, session });
+          if (!evaluation) throw new AppError('Matching is already running or this review cannot be retried.', 409);
           update.resourceId = evaluation._id;
           created.operation.resourceId = evaluation._id;
         }
@@ -398,6 +412,17 @@ class OperationServiceImpl implements OperationService {
       if (op.status === 'completed') return;
       if (op.status !== 'running' || (workerToken && op.workerToken !== workerToken)) throw new AppError('Operation lease was lost.', 409);
       const now = new Date();
+      if (op.action === 'job_match_retry') {
+        const matching = (resultData as { matching?: { suggestedRoles?: unknown; jobs?: unknown } })?.matching;
+        if (!matching || !Array.isArray(matching.jobs) || !Array.isArray(matching.suggestedRoles)) {
+          throw new AppError('Job matching did not produce a valid result.', 502);
+        }
+        const saved = await Evaluation.updateOne({ _id: op.resourceId, userId: op.userId, matchingRetryOperationId: op._id }, {
+          $set: { 'result.jobMatches': matching.jobs, 'result.suggestedRoles': matching.suggestedRoles, 'result.jobMatchingStatus': 'completed' },
+          $unset: { 'result.jobMatchingError': 1, matchingRetryOperationId: 1 },
+        }, { session });
+        if (saved.modifiedCount !== 1) throw new AppError('Matching retry no longer owns this review.', 409);
+      }
       const result = await AiOperationResult.findOneAndUpdate({ operationId: id }, {
         $setOnInsert: {
           operationId: id, userId: op.userId, resultData, schemaVersion: 1,
@@ -416,32 +441,36 @@ class OperationServiceImpl implements OperationService {
     });
   }
 
-  async savePartialAndRelease(operationId: string, failureCode: string, partialResult?: unknown, workerToken?: string): Promise<void> {
+  async savePartialAndSettle(operationId: string, failureCode: string, partialResult?: unknown, workerToken?: string): Promise<void> {
     const id = toObjectId(operationId);
     await inTransaction(async session => {
       const op = await AiOperation.findById(id).session(session);
       if (!op) throw new AppError('AI operation not found.', 404);
       if (op.status === 'completed_partial') return;
       if (op.status !== 'running' || (workerToken && op.workerToken !== workerToken)) throw new AppError('Operation lease was lost.', 409);
-      const now = new Date();
-      let resultId = op.resultId;
-      if (partialResult !== undefined) {
-        const result = await AiOperationResult.findOneAndUpdate({ operationId: id }, { $setOnInsert: {
-          operationId: id, userId: op.userId, resultData: partialResult, schemaVersion: 1,
-          source: 'review', state: 'available', expiresAt: new Date(now.getTime() + 30 * 86400_000),
-        } }, { upsert: true, new: true, session });
-        resultId = result._id;
-      }
-      await billingService.settleCreditOperation(operationId, 'release', failureCode, session);
-      op.status = 'completed_partial'; op.failureCode = failureCode.slice(0,80); op.completedAt = now;
-      if (resultId) op.resultId = resultId;
-      op.set('inputSnapshot', undefined); op.workerToken = undefined; op.leaseUntil = undefined; op.stateVersion += 1;
-      await op.save({ session });
-      await OutboxEvent.updateOne({ eventKey: `ai-operation.partial:${op.id}` }, { $setOnInsert: {
-        eventKey: `ai-operation.partial:${op.id}`, type: 'email.partial_result', entityId: op._id,
-        payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale }, state: 'pending', attempts: 0, nextAttemptAt: now,
-      } }, { upsert: true, session });
+      await this.persistPartialAndSettle(op, failureCode, partialResult, session);
     });
+  }
+
+  private async persistPartialAndSettle(op: IAiOperation, failureCode: string, partialResult: unknown, session: mongoose.ClientSession): Promise<void> {
+    const now = new Date();
+    let resultId = op.resultId;
+    if (partialResult !== undefined) {
+      const result = await AiOperationResult.findOneAndUpdate({ operationId: op._id }, { $setOnInsert: {
+        operationId: op._id, userId: op.userId, resultData: partialResult, schemaVersion: 1,
+        source: 'review', state: 'available', expiresAt: new Date(now.getTime() + 30 * 86400_000),
+      } }, { upsert: true, new: true, session });
+      resultId = result._id;
+    }
+    await billingService.settleCreditOperation(String(op._id), 'partial', failureCode, session);
+    op.status = 'completed_partial'; op.failureCode = failureCode.slice(0,80); op.completedAt = now;
+    if (resultId) op.resultId = resultId;
+    op.set('inputSnapshot', undefined); op.workerToken = undefined; op.leaseUntil = undefined; op.stateVersion += 1;
+    await op.save({ session });
+    await OutboxEvent.updateOne({ eventKey: `ai-operation.partial:${op.id}` }, { $setOnInsert: {
+      eventKey: `ai-operation.partial:${op.id}`, type: 'email.partial_result', entityId: op._id,
+      payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale }, state: 'pending', attempts: 0, nextAttemptAt: now,
+    } }, { upsert: true, session });
   }
 
   async releaseTerminal(operationId: string, failureCode: string, workerToken?: string): Promise<void> {
@@ -452,8 +481,20 @@ class OperationServiceImpl implements OperationService {
       if (op.status === 'failed') return;
       if (op.status !== 'queued' && op.status !== 'running') throw new AppError('Operation is already terminal.', 409);
       if (workerToken && op.workerToken !== workerToken) throw new AppError('Operation lease was lost.', 409);
+      if (op.action === 'cv_review_bundle' && op.resourceId) {
+        const review = await Evaluation.findOne({ _id: op.resourceId, userId: op.userId, status: 'completed', 'result.jobMatchingStatus': 'failed' }).session(session);
+        if (review) {
+          await this.persistPartialAndSettle(op, 'matching_failed_final', { evaluationId: String(op.resourceId) }, session);
+          return;
+        }
+      }
       const now = new Date();
       await billingService.settleCreditOperation(operationId, 'release', failureCode, session);
+      if (op.action === 'job_match_retry') {
+        await Evaluation.updateOne({ _id: op.resourceId, userId: op.userId, matchingRetryOperationId: op._id }, {
+          $unset: { matchingRetryOperationId: 1 },
+        }, { session });
+      }
       op.status = 'failed'; op.failureCode = failureCode.slice(0,80); op.completedAt = now;
       op.set('inputSnapshot', undefined); op.workerToken = undefined; op.leaseUntil = undefined; op.stateVersion += 1;
       await op.save({ session });

@@ -34,6 +34,7 @@ class OpenAIService {
       maxTokens?: number;
       systemPrompt?: string;
       stage?: string;
+      rejectTruncated?: boolean;
     } = {},
   ): Promise<string> {
     const temperature = options.temperature ?? config.ai.temperature;
@@ -96,6 +97,8 @@ class OpenAIService {
       }
 
       const usage = completion.usage;
+      const finishReason = completion.choices[0]?.finish_reason;
+      const truncated = options.rejectTruncated && finishReason === 'length';
       await this.recordUsage({
         callId,
         stage: options.stage,
@@ -111,8 +114,18 @@ class OpenAIService {
         latencyMs: Math.round(performance.now() - startedAt),
         requestId: this.readResponseRequestId(completion),
         finishReason: completion.choices[0]?.finish_reason || undefined,
-        status: 'succeeded',
+        status: truncated ? 'failed' : 'succeeded',
+        failureCode: truncated ? 'response_truncated' : undefined,
       });
+      if (truncated) {
+        logger.warn('AI response reached its token limit; rejecting incomplete output', {
+          stage: options.stage || 'unspecified',
+          maxTokens,
+          outputTokens: usage?.completion_tokens,
+          requestId: this.readResponseRequestId(completion),
+        });
+        throw new AppError('AI response was truncated. Please retry the review.', 502);
+      }
       return completion.choices[0]?.message?.content || '';
     }
 

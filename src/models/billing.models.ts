@@ -24,7 +24,7 @@ export interface IBillingPackage extends mongoose.Document {
 }
 
 export interface IActionCost extends mongoose.Document {
-  action: 'cv_review_bundle' | 'ai_draft';
+  action: 'cv_review_bundle' | 'ai_draft' | 'job_match_retry';
   version: number;
   creditsRequired: number;
   active: boolean;
@@ -59,7 +59,9 @@ export interface ICreditReservation extends mongoose.Document {
   reservationKey: string;
   totalCredits: number;
   allocations: Array<{ lotId: mongoose.Types.ObjectId; credits: number }>;
-  status: 'held' | 'captured' | 'released' | 'revoked';
+  status: 'held' | 'captured' | 'partially_captured' | 'released' | 'revoked';
+  capturedCredits?: number;
+  releasedCredits?: number;
 }
 
 export interface ICreditLedger extends mongoose.Document {
@@ -80,7 +82,7 @@ export interface ICreditLedger extends mongoose.Document {
 
 export interface IAiOperation extends mongoose.Document {
   userId: mongoose.Types.ObjectId;
-  action: 'cv_review_bundle' | 'ai_draft';
+  action: 'cv_review_bundle' | 'ai_draft' | 'job_match_retry';
   status: 'queued' | 'running' | 'completed' | 'completed_partial' | 'failed' | 'cancelled';
   billingMode: 'credits' | 'sponsored';
   costSnapshot: Record<string, unknown>;
@@ -127,7 +129,7 @@ BillingPackageSchema.index({ active: 1, effectiveFrom: 1 }, { name: 'active_effe
 BillingPackageSchema.index({ lynkProductId: 1 }, { unique: true, partialFilterExpression: { lynkProductId: { $type: 'string' } }, name: 'lynk_product_unique' });
 
 const ActionCostSchema = new Schema({
-  action: { type: String, required: true, enum: ['cv_review_bundle', 'ai_draft'] },
+  action: { type: String, required: true, enum: ['cv_review_bundle', 'ai_draft', 'job_match_retry'] },
   version: { ...positiveInteger, required: true },
   creditsRequired: { ...positiveInteger, required: true },
   active: { type: Boolean, required: true, default: false },
@@ -183,7 +185,9 @@ const CreditReservationSchema = new Schema({
     lotId: { type: objectId, ref: 'CreditLot', required: true },
     credits: { ...positiveInteger, required: true },
   }],
-  status: { type: String, required: true, enum: ['held', 'captured', 'released', 'revoked'], default: 'held' },
+  status: { type: String, required: true, enum: ['held', 'captured', 'partially_captured', 'released', 'revoked'], default: 'held' },
+  capturedCredits: nonNegativeInteger,
+  releasedCredits: nonNegativeInteger,
   leaseExpiresAt: Date,
   finalizedAt: Date,
 }, timestamps);
@@ -229,7 +233,7 @@ for (const operation of ['updateOne', 'updateMany', 'findOneAndUpdate', 'replace
 
 const AiOperationSchema = new Schema({
   userId: { type: objectId, ref: 'User', required: true },
-  action: { type: String, required: true, enum: ['cv_review_bundle', 'ai_draft'] },
+  action: { type: String, required: true, enum: ['cv_review_bundle', 'ai_draft', 'job_match_retry'] },
   status: {
     type: String, required: true,
     enum: ['queued', 'running', 'completed', 'completed_partial', 'failed', 'cancelled'],

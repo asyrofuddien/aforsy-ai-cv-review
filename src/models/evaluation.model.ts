@@ -3,6 +3,9 @@ import { EvaluationResult, EvaluationStatus } from '../types/evaluation.types';
 
 export interface IEvaluation extends Document {
   candidateName?: string;
+  matchingProfile?: Record<string, unknown>;
+  matchingRetryOperationId?: mongoose.Types.ObjectId;
+  lastMatchingRetryOperationId?: mongoose.Types.ObjectId;
   cvDocumentId: mongoose.Types.ObjectId;
   jobDescriptionId?: mongoose.Types.ObjectId;
   locale?: 'id' | 'en';
@@ -21,6 +24,9 @@ export interface IEvaluation extends Document {
 const EvaluationSchema = new Schema(
   {
     candidateName: { type: String },
+    matchingProfile: { type: Schema.Types.Mixed, select: false },
+    matchingRetryOperationId: { type: Schema.Types.ObjectId, ref: 'AiOperation' },
+    lastMatchingRetryOperationId: { type: Schema.Types.ObjectId, ref: 'AiOperation' },
     cvDocumentId: {
       type: Schema.Types.ObjectId,
       ref: 'Document',

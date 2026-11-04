@@ -1,6 +1,6 @@
 import { Job } from "bullmq";
 import queueService from "../services/queue.service";
-import { reviewWorkflow } from "../features/review";
+import { reviewWorkflow, jobMatcher } from "../features/review";
 import { matcherWorkflow } from "../features/cv-matcher";
 import appLogger from "../utils/logger";
 import { logContext } from "../utils/log-context";
@@ -9,6 +9,8 @@ import { operationService } from "../features/ai-operations/operation.service";
 import { AiOperation } from "../models/billing.models";
 import { aiResultCleanupWorker } from "./cleanup.worker";
 import Evaluation from "../models/evaluation.model";
+import Document from "../models/document.model";
+import { ReviewAIService } from "../features/review/review.ai";
 import { createAiDraft } from "../services/cv-draft-ai.service";
 import { outboxDispatcher } from "./outbox.dispatcher";
 import config from "../config/config";
@@ -72,6 +74,20 @@ async function processDurableOperation(job: Job<{ operationId: string }>) {
     }
     const evaluationId = String(op.resourceId || "");
     if (!evaluationId) throw new Error("Review record is unavailable");
+    if (op.action === "job_match_retry") {
+      const evaluation = await Evaluation.findOne({ _id: evaluationId, userId: operation.userId, matchingRetryOperationId: operationId }).select("+matchingProfile cvDocumentId");
+      if (!evaluation) throw new Error("Matching retry source is unavailable");
+      let profile = evaluation.matchingProfile;
+      if (!profile) {
+        const document = await Document.findOne({ _id: evaluation.cvDocumentId, userId: operation.userId }).select("content").lean();
+        if (!document?.content?.trim()) throw new Error("CV source is no longer available");
+        profile = await new ReviewAIService().extractCVInfo(document.content) as unknown as Record<string, unknown>;
+        await Evaluation.updateOne({ _id: evaluationId, matchingRetryOperationId: operationId }, { $set: { matchingProfile: profile } });
+      }
+      const matching = await logContext.run({ evaluationId, jobId: String(job.id), operationId, attempt: String(op.attemptCount) }, () => jobMatcher.findMatches(profile));
+      await operationService.saveResultAndCapture(operationId, { evaluationId, matching }, workerToken);
+      return { status: "completed" };
+    }
     const reviewResult = await reviewWorkflow.process({
       evaluationId,
       cvDocumentId: String(snapshot.cvDocumentId),
@@ -85,7 +101,7 @@ async function processDurableOperation(job: Job<{ operationId: string }>) {
     const evaluation = await Evaluation.findById(evaluationId).select("status result").lean();
     if (!evaluation || evaluation.status !== "completed" || !evaluation.result) throw new Error("Review did not produce a completed result");
     if (evaluation.result.jobMatchingStatus === "failed") {
-      await operationService.savePartialAndRelease(operationId, "matching_failed_final", { evaluationId }, workerToken);
+      await operationService.savePartialAndSettle(operationId, "matching_failed_final", { evaluationId }, workerToken);
       return { status: "completed_partial" };
     }
     await operationService.saveResultAndCapture(operationId, { evaluationId }, workerToken);
@@ -108,7 +124,9 @@ export const startWorker = (): void => {
     processJob(job, "cv-matcher"),
   );
   queueService.initializeAiOperationWorker(processDurableOperation);
-  outboxDispatcher.start(config.billing.reconcileIntervalMs);
+  // Poll durable inbox/outbox frequently so confirmed purchases grant credits
+  // and send their receipt without waiting for the slower safety reconciler.
+  outboxDispatcher.start(5_000);
   localBillingReconciler.start(config.billing.reconcileIntervalMs);
   aiResultCleanupWorker.start();
   logger.info("Workers ready", { queues: ["review", "cv-matcher", "ai-operation"] });

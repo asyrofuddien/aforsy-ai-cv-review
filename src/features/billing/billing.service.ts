@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import { createHash } from 'crypto';
 import config from '../../config/config';
+import { planCreditSettlement } from './credit-settlement';
 import { AppError } from '../../middlewares/error.middleware';
 import AdminAuditLog from '../../models/adminAuditLog.model';
 import User from '../../models/user.model';
@@ -16,12 +17,12 @@ import {
   IdempotencyRecord,
 } from '../../models/billing.models';
 
-const POLICY_VERSION = 'credits-v1';
+const POLICY_VERSION = 'credits-v2-matching-split';
 const TRIAL_SKU = 'welcome.v1';
 const TRIAL_CREDITS = 4;
 const MAX_GOODWILL_CREDITS = 5;
 
-type CreditAction = 'cv_review_bundle' | 'ai_draft';
+type CreditAction = 'cv_review_bundle' | 'ai_draft' | 'job_match_retry';
 type GrantSource = 'trial' | 'purchase' | 'goodwill';
 type TransactionWork<T> = (_session: mongoose.ClientSession) => Promise<T>;
 
@@ -389,7 +390,7 @@ export const billingService = {
         action: input.action,
         status: 'queued',
         billingMode: 'credits',
-        costSnapshot: { action: input.action, version: cost.version, creditsRequired: cost.creditsRequired },
+        costSnapshot: { action: input.action, version: cost.version, creditsRequired: cost.creditsRequired, policyVersion: POLICY_VERSION, ...(input.action === 'cv_review_bundle' ? { matchingCreditsRequired: 1 } : {}) },
         locale: input.locale,
         inputFingerprint: input.inputFingerprint,
         inputSnapshotRef: input.inputSnapshotRef,
@@ -476,7 +477,7 @@ export const billingService = {
     }
   },
 
-  async settleCreditOperation(operationId: string, outcome: 'capture' | 'release', failureCode = 'technical_failure', externalSession?: mongoose.ClientSession) {
+  async settleCreditOperation(operationId: string, outcome: 'capture' | 'release' | 'partial', failureCode = 'technical_failure', externalSession?: mongoose.ClientSession) {
     if (!/^[a-z0-9_:-]{1,80}$/i.test(failureCode)) throw new AppError('Invalid failure code.', 400);
     const id = objectId(operationId);
     const work = async (session: mongoose.ClientSession) => {
@@ -484,62 +485,67 @@ export const billingService = {
       if (!operation) throw new AppError('AI operation not found.', 404);
       const reservation = await CreditReservation.findOne({ referenceId: id }).session(session);
       if (!reservation) throw new AppError('Operation reservation not found.', 404);
-      const terminalStatus = outcome === 'capture' ? 'completed' : 'failed';
-      if (operation.status === terminalStatus && reservation.status === (outcome === 'capture' ? 'captured' : 'released')) {
+      const terminalStatus = outcome === 'capture' ? 'completed' : outcome === 'partial' ? 'completed_partial' : 'failed';
+      const reservationStatus = outcome === 'capture' ? 'captured' : outcome === 'partial' ? 'partially_captured' : 'released';
+      if (operation.status === terminalStatus && reservation.status === reservationStatus) {
         return { operationId: operation.id, status: operation.status, settled: false };
       }
       if (operation.status !== 'queued' && operation.status !== 'running') {
         throw new AppError('AI operation is already in a different terminal state.', 409);
       }
       if (reservation.status !== 'held') throw new AppError('Credit reservation is already settled.', 409);
-
-      const walletDeltas = outcome === 'capture'
-        ? { reservedCredits: -reservation.totalCredits, version: 1 }
-        : { availableCredits: reservation.totalCredits, reservedCredits: -reservation.totalCredits, version: 1 };
+      if (outcome === 'partial' && (operation.action !== 'cv_review_bundle' || reservation.totalCredits < 2)) {
+        throw new AppError('Partial settlement requires a completed CV review bundle.', 409);
+      }
+      const releasedCredits = outcome === 'release' ? reservation.totalCredits : outcome === 'partial' ? 1 : 0;
+      const capturedCredits = reservation.totalCredits - releasedCredits;
+      const plan = planCreditSettlement(reservation.allocations, reservation.totalCredits, releasedCredits);
       const walletUpdate = await BillingWallet.updateOne(
         { userId: operation.userId, reservedCredits: { $gte: reservation.totalCredits } },
-        { $inc: walletDeltas },
+        { $inc: { availableCredits: releasedCredits, reservedCredits: -reservation.totalCredits, version: 1 } },
         { session },
       );
       if (walletUpdate.modifiedCount !== 1) throw new AppError('Credit wallet and reservation do not reconcile.', 503);
-      for (const allocation of reservation.allocations) {
-        const lotDeltas = outcome === 'capture'
-          ? { reserved: -allocation.credits, consumed: allocation.credits }
-          : { reserved: -allocation.credits, available: allocation.credits };
+      for (const allocation of plan) {
         const lotUpdate = await CreditLot.updateOne(
           { _id: allocation.lotId, userId: operation.userId, reserved: { $gte: allocation.credits } },
-          { $inc: lotDeltas },
+          { $inc: { reserved: -allocation.credits, consumed: allocation.captured, available: allocation.released } },
           { session },
         );
         if (lotUpdate.modifiedCount !== 1) throw new AppError('Credit lot and reservation do not reconcile.', 503);
-        await CreditLedger.create([{
-          userId: operation.userId,
-          eventKey: `${reservation.reservationKey}:${outcome}:${allocation.lotId}`,
-          eventType: outcome === 'capture' ? 'capture_ai' : 'release_ai',
-          lotId: allocation.lotId,
-          reservationId: reservation._id,
-          operationId: operation._id,
-          deltaAvailable: outcome === 'release' ? allocation.credits : 0,
-          deltaReserved: -allocation.credits,
-          deltaConsumed: outcome === 'capture' ? allocation.credits : 0,
-          deltaRevoked: 0,
-          creditsGrantedDelta: 0,
-          reasonCode: outcome === 'capture' ? 'operation_completed' : failureCode,
-          actorType: 'system',
-          policyVersion: POLICY_VERSION,
-        }], { session });
+        for (const entry of [{ kind: 'capture', amount: allocation.captured }, { kind: 'release', amount: allocation.released }]) {
+          if (!entry.amount) continue;
+          await CreditLedger.create([{
+            userId: operation.userId,
+            eventKey: `${reservation.reservationKey}:${entry.kind}:${allocation.lotId}`,
+            eventType: entry.kind === 'capture' ? 'capture_ai' : 'release_ai',
+            lotId: allocation.lotId,
+            reservationId: reservation._id,
+            operationId: operation._id,
+            deltaAvailable: entry.kind === 'release' ? entry.amount : 0,
+            deltaReserved: -entry.amount,
+            deltaConsumed: entry.kind === 'capture' ? entry.amount : 0,
+            deltaRevoked: 0,
+            creditsGrantedDelta: 0,
+            reasonCode: outcome === 'capture' ? 'operation_completed' : failureCode,
+            actorType: 'system',
+            policyVersion: POLICY_VERSION,
+          }], { session });
+        }
       }
-      reservation.status = outcome === 'capture' ? 'captured' : 'released';
+      reservation.status = reservationStatus;
+      reservation.capturedCredits = capturedCredits;
+      reservation.releasedCredits = releasedCredits;
       reservation.set('finalizedAt', new Date());
       await reservation.save({ session });
       operation.status = terminalStatus;
       operation.set('completedAt', new Date());
-      if (outcome === 'release') operation.failureCode = failureCode.slice(0, 80);
+      if (outcome !== 'capture') operation.failureCode = failureCode.slice(0, 80);
       operation.stateVersion += 1;
       await operation.save({ session });
       await IdempotencyRecord.updateOne(
         { userId: operation.userId, scope: 'ai_operation', key: operation.clientIntentKey },
-        { $set: { outcome: outcome === 'capture' ? 'completed' : 'conflict' } },
+        { $set: { outcome: outcome === 'release' ? 'conflict' : 'completed' } },
         { session },
       );
       return { operationId: operation.id, status: operation.status, settled: true };

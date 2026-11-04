@@ -32,7 +32,7 @@ async function runMatchingStage<T>(stage: string, operation: () => Promise<T>): 
   }
 }
 
-const jobMatcher = {
+export const jobMatcher = {
   async findMatches(profile: unknown) {
     const candidate = profile && typeof profile === 'object' ? profile as CandidateForMatching : {};
     const roles = await runMatchingStage('suggest job roles from reviewed CV', () => matcherAI.RoleSuggestion(candidate));

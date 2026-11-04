@@ -75,3 +75,19 @@ test('reported provider usage is preserved without converting absence to zero', 
   assert.equal(fixture.records[0].inputTokens, 17);
   assert.equal(fixture.records[0].outputTokens, 9);
 });
+
+test('truncated review output is rejected before parsing and its failed usage remains metered', async () => {
+  const fixture = createService({
+    maxRetries: 1,
+    createCompletion: () => ({
+      model: 'fixture-model',
+      choices: [{ message: { content: '{"criteria":[' }, finish_reason: 'length' }],
+      usage: { prompt_tokens: 20, completion_tokens: 8000 },
+    }),
+  });
+  await assert.rejects(fixture.service.completion('private CV prompt', { stage: 'cv_evaluation', rejectTruncated: true }), /response was truncated/);
+  assert.equal(fixture.records.length, 1);
+  assert.equal(fixture.records[0].status, 'failed');
+  assert.equal(fixture.records[0].failureCode, 'response_truncated');
+  assert.equal(fixture.records[0].outputTokens, 8000);
+});

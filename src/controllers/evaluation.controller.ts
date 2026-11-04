@@ -10,6 +10,7 @@ import cvMatcherModel from '../models/cvMatcher.model';
 import Document from '../models/document.model';
 import { createHash } from 'crypto';
 import config from '../config/config';
+import { AiOperation, CreditReservation } from '../models/billing.models';
 
 const logger = appLogger.child({ scope: 'review-api' });
 
@@ -150,9 +151,13 @@ export class EvaluationController {
 
       // Format response based on status
       if (evaluation.status === 'completed' && evaluation.result) {
+        const operation = await AiOperation.findOne({ resourceId: evaluation._id, userId: req.authUser!.userId, action: 'cv_review_bundle' }).select('_id').lean();
+        const reservation = operation ? await CreditReservation.findOne({ referenceId: operation._id }).select('status totalCredits capturedCredits releasedCredits').lean() : null;
         res.status(200).json({
+          billing: reservation ? { status: reservation.status, credits: reservation.totalCredits, capturedCredits: reservation.capturedCredits, releasedCredits: reservation.releasedCredits } : undefined,
           id: evaluation.id,
           candidateName: evaluation.candidateName,
+          matchingRetryOperationId: evaluation.lastMatchingRetryOperationId ? String(evaluation.lastMatchingRetryOperationId) : undefined,
           status: evaluation.status,
           result: {
             schema_version: evaluation.result.schemaVersion,

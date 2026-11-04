@@ -13,6 +13,7 @@ const packages = [
 const actionCosts = [
   { action: 'cv_review_bundle', version: 1, creditsRequired: 3 },
   { action: 'ai_draft', version: 1, creditsRequired: 1 },
+  { action: 'job_match_retry', version: 1, creditsRequired: 1 },
 ] as const;
 
 const apply = process.argv.includes('--apply');
