@@ -17,6 +17,7 @@ const AdminAuditLogSchema = new Schema(
         'refund_request',
         'billing_catalog',
         'affiliate_config',
+        'support_case',
       ],
       required: true,
       index: true,

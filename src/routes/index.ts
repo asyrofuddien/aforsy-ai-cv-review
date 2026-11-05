@@ -16,6 +16,7 @@ import aiOperationRoutes from '../features/ai-operations/operation.routes';
 import rateLimit from 'express-rate-limit';
 import { receiveLynkWebhook } from '../features/billing/webhooks/webhook.receiver';
 import { getAffiliateConfig } from '../controllers/affiliate.controller';
+import workspaceRoutes from '../features/career-workspace/workspace.routes';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.use('/admin', adminRoutes);
 
 // Product routes use the authenticated user as the owner of all created data.
 router.use('/ai/operations', aiOperationRoutes);
+router.use('/workspace', workspaceRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/evaluate', evaluationRoutes);
 router.use('/job-descriptions', jobDescriptionRoutes);

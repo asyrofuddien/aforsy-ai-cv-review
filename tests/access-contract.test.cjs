@@ -107,6 +107,7 @@ function fixture() {
     '../controllers/affiliate.controller': { getAffiliateConfig: (_req, res) => res.json({ success: true, data: { status: 'coming_soon' } }) },
     '../features/billing/webhooks/webhook.receiver': { receiveLynkWebhook: (_req, res) => res.json({ success: true }) },
     '../features/ai-operations/operation.routes': express.Router(),
+    '../features/career-workspace/workspace.routes': express.Router(),
     '../middlewares/auth.middleware': { authenticate, requireAdmin },
     '../controllers/dashboard.controller': { dashboardSummary: (_req, res) => res.json({ success: true }) },
     './system.routes': loadTs('src/routes/system.routes.ts', {

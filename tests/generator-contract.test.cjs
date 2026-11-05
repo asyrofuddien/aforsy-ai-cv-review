@@ -10,7 +10,7 @@ function fixture(failAt) {
   const fail = (step) => { if (failAt === step) throw new Error(`Synthetic ${step} failure`); };
   const page = {
     target: () => ({ createCDPSession: async () => ({ send: async () => {} }) }),
-    setRequestInterception: async () => {}, setViewport: async () => {},
+    setRequestInterception: async () => {}, on: () => {}, setViewport: async () => {},
     setContent: async () => { fail('content'); }, evaluateHandle: async () => {},
     pdf: async ({ path }) => { files.set(path, Buffer.from('%PDF-synthetic')); fail('pdf'); },
   };
