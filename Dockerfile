@@ -55,7 +55,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/results ./results
 
 # Directories your app expects
-RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs cached
+RUN mkdir -p uploads/cvs uploads/projects uploads/temp logs cached results \
+  && chown -R node:node /app
+
+USER node
 
 # Expose port 3001 (configurable via PORT env var at runtime)
 EXPOSE 3001

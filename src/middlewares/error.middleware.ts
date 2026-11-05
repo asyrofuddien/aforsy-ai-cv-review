@@ -46,6 +46,7 @@ export const errorMiddleware = (
   }
 
   const status = (error as AppError).statusCode || 500;
+  const publicMessage = status >= 500 ? 'Server Error' : error.message || 'Request failed';
   res.locals.failureLogged = true;
   logger.log(status >= 500 ? 'error' : 'warn', 'Request failed', {
     status,
@@ -57,7 +58,7 @@ export const errorMiddleware = (
   res.status(status).json({
     success: false,
     error: {
-      message: error.message || 'Server Error',
+      message: publicMessage,
     },
   });
 };

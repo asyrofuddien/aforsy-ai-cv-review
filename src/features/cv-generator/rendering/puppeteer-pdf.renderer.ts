@@ -35,28 +35,24 @@ export async function renderCvPdf(
       headless: true,
       protocolTimeout: options.protocolTimeoutMs,
       args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-software-rasterizer',
         '--no-zygote',
         '--single-process',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process,NetworkService',
       ],
       timeout: options.timeoutMs,
     });
 
     const page = await browser.newPage();
-    try {
-      const client = await page.target().createCDPSession();
-      await client.send('Network.disable');
-    } catch (error) {
-      logger.warn('Could not disable browser network monitoring', error);
-    }
-
-    await page.setRequestInterception(false);
+    // CV content is user controlled. Keep rendering self-contained so crafted
+    // values cannot make Chromium fetch internal services or external URLs.
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+      const url = request.url();
+      if (url.startsWith('data:') || url === 'about:blank') void request.continue();
+      else void request.abort();
+    });
     await page.setViewport(options.viewport);
     await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: options.timeoutMs });
     await page.evaluateHandle('document.fonts.ready');

@@ -121,7 +121,6 @@ export class CVGeneratorController {
         res.status(500).json({
           success: false,
           message: 'Failed to generate CV',
-          error: error.message,
         });
       }
     },
@@ -142,7 +141,6 @@ export class CVGeneratorController {
         res.status(500).json({
           success: false,
           message: 'Failed to generate CV',
-          error: error.message,
         });
       }
     },
