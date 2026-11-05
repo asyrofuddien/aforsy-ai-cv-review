@@ -17,7 +17,7 @@ export class LynkAdapter implements PaymentProvider {
     checkoutUrl: string;
     orderReference: string;
   }): string {
-    if (!/^https:\/\/lynk\.id\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/.test(input.checkoutUrl))
+    if (!/^https:\/\/lynk\.id\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+(?:\/checkout)?$/.test(input.checkoutUrl))
       throw new AppError('Lynk checkout URL is not allowlisted.', 503);
     if (!input.productId || !input.orderReference)
       throw new AppError('Lynk product mapping is incomplete.', 503);
