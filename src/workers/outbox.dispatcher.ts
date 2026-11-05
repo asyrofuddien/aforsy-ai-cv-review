@@ -31,7 +31,7 @@ export class OutboxDispatcher {
     this.stopping = true;
     if (this.timer) clearInterval(this.timer);
     this.timer = undefined;
-    while (this.running) await new Promise(resolve => setTimeout(resolve, 25));
+    while (this.running) await new Promise((resolve) => setTimeout(resolve, 25));
   }
 
   private async acquireSchedulerLease(): Promise<boolean> {
@@ -54,26 +54,57 @@ export class OutboxDispatcher {
   private async recoverExpiredOperations(): Promise<void> {
     const now = new Date();
     const expired = await AiOperation.find({ status: 'running', leaseUntil: { $lte: now } })
-      .select('_id attemptCount maxAttempts').limit(50).lean();
+      .select('_id attemptCount maxAttempts')
+      .limit(50)
+      .lean();
     for (const op of expired) {
       if (op.attemptCount >= op.maxAttempts) {
-        await AiOperation.updateOne({ _id: op._id, status: 'running', leaseUntil: { $lte: now } }, {
-          $set: { status: 'queued' }, $unset: { workerToken: 1, leaseUntil: 1 }, $inc: { stateVersion: 1 },
-        });
-        try { await this.failExpiredOperation(String(op._id)); } catch (error) {
-          logger.error('Unable to settle expired operation', { operationId: String(op._id), error });
+        await AiOperation.updateOne(
+          { _id: op._id, status: 'running', leaseUntil: { $lte: now } },
+          {
+            $set: { status: 'queued' },
+            $unset: { workerToken: 1, leaseUntil: 1 },
+            $inc: { stateVersion: 1 },
+          },
+        );
+        try {
+          await this.failExpiredOperation(String(op._id));
+        } catch (error) {
+          logger.error('Unable to settle expired operation', {
+            operationId: String(op._id),
+            error,
+          });
         }
         continue;
       }
-      const reclaimed = await AiOperation.updateOne({ _id: op._id, status: 'running', leaseUntil: { $lte: now } }, {
-        $set: { status: 'queued' }, $unset: { workerToken: 1, leaseUntil: 1 }, $inc: { stateVersion: 1 },
-      });
+      const reclaimed = await AiOperation.updateOne(
+        { _id: op._id, status: 'running', leaseUntil: { $lte: now } },
+        {
+          $set: { status: 'queued' },
+          $unset: { workerToken: 1, leaseUntil: 1 },
+          $inc: { stateVersion: 1 },
+        },
+      );
       if (reclaimed.modifiedCount !== 1) continue;
-      await OutboxEvent.updateOne({ eventKey: `ai-operation.retry:${op._id}:${op.attemptCount}` }, { $setOnInsert: {
-        eventKey: `ai-operation.retry:${op._id}:${op.attemptCount}`, type: 'ai-operation.retry', entityId: op._id,
-        payload: { operationId: String(op._id) }, state: 'pending', attempts: 0, nextAttemptAt: now,
-      } }, { upsert: true });
-      logger.warn('Recovered expired AI operation lease', { operationId: String(op._id), attempt: op.attemptCount });
+      await OutboxEvent.updateOne(
+        { eventKey: `ai-operation.retry:${op._id}:${op.attemptCount}` },
+        {
+          $setOnInsert: {
+            eventKey: `ai-operation.retry:${op._id}:${op.attemptCount}`,
+            type: 'ai-operation.retry',
+            entityId: op._id,
+            payload: { operationId: String(op._id) },
+            state: 'pending',
+            attempts: 0,
+            nextAttemptAt: now,
+          },
+        },
+        { upsert: true },
+      );
+      logger.warn('Recovered expired AI operation lease', {
+        operationId: String(op._id),
+        attempt: op.attemptCount,
+      });
     }
   }
 
@@ -90,47 +121,81 @@ export class OutboxDispatcher {
       await this.recoverExpiredOperations();
       for (let count = 0; count < 25 && !this.stopping; count += 1) {
         const now = new Date();
-        const event = await OutboxEvent.findOneAndUpdate({
-          type: { $in: ['ai-operation.enqueue', 'ai-operation.retry', 'email.purchase_receipt', 'email.result_ready'] },
-          $or: [
-            { state: 'pending', nextAttemptAt: { $lte: now } },
-            { state: 'processing', lockedUntil: { $lte: now } },
-          ],
-        }, {
-          $set: { state: 'processing', lockedUntil: new Date(now.getTime() + LOCK_MS) },
-          $inc: { attempts: 1 },
-        }, { sort: { createdAt: 1 }, new: true }).select('+payload');
+        const event = await OutboxEvent.findOneAndUpdate(
+          {
+            type: {
+              $in: [
+                'ai-operation.enqueue',
+                'ai-operation.retry',
+                'email.purchase_receipt',
+                'email.result_ready',
+              ],
+            },
+            $or: [
+              { state: 'pending', nextAttemptAt: { $lte: now } },
+              { state: 'processing', lockedUntil: { $lte: now } },
+            ],
+          },
+          {
+            $set: { state: 'processing', lockedUntil: new Date(now.getTime() + LOCK_MS) },
+            $inc: { attempts: 1 },
+          },
+          { sort: { createdAt: 1 }, new: true },
+        ).select('+payload');
         if (!event) break;
         try {
           if (event.type.startsWith('email.')) {
             await deliverBillingEmail(event);
-            await OutboxEvent.updateOne({ _id: event._id, state: 'processing' }, { $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 } });
+            await OutboxEvent.updateOne(
+              { _id: event._id, state: 'processing' },
+              { $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 } },
+            );
             continue;
           }
           const operationId = String((event.payload as any)?.operationId || event.entityId);
-          const operation = await AiOperation.findById(operationId).select('maxAttempts status').lean();
+          const operation = await AiOperation.findById(operationId)
+            .select('maxAttempts status')
+            .lean();
           if (!operation || operation.status !== 'queued') {
-            await OutboxEvent.updateOne({ _id: event._id }, { $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 } });
+            await OutboxEvent.updateOne(
+              { _id: event._id },
+              { $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 } },
+            );
             continue;
           }
           await queueService.addDurableOperationJob(operationId, operation.maxAttempts);
-          await OutboxEvent.updateOne({ _id: event._id, state: 'processing' }, {
-            $set: { state: 'delivered', deliveredAt: new Date() }, $unset: { lockedUntil: 1 },
-          });
+          await OutboxEvent.updateOne(
+            { _id: event._id, state: 'processing' },
+            {
+              $set: { state: 'delivered', deliveredAt: new Date() },
+              $unset: { lockedUntil: 1 },
+            },
+          );
         } catch (error) {
           const attempts = event.attempts;
           const terminal = attempts >= MAX_ATTEMPTS;
-          const delayMs = Math.min(15 * 60_000, 1_000 * (2 ** Math.min(attempts, 10)));
+          const delayMs = Math.min(15 * 60_000, 1_000 * 2 ** Math.min(attempts, 10));
           if (terminal && !event.type.startsWith('email.')) {
-            await operationService.releaseTerminal(String((event.payload as any)?.operationId || event.entityId), 'enqueue_failed_final');
+            await operationService.releaseTerminal(
+              String((event.payload as any)?.operationId || event.entityId),
+              'enqueue_failed_final',
+            );
           }
-          await OutboxEvent.updateOne({ _id: event._id, state: 'processing' }, {
-            $set: terminal
-              ? { state: 'failed' }
-              : { state: 'pending', nextAttemptAt: new Date(Date.now() + delayMs) },
-            $unset: { lockedUntil: 1 },
+          await OutboxEvent.updateOne(
+            { _id: event._id, state: 'processing' },
+            {
+              $set: terminal
+                ? { state: 'failed' }
+                : { state: 'pending', nextAttemptAt: new Date(Date.now() + delayMs) },
+              $unset: { lockedUntil: 1 },
+            },
+          );
+          logger.error('Outbox delivery attempt failed', {
+            eventId: String(event._id),
+            attempts,
+            terminal,
+            error,
           });
-          logger.error('Outbox delivery attempt failed', { eventId: String(event._id), attempts, terminal, error });
         }
       }
     } catch (error) {

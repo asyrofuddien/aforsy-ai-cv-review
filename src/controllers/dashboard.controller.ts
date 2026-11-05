@@ -9,7 +9,10 @@ export const dashboardSummary = asyncHandler(async (req: Request, res: Response)
   const ownerFilter = req.authUser!.role === 'admin' ? {} : { userId: req.authUser!.userId };
   const [documents, evaluations, matches, generatedCvs] = await Promise.all([
     Document.countDocuments(ownerFilter),
-    Evaluation.aggregate([{ $match: ownerFilter }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+    Evaluation.aggregate([
+      { $match: ownerFilter },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]),
     CvMatcher.countDocuments(ownerFilter),
     AtsPdf.countDocuments(ownerFilter),
   ]);
@@ -17,5 +20,8 @@ export const dashboardSummary = asyncHandler(async (req: Request, res: Response)
     counts[row._id] = row.count;
     return counts;
   }, {});
-  res.json({ success: true, data: { documents, evaluations: evaluationCounts, cvMatches: matches, generatedCvs } });
+  res.json({
+    success: true,
+    data: { documents, evaluations: evaluationCounts, cvMatches: matches, generatedCvs },
+  });
 });

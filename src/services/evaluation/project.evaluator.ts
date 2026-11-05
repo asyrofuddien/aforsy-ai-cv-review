@@ -19,20 +19,14 @@ export class ProjectEvaluator {
       const rubricContext = await vectordbService.search(
         'project scoring rubric technical evaluation',
         3,
-        { type: 'scoring_rubric' }
+        { type: 'scoring_rubric' },
       );
 
       // Default rubric if none found
-      const rubric =
-        rubricContext.length > 0
-          ? rubricContext[0].metadata
-          : this.getDefaultRubric();
+      const rubric = rubricContext.length > 0 ? rubricContext[0].metadata : this.getDefaultRubric();
 
       // Evaluate project
-      const evaluation = await projectAI.evaluateProject(
-        projectDoc.content || '',
-        rubric
-      );
+      const evaluation = await projectAI.evaluateProject(projectDoc.content || '', rubric);
 
       return {
         evaluation,

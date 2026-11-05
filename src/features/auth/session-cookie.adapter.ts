@@ -10,7 +10,12 @@ const cookieOptions = (req: Request) => ({
   sameSite: 'lax' as const,
 });
 
-export function setSessionCookie(req: Request, res: Response, token: string, expiresAt: Date): void {
+export function setSessionCookie(
+  req: Request,
+  res: Response,
+  token: string,
+  expiresAt: Date,
+): void {
   res.clearCookie(sessionCookieName, { ...cookieOptions(req), path: '/api' });
   res.cookie(sessionCookieName, token, { ...cookieOptions(req), path: '/', expires: expiresAt });
 }

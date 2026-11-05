@@ -16,14 +16,24 @@ export const savedCvDraftService = {
       try {
         await SavedCvDraft.updateOne(
           { legacyDraftId: legacy._id },
-          { $setOnInsert: { userId: legacy.userId, name: 'CV draft', data: legacy.data, legacyDraftId: legacy._id } },
+          {
+            $setOnInsert: {
+              userId: legacy.userId,
+              name: 'CV draft',
+              data: legacy.data,
+              legacyDraftId: legacy._id,
+            },
+          },
           { upsert: true },
         );
       } catch (error) {
         if ((error as { code?: number })?.code !== 11000) throw error;
       }
     }
-    const drafts = await SavedCvDraft.find({ userId: ownerId }).sort({ updatedAt: -1 }).select('_id name updatedAt createdAt').lean();
+    const drafts = await SavedCvDraft.find({ userId: ownerId })
+      .sort({ updatedAt: -1 })
+      .select('_id name updatedAt createdAt')
+      .lean();
     return drafts;
   },
 
@@ -40,7 +50,11 @@ export const savedCvDraftService = {
     return SavedCvDraft.create({ userId: ownerId, name: cleanName(name), data });
   },
 
-  async update(ownerId: string, id: string, updates: { name?: unknown; data?: Record<string, unknown> }) {
+  async update(
+    ownerId: string,
+    id: string,
+    updates: { name?: unknown; data?: Record<string, unknown> },
+  ) {
     if (!mongoose.isValidObjectId(id)) throw new AppError('Draft not found.', 404);
     const set: Record<string, unknown> = {};
     if (updates.name !== undefined) set.name = cleanName(updates.name);
@@ -57,7 +71,9 @@ export const savedCvDraftService = {
 
   async delete(ownerId: string, id: string) {
     if (!mongoose.isValidObjectId(id)) throw new AppError('Draft not found.', 404);
-    const draft = await SavedCvDraft.findOne({ _id: id, userId: ownerId }).select('legacyDraftId').lean();
+    const draft = await SavedCvDraft.findOne({ _id: id, userId: ownerId })
+      .select('legacyDraftId')
+      .lean();
     if (!draft) throw new AppError('Draft not found.', 404);
     if (draft.legacyDraftId) await CvDraft.deleteOne({ _id: draft.legacyDraftId, userId: ownerId });
     const result = await SavedCvDraft.deleteOne({ _id: id, userId: ownerId });

@@ -36,7 +36,10 @@ function withTimeout<T>(operation: Promise<T>, timeoutMs: number, label: string)
   return Promise.race([
     operation,
     new Promise<T>((_, reject) => {
-      timer = setTimeout(() => reject(new Error(`${label} exceeded ${timeoutMs}ms shutdown timeout`)), timeoutMs);
+      timer = setTimeout(
+        () => reject(new Error(`${label} exceeded ${timeoutMs}ms shutdown timeout`)),
+        timeoutMs,
+      );
       timer.unref?.();
     }),
   ]).finally(() => clearTimeout(timer!));
@@ -44,16 +47,20 @@ function withTimeout<T>(operation: Promise<T>, timeoutMs: number, label: string)
 
 function createServerCloser(server: ManagedHttpServer): (_force: boolean) => Promise<void> {
   let closing: Promise<void> | null = null;
-  return force => {
+  return (force) => {
     if (force) server.closeAllConnections?.();
     if (!closing) {
-      closing = new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+      closing = new Promise((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
     }
     return closing;
   };
 }
 
-export function createBootstrap<TServer extends ManagedHttpServer>(dependencies: BootstrapDependencies<TServer>) {
+export function createBootstrap<TServer extends ManagedHttpServer>(
+  dependencies: BootstrapDependencies<TServer>,
+) {
   const cleanup: CleanupResource[] = [];
   const gracefulTimeoutMs = dependencies.gracefulTimeoutMs ?? 30_000;
   const forceTimeoutMs = dependencies.forceTimeoutMs ?? 3_000;
@@ -63,20 +70,23 @@ export function createBootstrap<TServer extends ManagedHttpServer>(dependencies:
   let removeSignalHandlers = () => undefined;
   let loggerClose: Promise<void> | null = null;
   if (dependencies.logger.end || dependencies.logger.close) {
-    cleanup.push({ name: 'logger transports', close: () => {
-      if (!loggerClose) {
-        loggerClose = new Promise(resolve => {
-          if (dependencies.logger.end && dependencies.logger.once) {
-            dependencies.logger.once('finish', resolve);
-            dependencies.logger.end();
-          } else {
-            dependencies.logger.close?.();
-            resolve();
-          }
-        });
-      }
-      return loggerClose;
-    } });
+    cleanup.push({
+      name: 'logger transports',
+      close: () => {
+        if (!loggerClose) {
+          loggerClose = new Promise((resolve) => {
+            if (dependencies.logger.end && dependencies.logger.once) {
+              dependencies.logger.once('finish', resolve);
+              dependencies.logger.end();
+            } else {
+              dependencies.logger.close?.();
+              resolve();
+            }
+          });
+        }
+        return loggerClose;
+      },
+    });
   }
 
   const shutdown = (reason = 'shutdown'): Promise<void> => {
@@ -89,16 +99,24 @@ export function createBootstrap<TServer extends ManagedHttpServer>(dependencies:
       for (const resource of cleanup.splice(0).reverse()) {
         try {
           const remainingMs = gracefulDeadline - Date.now();
-          if (remainingMs <= 0) throw new Error(`${resource.name} exceeded the total graceful shutdown budget`);
+          if (remainingMs <= 0)
+            throw new Error(`${resource.name} exceeded the total graceful shutdown budget`);
           await withTimeout(resource.close(false), remainingMs, resource.name);
         } catch (error) {
           const cause = error instanceof Error ? error : new Error(String(error));
-          dependencies.logger.warn('Graceful resource close failed; forcing close', { resource: resource.name, error: cause });
+          dependencies.logger.warn('Graceful resource close failed; forcing close', {
+            resource: resource.name,
+            error: cause,
+          });
           try {
             await withTimeout(resource.close(true), forceTimeoutMs, `${resource.name} force-close`);
           } catch (forceError) {
-            const forceCause = forceError instanceof Error ? forceError : new Error(String(forceError));
-            dependencies.logger.error('Resource force-close failed', { resource: resource.name, error: forceCause });
+            const forceCause =
+              forceError instanceof Error ? forceError : new Error(String(forceError));
+            dependencies.logger.error('Resource force-close failed', {
+              resource: resource.name,
+              error: forceCause,
+            });
             errors.push(forceCause);
           }
         }
@@ -107,7 +125,9 @@ export function createBootstrap<TServer extends ManagedHttpServer>(dependencies:
       started = false;
       dependencies.logger.info('Graceful shutdown finished', { reason, errors: errors.length });
       if (errors.length) {
-        const error = new Error('One or more resources failed to close cleanly') as Error & { causes?: Error[] };
+        const error = new Error('One or more resources failed to close cleanly') as Error & {
+          causes?: Error[];
+        };
         error.causes = errors;
         throw error;
       }
@@ -128,7 +148,10 @@ export function createBootstrap<TServer extends ManagedHttpServer>(dependencies:
       await dependencies.initializeVectorDB();
 
       // Register cleanup first so partially initialized queue resources are also closed.
-      cleanup.push({ name: 'BullMQ workers and queues', close: force => dependencies.closeWorkers(force) });
+      cleanup.push({
+        name: 'BullMQ workers and queues',
+        close: (force) => dependencies.closeWorkers(force),
+      });
       await dependencies.startWorkers();
 
       server = await dependencies.listen();
@@ -137,14 +160,20 @@ export function createBootstrap<TServer extends ManagedHttpServer>(dependencies:
       started = true;
       return server;
     } catch (error) {
-      try { await shutdown('startup failure'); } catch { /* preserve the startup error */ }
+      try {
+        await shutdown('startup failure');
+      } catch {
+        /* preserve the startup error */
+      }
       throw error;
     }
   };
 
   const installSignalHandlers = (signalSource: NodeJS.Process = process): (() => void) => {
     const handleSignal = (signal: NodeJS.Signals) => {
-      void shutdown(signal).catch(error => dependencies.logger.error('Shutdown completed with errors', { signal, error }));
+      void shutdown(signal).catch((error) =>
+        dependencies.logger.error('Shutdown completed with errors', { signal, error }),
+      );
     };
     const onSigterm = () => handleSignal('SIGTERM');
     const onSigint = () => handleSignal('SIGINT');

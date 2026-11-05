@@ -1,4 +1,10 @@
-import { ExtractedCv, MatcherDocument, MatcherJobPayload, MatcherResult, RoleSuggestion } from './matcher.types';
+import {
+  ExtractedCv,
+  MatcherDocument,
+  MatcherJobPayload,
+  MatcherResult,
+  RoleSuggestion,
+} from './matcher.types';
 import { JobListing, ScoredJobListing } from '../jobs/model/job.types';
 
 export interface MatcherWorkflowDependencies {
@@ -14,13 +20,20 @@ export interface MatcherWorkflowDependencies {
   ai: {
     extractCVToJSON(text: string): Promise<ExtractedCv>;
     RoleSuggestion(cv: ExtractedCv): Promise<RoleSuggestion>;
-    SummaryRecommendation(cv: ExtractedCv, roles: RoleSuggestion, jobs: JobListing[]): Promise<{ summary: unknown }>;
+    SummaryRecommendation(
+      cv: ExtractedCv,
+      roles: RoleSuggestion,
+      jobs: JobListing[],
+    ): Promise<{ summary: unknown }>;
   };
   jobs: {
     findJobs(roles: RoleSuggestion): Promise<JobListing[]>;
     matchWithJobs(cv: ExtractedCv, jobs: JobListing[]): Promise<ScoredJobListing[]>;
   };
-  logger?: { debug(message: string, metadata?: unknown): void; warn(message: string, metadata?: unknown): void };
+  logger?: {
+    debug(message: string, metadata?: unknown): void;
+    warn(message: string, metadata?: unknown): void;
+  };
 }
 
 export function createMatcherWorkflow(dependencies: MatcherWorkflowDependencies) {
@@ -37,7 +50,10 @@ export function createMatcherWorkflow(dependencies: MatcherWorkflowDependencies)
         try {
           rawText = await parser.parseFile(document.path, document.mimeType);
         } catch (error) {
-          if (!document.content) throw new Error(`Failed to parse CV file and no cached content available: ${error instanceof Error ? error.message : 'Unknown parser error'}`);
+          if (!document.content)
+            throw new Error(
+              `Failed to parse CV file and no cached content available: ${error instanceof Error ? error.message : 'Unknown parser error'}`,
+            );
           rawText = document.content;
           logger?.warn('CV parser failed; using cached document text');
         }
@@ -65,7 +81,8 @@ export function createMatcherWorkflow(dependencies: MatcherWorkflowDependencies)
         return result;
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        if ((payload.attempt ?? 1) < (payload.maxAttempts ?? 1) && repository.retry) await repository.retry(payload.cvMatcherId);
+        if ((payload.attempt ?? 1) < (payload.maxAttempts ?? 1) && repository.retry)
+          await repository.retry(payload.cvMatcherId);
         else await repository.fail(payload.cvMatcherId, message);
         throw error;
       }

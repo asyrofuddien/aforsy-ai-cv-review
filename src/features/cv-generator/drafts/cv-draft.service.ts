@@ -8,7 +8,11 @@ export function createCvDraftService(repository: CvDraftRepository) {
       return repository.findByOwner(ownerId);
     },
 
-    saveDraft(ownerId: string, requestedOwnerId: string | undefined, data: Record<string, unknown>) {
+    saveDraft(
+      ownerId: string,
+      requestedOwnerId: string | undefined,
+      data: Record<string, unknown>,
+    ) {
       if (requestedOwnerId && requestedOwnerId !== ownerId) {
         throw new AppError('Draft owner no longer matches the active account.', 403);
       }

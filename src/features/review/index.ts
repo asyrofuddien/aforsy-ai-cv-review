@@ -34,12 +34,21 @@ async function runMatchingStage<T>(stage: string, operation: () => Promise<T>): 
 
 export const jobMatcher = {
   async findMatches(profile: unknown) {
-    const candidate = profile && typeof profile === 'object' ? profile as CandidateForMatching : {};
-    const roles = await runMatchingStage('suggest job roles from reviewed CV', () => matcherAI.RoleSuggestion(candidate));
-    matchingLogger.info('Suggested role candidates ready', { roleCount: roles.suggested_roles.length });
-    const listings = await runMatchingStage('search providers and retrieve job details', () => jobsService.findJobs(roles));
+    const candidate =
+      profile && typeof profile === 'object' ? (profile as CandidateForMatching) : {};
+    const roles = await runMatchingStage('suggest job roles from reviewed CV', () =>
+      matcherAI.RoleSuggestion(candidate),
+    );
+    matchingLogger.info('Suggested role candidates ready', {
+      roleCount: roles.suggested_roles.length,
+    });
+    const listings = await runMatchingStage('search providers and retrieve job details', () =>
+      jobsService.findJobs(roles),
+    );
     matchingLogger.info('Job listings retrieved', { listingCount: listings.length });
-    const jobs = await runMatchingStage('score job listings against reviewed CV', () => jobsService.matchWithJobs(candidate, listings));
+    const jobs = await runMatchingStage('score job listings against reviewed CV', () =>
+      jobsService.matchWithJobs(candidate, listings),
+    );
     matchingLogger.info('Job matching results ready', { matchCount: jobs.length });
     return { suggestedRoles: roles.suggested_roles, jobs };
   },

@@ -6,10 +6,7 @@ function setupDocsAssets(): void {
     console.log('📦 Setting up Swagger UI assets...');
 
     const assetsDir = path.join(__dirname, '../public/docs/assets');
-    const swaggerUiPath = path.join(
-      __dirname,
-      '../node_modules/swagger-ui-dist'
-    );
+    const swaggerUiPath = path.join(__dirname, '../node_modules/swagger-ui-dist');
 
     // Ensure assets directory exists
     if (!fs.existsSync(assetsDir)) {
@@ -17,11 +14,7 @@ function setupDocsAssets(): void {
     }
 
     // Copy required assets
-    const assetsToCopy = [
-      'swagger-ui-bundle.js',
-      'swagger-ui.css',
-      'favicon-32x32.png',
-    ];
+    const assetsToCopy = ['swagger-ui-bundle.js', 'swagger-ui.css', 'favicon-32x32.png'];
 
     assetsToCopy.forEach((asset) => {
       const srcPath = path.join(swaggerUiPath, asset);

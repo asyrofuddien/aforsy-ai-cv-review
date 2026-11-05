@@ -9,9 +9,7 @@ let pineconeClient: Pinecone | null = null;
 export const initializeVectorDB = async (): Promise<void> => {
   try {
     if (!config.pinecone.apiKey) {
-      logger.warn(
-        '⚠️ Pinecone API key not found - using in-memory vector store'
-      );
+      logger.warn('⚠️ Pinecone API key not found - using in-memory vector store');
       return;
     }
 

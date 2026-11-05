@@ -41,8 +41,7 @@ const jobDescriptions = [
     slug: 'fullstack-engineer',
     title: 'Full Stack Engineer',
     company: 'Tech Startup',
-    description:
-      'Looking for a Full Stack Engineer with experience in modern web technologies.',
+    description: 'Looking for a Full Stack Engineer with experience in modern web technologies.',
     requirements: {
       technical: [
         '3+ years of full stack development',
@@ -51,12 +50,7 @@ const jobDescriptions = [
         'RESTful API design',
         'Git version control',
       ],
-      soft_skills: [
-        'Self-motivated',
-        'Good communication',
-        'Team player',
-        'Fast learner',
-      ],
+      soft_skills: ['Self-motivated', 'Good communication', 'Team player', 'Fast learner'],
     },
     isDefault: false,
   },
@@ -79,9 +73,7 @@ const seedJobDescriptions = async () => {
     const allJobs = await JobDescription.find({}, 'slug title isDefault');
     logger.info('Available job descriptions:');
     allJobs.forEach((job) => {
-      logger.info(
-        `- ${job.slug}: ${job.title}${job.isDefault ? ' (DEFAULT)' : ''}`
-      );
+      logger.info(`- ${job.slug}: ${job.title}${job.isDefault ? ' (DEFAULT)' : ''}`);
     });
 
     await mongoose.disconnect();

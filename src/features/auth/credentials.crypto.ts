@@ -3,7 +3,8 @@ import { promisify } from 'util';
 
 const scrypt = promisify(scryptCallback);
 
-export const hashOpaqueToken = (token: string): string => createHash('sha256').update(token).digest('hex');
+export const hashOpaqueToken = (token: string): string =>
+  createHash('sha256').update(token).digest('hex');
 
 export const verifyPassword = async (password: string, encoded: string): Promise<boolean> => {
   const [algorithm, salt, expectedHex] = encoded.split('$');

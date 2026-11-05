@@ -1,6 +1,7 @@
 export const MATCHER_PROMPTS = {
   EXTRACT_CV_STRUCTURED_JSON: {
-    system: 'You are an expert CV Parsing Engine. Your PRIMARY task is to extract the candidate\'s NAME accurately. Extract ALL information from ANY type of CV (tech, creative, business, etc.) and convert it into structured JSON format.',
+    system:
+      "You are an expert CV Parsing Engine. Your PRIMARY task is to extract the candidate's NAME accurately. Extract ALL information from ANY type of CV (tech, creative, business, etc.) and convert it into structured JSON format.",
     user: (rawText: string) => `Extract information from this CV text:
 
 """
@@ -70,8 +71,11 @@ Return ONLY this JSON structure (no markdown, no explanation):
 REMEMBER: The "name" field is the MOST CRITICAL field. Look at the VERY TOP of the CV text for the largest/first text that looks like a person's name.`,
   },
   ROLE_SUGGESTION: {
-    system: 'You are an expert career advisor with knowledge across ALL industries (tech, creative, business, healthcare, etc.).',
-    user: (extractedCv: object) => `Analyze this CV and suggest the most suitable job roles based on their background:
+    system:
+      'You are an expert career advisor with knowledge across ALL industries (tech, creative, business, healthcare, etc.).',
+    user: (
+      extractedCv: object,
+    ) => `Analyze this CV and suggest the most suitable job roles based on their background:
 
 ${JSON.stringify(extractedCv, null, 2)}
 
@@ -106,7 +110,11 @@ Return ONLY this JSON (no markdown, no explanation):
   },
   SUMMARY_RECOMENDATION: {
     system: 'You are an expert career advisor providing actionable recommendations.',
-    user: (extractedCv: object, roleSuggestion: object, jobListed: object) => `Analyze this candidate's profile and job matches to provide career recommendations:
+    user: (
+      extractedCv: object,
+      roleSuggestion: object,
+      jobListed: object,
+    ) => `Analyze this candidate's profile and job matches to provide career recommendations:
 
 CV Profile:
 ${JSON.stringify(extractedCv, null, 2)}

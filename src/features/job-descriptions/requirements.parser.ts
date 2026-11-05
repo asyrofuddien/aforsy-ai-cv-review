@@ -12,7 +12,8 @@ export function parseRequirements(content: string): ParsedRequirements {
     const trimmed = line.trim();
     const heading = trimmed.toLowerCase();
     if (heading.includes('technical') || heading.includes('requirements')) section = 'technical';
-    else if (heading.includes('soft skills') || heading.includes('qualifications')) section = 'soft_skills';
+    else if (heading.includes('soft skills') || heading.includes('qualifications'))
+      section = 'soft_skills';
     if (section && /^[-•*]/.test(trimmed)) requirements[section].push(trimmed.slice(1).trim());
   }
 

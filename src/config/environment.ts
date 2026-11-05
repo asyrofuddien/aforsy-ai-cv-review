@@ -8,8 +8,12 @@ const schema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'test', 'production').default('development'),
   PORT: positiveInteger(3001),
   HOST: Joi.string().trim().min(1).default('0.0.0.0'),
-  MONGODB_URI: Joi.string().uri({ scheme: ['mongodb', 'mongodb+srv'] }).default('mongodb://localhost:27017/cv-evaluation'),
-  REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).default('redis://localhost:6379'),
+  MONGODB_URI: Joi.string()
+    .uri({ scheme: ['mongodb', 'mongodb+srv'] })
+    .default('mongodb://localhost:27017/cv-evaluation'),
+  REDIS_URL: Joi.string()
+    .uri({ scheme: ['redis', 'rediss'] })
+    .default('redis://localhost:6379'),
   OPENAI_API_KEY: optionalSecret,
   OPENAI_MODEL: Joi.string().trim().min(1).default('gpt-4-turbo-preview'),
   SUMOPOD_API_KEY: optionalSecret,
@@ -32,7 +36,9 @@ const schema = Joi.object({
   PINECONE_ENVIRONMENT: optionalSecret,
   PINECONE_INDEX_NAME: Joi.string().trim().min(1).default('cv-evaluation'),
   MAX_FILE_SIZE: positiveInteger(10 * 1024 * 1024),
-  ALLOWED_FILE_TYPES: Joi.string().default('application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain'),
+  ALLOWED_FILE_TYPES: Joi.string().default(
+    'application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain',
+  ),
   UPLOAD_DIR: Joi.string().trim().min(1).default('uploads'),
   QUEUE_CONCURRENCY: positiveInteger(2),
   CV_MATCHER_QUEUE_CONCURRENCY: positiveInteger(10),
@@ -60,13 +66,17 @@ const schema = Joi.object({
   RAPIDAPI_PLATFORM: Joi.string().valid('linkedin', 'indeed', 'bing', 'xing').default('linkedin'),
   RAPIDAPI_COUNTRY_CODE: Joi.string().trim().min(2).max(2).default('id'),
   RAPIDAPI_MAX_PAGES: Joi.number().integer().min(1).max(5).default(1),
-  JOB_PROVIDER: Joi.string().valid('rapidapi', 'aggregate', 'greenhouse', 'lever').default('rapidapi'),
+  JOB_PROVIDER: Joi.string()
+    .valid('rapidapi', 'aggregate', 'greenhouse', 'lever')
+    .default('rapidapi'),
   JOB_PROVIDER_FALLBACK: Joi.string().valid('aggregate', 'none').default('aggregate'),
   GREENHOUSE_BOARDS: Joi.string().allow('').default(''),
   LEVER_SITES: Joi.string().allow('').default(''),
   SHUTDOWN_GRACE_PERIOD_MS: positiveInteger(30000),
   SHUTDOWN_FORCE_PERIOD_MS: positiveInteger(3000),
-  LOG_LEVEL: Joi.string().valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly').optional(),
+  LOG_LEVEL: Joi.string()
+    .valid('error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly')
+    .optional(),
   LOG_DIR: Joi.string().trim().min(1).default('logs'),
   PUPPETEER_EXECUTABLE_PATH: Joi.string().allow('').optional(),
 }).unknown(true);
@@ -83,15 +93,22 @@ export function parseEnvironment(input: NodeJS.ProcessEnv): Record<string, unkno
     ...value,
     EMAIL_PROVIDER: value.EMAIL_PROVIDER || (nodeEnv === 'production' ? 'resend' : 'smtp'),
     SMTP_HOST: value.SMTP_HOST || (nodeEnv === 'development' ? 'localhost' : ''),
-    SMTP_PORT: input.SMTP_PORT === undefined ? (nodeEnv === 'development' ? 1025 : 587) : value.SMTP_PORT,
-    CORS_ORIGINS: value.CORS_ORIGINS === undefined
-      ? (nodeEnv === 'development' ? 'http://localhost:3000,http://127.0.0.1:3000' : '')
-      : value.CORS_ORIGINS,
+    SMTP_PORT:
+      input.SMTP_PORT === undefined ? (nodeEnv === 'development' ? 1025 : 587) : value.SMTP_PORT,
+    CORS_ORIGINS:
+      value.CORS_ORIGINS === undefined
+        ? nodeEnv === 'development'
+          ? 'http://localhost:3000,http://127.0.0.1:3000'
+          : ''
+        : value.CORS_ORIGINS,
   };
 }
 
 export function validateBillingStartup(input: Record<string, unknown>): void {
-  if (input.BILLING_MODE === 'live' && !(typeof input.LYNK_MERCHANT_KEY === 'string' && input.LYNK_MERCHANT_KEY.trim())) {
+  if (
+    input.BILLING_MODE === 'live' &&
+    !(typeof input.LYNK_MERCHANT_KEY === 'string' && input.LYNK_MERCHANT_KEY.trim())
+  ) {
     throw new Error('LYNK_MERCHANT_KEY must be set when BILLING_MODE=live');
   }
 }

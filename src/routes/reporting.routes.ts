@@ -11,7 +11,10 @@ const router = Router();
 router.get('/recent-uploads', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
-    const documents = await Document.find().sort({ uploadedAt: -1 }).limit(limit).select('originalName type size uploadedAt');
+    const documents = await Document.find()
+      .sort({ uploadedAt: -1 })
+      .limit(limit)
+      .select('originalName type size uploadedAt');
 
     res.json({
       success: true,
@@ -30,7 +33,10 @@ router.get('/recent-uploads', async (req: Request, res: Response) => {
 router.get('/recent-evaluations', async (req: Request, res: Response) => {
   try {
     const limit = parseInt(req.query.limit as string) || 5;
-    const evaluations = await Evaluation.find().sort({ createdAt: -1 }).limit(limit).select('candidateName status createdAt updatedAt');
+    const evaluations = await Evaluation.find()
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select('candidateName status createdAt updatedAt');
 
     res.json({
       success: true,
@@ -101,7 +107,16 @@ router.delete('/clear-test-data', async (req: Request, res: Response) => {
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     // Get comprehensive stats from all models
-    const { codeStats, documentStats, evaluationStats, cvMatcherStats, atsPdfStats, templateStats, jobDescStats, queueStats } = await loadSystemStats();
+    const {
+      codeStats,
+      documentStats,
+      evaluationStats,
+      cvMatcherStats,
+      atsPdfStats,
+      templateStats,
+      jobDescStats,
+      queueStats,
+    } = await loadSystemStats();
 
     // Process code stats
     const [codeCount, codeDetails] = codeStats;
@@ -124,11 +139,20 @@ router.get('/stats', async (req: Request, res: Response) => {
       acc[stat._id] = stat.count;
       return acc;
     }, {});
-    const completionRate = evalCount > 0 ? ((evalStatusBreakdown.completed || 0) / evalCount * 100).toFixed(2) : '0.00';
-    const avgScores = evalScores[0] || { avgCvMatchRate: 0, avgProjectScore: 0, maxCvMatchRate: 0, minCvMatchRate: 0 };
+    const completionRate =
+      evalCount > 0
+        ? (((evalStatusBreakdown.completed || 0) / evalCount) * 100).toFixed(2)
+        : '0.00';
+    const avgScores = evalScores[0] || {
+      avgCvMatchRate: 0,
+      avgProjectScore: 0,
+      maxCvMatchRate: 0,
+      minCvMatchRate: 0,
+    };
 
     // Process CV Matcher stats
-    const [cvMatcherCount, cvMatcherByStatus, cvMatcherBySeniority, cvMatcherByGrade] = cvMatcherStats;
+    const [cvMatcherCount, cvMatcherByStatus, cvMatcherBySeniority, cvMatcherByGrade] =
+      cvMatcherStats;
     const cvMatcherStatusBreakdown = cvMatcherByStatus.reduce((acc: any, stat: any) => {
       acc[stat._id] = stat.count;
       return acc;
@@ -146,11 +170,14 @@ router.get('/stats', async (req: Request, res: Response) => {
     const [jobCount, defaultJobCount, jobsByCompany] = jobDescStats;
 
     // Calculate system health metrics
-    const totalProcessedItems = (evalStatusBreakdown.completed || 0) + (cvMatcherStatusBreakdown.completed || 0);
-    const totalFailedItems = (evalStatusBreakdown.failed || 0) + (cvMatcherStatusBreakdown.failed || 0);
-    const systemReliability = totalProcessedItems + totalFailedItems > 0 
-      ? ((totalProcessedItems / (totalProcessedItems + totalFailedItems)) * 100).toFixed(2)
-      : '100.00';
+    const totalProcessedItems =
+      (evalStatusBreakdown.completed || 0) + (cvMatcherStatusBreakdown.completed || 0);
+    const totalFailedItems =
+      (evalStatusBreakdown.failed || 0) + (cvMatcherStatusBreakdown.failed || 0);
+    const systemReliability =
+      totalProcessedItems + totalFailedItems > 0
+        ? ((totalProcessedItems / (totalProcessedItems + totalFailedItems)) * 100).toFixed(2)
+        : '100.00';
 
     res.json({
       success: true,
@@ -166,7 +193,7 @@ router.get('/stats', async (req: Request, res: Response) => {
         systemReliability: `${systemReliability}%`,
         evaluationCompletionRate: `${completionRate}%`,
       },
-      
+
       coreMetrics: {
         averageCvMatchRate: `${(avgScores.avgCvMatchRate || 0).toFixed(2)}%`,
         averageProjectScore: (avgScores.avgProjectScore || 0).toFixed(2),
@@ -184,13 +211,13 @@ router.get('/stats', async (req: Request, res: Response) => {
           oldestGenerated: codeInfo.oldestCode,
           newestGenerated: codeInfo.newestCode,
         },
-        
+
         documents: {
           total: docCount,
           byType: docTypeBreakdown,
           monthlyUploads: docsByMonth.slice(0, 6),
         },
-        
+
         evaluations: {
           total: evalCount,
           byStatus: evalStatusBreakdown,
@@ -205,7 +232,7 @@ router.get('/stats', async (req: Request, res: Response) => {
           },
           recentTrends: evalTrends.slice(0, 7),
         },
-        
+
         cvMatcher: {
           total: cvMatcherCount,
           byStatus: cvMatcherStatusBreakdown,
@@ -213,61 +240,65 @@ router.get('/stats', async (req: Request, res: Response) => {
             bySeniority: cvMatcherBySeniority,
             byJobGrade: cvMatcherByGrade,
           },
-          completionRate: cvMatcherCount > 0 
-            ? `${(((cvMatcherStatusBreakdown.completed || 0) / cvMatcherCount) * 100).toFixed(2)}%`
-            : '0.00%',
+          completionRate:
+            cvMatcherCount > 0
+              ? `${(((cvMatcherStatusBreakdown.completed || 0) / cvMatcherCount) * 100).toFixed(2)}%`
+              : '0.00%',
         },
-        
+
         atsReports: {
           total: atsPdfCount,
           averageHtmlLength: Math.round(atsPdfInfo.avgHtmlLength || 0),
           formats: ['HTML', 'PDF'],
           generatedReports: atsPdfInfo.totalReports || 0,
         },
-        
+
         templates: {
           total: templateCount,
           averageContentLength: Math.round(templateInfo.avgContentLength || 0),
           availableTemplates: templateInfo.templates.map((t: any) => ({
             name: t.name,
-            size: `${Math.round(t.length / 1024)} KB`
+            size: `${Math.round(t.length / 1024)} KB`,
           })),
         },
-        
+
         jobDescriptions: {
           total: jobCount,
           default: defaultJobCount,
           custom: jobCount - defaultJobCount,
           byCompany: jobsByCompany,
         },
-        
+
         systemQueue: queueStats,
       },
 
       businessInsights: {
         productUtilization: {
-          documentProcessingRate: docCount > 0 ? `${((evalCount / docCount) * 100).toFixed(2)}%` : '0%',
-          cvMatchingAdoption: docCount > 0 ? `${((cvMatcherCount / docCount) * 100).toFixed(2)}%` : '0%',
-          atsReportGeneration: docCount > 0 ? `${((atsPdfCount / docCount) * 100).toFixed(2)}%` : '0%',
+          documentProcessingRate:
+            docCount > 0 ? `${((evalCount / docCount) * 100).toFixed(2)}%` : '0%',
+          cvMatchingAdoption:
+            docCount > 0 ? `${((cvMatcherCount / docCount) * 100).toFixed(2)}%` : '0%',
+          atsReportGeneration:
+            docCount > 0 ? `${((atsPdfCount / docCount) * 100).toFixed(2)}%` : '0%',
         },
-        
+
         qualityMetrics: {
           systemReliability: `${systemReliability}%`,
           averageProcessingSuccess: `${completionRate}%`,
           dataIntegrity: codeCount === 1223 ? 'Excellent' : 'Needs Review',
         },
-        
+
         capacityMetrics: {
           totalCodesGenerated: codeCount,
           codesUtilized: evalCount + cvMatcherCount + atsPdfCount,
           remainingCapacity: Math.max(0, codeCount - (evalCount + cvMatcherCount + atsPdfCount)),
-          utilizationRate: codeCount > 0 
-            ? `${(((evalCount + cvMatcherCount + atsPdfCount) / codeCount) * 100).toFixed(2)}%`
-            : '0%',
-        }
-      }
+          utilizationRate:
+            codeCount > 0
+              ? `${(((evalCount + cvMatcherCount + atsPdfCount) / codeCount) * 100).toFixed(2)}%`
+              : '0%',
+        },
+      },
     });
-    
   } catch (error: any) {
     res.status(500).json({
       success: false,

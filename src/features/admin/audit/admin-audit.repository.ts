@@ -16,7 +16,12 @@ export function updateAdminAuditEvent(id: string, update: Record<string, unknown
 
 export async function listAdminAuditEvents(page: number, limit: number) {
   const [events, total] = await Promise.all([
-    AdminAuditLog.find().populate('actorUserId', 'displayName email').sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+    AdminAuditLog.find()
+      .populate('actorUserId', 'displayName email')
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
     AdminAuditLog.countDocuments(),
   ]);
   return { events, total };

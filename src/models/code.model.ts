@@ -4,10 +4,13 @@ export interface ICode extends Document {
   code: string;
 }
 
-const CodeSchema = new Schema({
-  code: { type: String, required: true },
-}, {
-  timestamps: true,
-});
+const CodeSchema = new Schema(
+  {
+    code: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 export default mongoose.model<ICode>('Code', CodeSchema);

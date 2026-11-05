@@ -12,10 +12,12 @@ export async function probeMongoTransactions(): Promise<boolean> {
   try {
     session = await connection.startSession();
     session.startTransaction({ readConcern: { level: 'snapshot' }, readPreference: 'primary' });
-    await connection.db.collection('users').findOne(
-      { _id: new mongoose.Types.ObjectId('000000000000000000000000') },
-      { session, projection: { _id: 1 } },
-    );
+    await connection.db
+      .collection('users')
+      .findOne(
+        { _id: new mongoose.Types.ObjectId('000000000000000000000000') },
+        { session, projection: { _id: 1 } },
+      );
     await session.abortTransaction();
     return true;
   } catch (error) {
@@ -36,7 +38,7 @@ export async function probeMongoTransactions(): Promise<boolean> {
 }
 
 export async function assertMongoTransactionsReady(): Promise<void> {
-  if (!await probeMongoTransactions()) {
+  if (!(await probeMongoTransactions())) {
     throw new AppError('MongoDB transaction support is unavailable.', 503);
   }
 }

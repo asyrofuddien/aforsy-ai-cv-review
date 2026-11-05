@@ -5,13 +5,37 @@ export interface ReviewWorkflowDependencies {
   repository: {
     markProcessing(id: string, retrying: boolean): Promise<unknown>;
     findJobDescription(id: string): Promise<ReviewDescription | null>;
-    complete(id: string, candidateName: string | undefined, result: ReviewResult, matchingProfile?: unknown): Promise<unknown>;
+    complete(
+      id: string,
+      candidateName: string | undefined,
+      result: ReviewResult,
+      matchingProfile?: unknown,
+    ): Promise<unknown>;
     fail(id: string, message: string): Promise<unknown>;
     retry?(id: string): Promise<unknown>;
   };
-  evaluator: { evaluate(cvDocumentId: string, jobDescriptionId?: string, jobDescriptionText?: string, locale?: 'id' | 'en'): Promise<any> };
-  summary: { generateFinalSummary(evaluation: unknown, mode: 'general' | 'job_specific', locale: 'id' | 'en'): Promise<{ overall_summary?: string; recommendation?: string; missing_information?: string[] }> };
-  jobMatcher?: { findMatches(profile: unknown): Promise<{ suggestedRoles: string[]; jobs: unknown[] }> };
+  evaluator: {
+    evaluate(
+      cvDocumentId: string,
+      jobDescriptionId?: string,
+      jobDescriptionText?: string,
+      locale?: 'id' | 'en',
+    ): Promise<any>;
+  };
+  summary: {
+    generateFinalSummary(
+      evaluation: unknown,
+      mode: 'general' | 'job_specific',
+      locale: 'id' | 'en',
+    ): Promise<{
+      overall_summary?: string;
+      recommendation?: string;
+      missing_information?: string[];
+    }>;
+  };
+  jobMatcher?: {
+    findMatches(profile: unknown): Promise<{ suggestedRoles: string[]; jobs: unknown[] }>;
+  };
   logger?: {
     debug?(message: string, metadata?: unknown): void;
     info?(_message: string, _metadata?: unknown): void;
@@ -30,7 +54,10 @@ async function runStage<T>(
   logger?.info?.('Review stage started', { stage });
   try {
     const result = await operation();
-    logger?.info?.('Review stage completed', { stage, durationMs: Math.round(performance.now() - started) });
+    logger?.info?.('Review stage completed', {
+      stage,
+      durationMs: Math.round(performance.now() - started),
+    });
     return result;
   } catch (error) {
     logger?.error?.('Review stage failed', {
@@ -55,24 +82,50 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
           maxAttempts: payload.maxAttempts ?? 1,
           mode: payload.jobDescriptionId || payload.jobDescriptionText ? 'job_specific' : 'general',
         });
-        const claimed = await runStage(logger, 'claim review record', () => repository.markProcessing(payload.evaluationId, (payload.attempt ?? 1) > 1));
+        const claimed = await runStage(logger, 'claim review record', () =>
+          repository.markProcessing(payload.evaluationId, (payload.attempt ?? 1) > 1),
+        );
         if (claimed === null) {
-          logger?.info?.('Review job skipped because the record is already claimed or complete', { evaluationId: payload.evaluationId });
+          logger?.info?.('Review job skipped because the record is already claimed or complete', {
+            evaluationId: payload.evaluationId,
+          });
           return null;
         }
         const description = payload.jobDescriptionId
-          ? await runStage(logger, 'load job description', () => repository.findJobDescription(payload.jobDescriptionId!))
+          ? await runStage(logger, 'load job description', () =>
+              repository.findJobDescription(payload.jobDescriptionId!),
+            )
           : null;
         if (payload.jobDescriptionId && !description) throw new Error('Job description not found');
-        const result = await runStage(logger, 'analyze CV', () => evaluator.evaluate(payload.cvDocumentId, payload.jobDescriptionId, payload.jobDescriptionText, locale));
+        const result = await runStage(logger, 'analyze CV', () =>
+          evaluator.evaluate(
+            payload.cvDocumentId,
+            payload.jobDescriptionId,
+            payload.jobDescriptionText,
+            locale,
+          ),
+        );
         const mode = description || payload.jobDescriptionText ? 'job_specific' : 'general';
-        const summaryResult = result.evaluation.schemaVersion === 2
-          ? { overall_summary: result.evaluation.feedback }
-          : await runStage(logger, 'generate review summary', () => summary.generateFinalSummary(result.evaluation, mode, locale));
-        const response = mapReviewResult(result, description, payload.jobDescriptionText, locale, summaryResult);
+        const summaryResult =
+          result.evaluation.schemaVersion === 2
+            ? { overall_summary: result.evaluation.feedback }
+            : await runStage(logger, 'generate review summary', () =>
+                summary.generateFinalSummary(result.evaluation, mode, locale),
+              );
+        const response = mapReviewResult(
+          result,
+          description,
+          payload.jobDescriptionText,
+          locale,
+          summaryResult,
+        );
         if (jobMatcher) {
           try {
-            const matches = await runStage(logger, 'suggest roles, search jobs, and score matches', () => jobMatcher.findMatches(result.extractedInfo));
+            const matches = await runStage(
+              logger,
+              'suggest roles, search jobs, and score matches',
+              () => jobMatcher.findMatches(result.extractedInfo),
+            );
             response.suggestedRoles = matches.suggestedRoles;
             response.jobMatches = matches.jobs;
             response.jobMatchingStatus = 'completed';
@@ -85,12 +138,19 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
             });
           }
         }
-        const candidateName = result.extractedInfo?.name && !['Unknown', 'Unknown Candidate'].includes(result.extractedInfo.name)
-          ? result.extractedInfo.name : undefined;
-        const completed = await runStage(logger, 'save completed review and job matches', () => repository.complete(payload.evaluationId, candidateName, response, result.extractedInfo));
+        const candidateName =
+          result.extractedInfo?.name &&
+          !['Unknown', 'Unknown Candidate'].includes(result.extractedInfo.name)
+            ? result.extractedInfo.name
+            : undefined;
+        const completed = await runStage(logger, 'save completed review and job matches', () =>
+          repository.complete(payload.evaluationId, candidateName, response, result.extractedInfo),
+        );
         if (completed && notifyCompleted) {
           try {
-            await runStage(logger, 'send review completion email', () => notifyCompleted(payload.evaluationId, candidateName));
+            await runStage(logger, 'send review completion email', () =>
+              notifyCompleted(payload.evaluationId, candidateName),
+            );
           } catch (error) {
             logger?.warn?.('Review completed but completion email could not be delivered', {
               evaluationId: payload.evaluationId,

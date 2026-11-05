@@ -50,7 +50,9 @@ export class JobsService {
     for (const [roleIndex, role] of roles.entries()) {
       const roleStarted = performance.now();
       try {
-        const search = await this.provider.search(this.buildSearchParams(role, roleSuggestion.seniority));
+        const search = await this.provider.search(
+          this.buildSearchParams(role, roleSuggestion.seniority),
+        );
         searchSucceeded += 1;
         const found = search.data || [];
         listingsFound += found.length;
@@ -77,7 +79,9 @@ export class JobsService {
               continue;
             }
             const job = this.parser.parseProviderDetails(details);
-            const dedupeKey = job.link || `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${job.location.toLowerCase()}`;
+            const dedupeKey =
+              job.link ||
+              `${job.title.toLowerCase()}|${job.company.toLowerCase()}|${job.location.toLowerCase()}`;
             if (seenJobs.has(dedupeKey)) {
               listingsDeduplicated += 1;
               continue;
@@ -144,7 +148,9 @@ export class JobsService {
       throw new Error('Job matching could not run because every search failed.');
     }
     if (status === 'partial' && jobs.length === 0) {
-      throw new Error('Job matching could not finish because job search or detail retrieval failed.');
+      throw new Error(
+        'Job matching could not finish because job search or detail retrieval failed.',
+      );
     }
     logger.info('Job provider search batch completed', {
       roleCount: roles.length,
@@ -160,18 +166,17 @@ export class JobsService {
     const started = performance.now();
     logger.info('Job scoring started', { listingCount: jobs.length });
     try {
-      const matches = await matchJobs(cv, jobs, (skills, requirements) => calculateSkillMatch(skills, requirements, this.skillMatch));
+      const matches = await matchJobs(cv, jobs, (skills, requirements) =>
+        calculateSkillMatch(skills, requirements, this.skillMatch),
+      );
       logger.info('Job scoring completed', {
         listingCount: jobs.length,
         matchCount: matches.length,
         durationMs: Math.round(performance.now() - started),
       });
-      await this.recordMetric(
-        'scoring',
-        jobs.length ? 'completed' : 'no_matches',
-        started,
-        { listingsReadyForScoring: jobs.length },
-      );
+      await this.recordMetric('scoring', jobs.length ? 'completed' : 'no_matches', started, {
+        listingsReadyForScoring: jobs.length,
+      });
       return matches;
     } catch (error) {
       await this.recordMetric('scoring', 'failed', started, {
@@ -234,12 +239,19 @@ export class JobsService {
     );
   }
 
-  async testJobScraping(jobSuggestions: string[], seniority?: string, location = 'indonesia'): Promise<JobListing[]> {
+  async testJobScraping(
+    jobSuggestions: string[],
+    seniority?: string,
+    location = 'indonesia',
+  ): Promise<JobListing[]> {
     // Preserve caller parameters in this smoke method; the provider adapter owns HTTP transport.
     const role = jobSuggestions[0];
     if (!role) return [];
     try {
-      const search = await this.provider.search({ ...this.buildSearchParams(role, seniority || 'Mid'), location });
+      const search = await this.provider.search({
+        ...this.buildSearchParams(role, seniority || 'Mid'),
+        location,
+      });
       const jobId = search.data?.[0]?.id;
       const details = jobId ? await this.provider.getDetails(jobId) : null;
       return details?.data ? [this.parser.parseProviderDetails(details)] : [];
@@ -262,7 +274,8 @@ export class JobsService {
 
   private mapSeniorityToExperienceLevels(seniority: string): string {
     const value = seniority.toLowerCase();
-    if (value.includes('entry') || value.includes('junior') || value.includes('intern')) return 'intern;entry';
+    if (value.includes('entry') || value.includes('junior') || value.includes('intern'))
+      return 'intern;entry';
     if (value.includes('mid')) return 'associate;midSenior';
     if (value.includes('senior') || value.includes('lead')) return 'midSenior;director';
     if (value.includes('director') || value.includes('principal')) return 'director;executive';

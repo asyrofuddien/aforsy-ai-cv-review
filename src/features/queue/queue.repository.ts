@@ -18,11 +18,17 @@ export const queueRepository = {
     return record;
   },
   async createMatcher(data: CVMatcherRequest, userId: string) {
-    const record = new cvMatcherModel({ cvDocumentId: data.cvDocumentId, userId, status: 'queued' });
+    const record = new cvMatcherModel({
+      cvDocumentId: data.cvDocumentId,
+      userId,
+      status: 'queued',
+    });
     record.queueJobId = record.id;
     await record.save();
     return record;
   },
-  markReviewEnqueueFailed: (id: string, message: string) => Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),
-  markMatcherEnqueueFailed: (id: string, message: string) => cvMatcherModel.findByIdAndUpdate(id, { status: 'failed', error: message }),
+  markReviewEnqueueFailed: (id: string, message: string) =>
+    Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),
+  markMatcherEnqueueFailed: (id: string, message: string) =>
+    cvMatcherModel.findByIdAndUpdate(id, { status: 'failed', error: message }),
 };

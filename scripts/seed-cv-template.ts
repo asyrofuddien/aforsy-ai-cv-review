@@ -20,7 +20,9 @@ const seedCvTemplate = async () => {
     { $set: { name: 'new_template', content } },
     { upsert: true },
   );
-  console.info(`CV template stored from ${templatePath}; matched=${result.matchedCount}, modified=${result.modifiedCount}, upserted=${result.upsertedCount}`);
+  console.info(
+    `CV template stored from ${templatePath}; matched=${result.matchedCount}, modified=${result.modifiedCount}, upserted=${result.upsertedCount}`,
+  );
 };
 
 seedCvTemplate()

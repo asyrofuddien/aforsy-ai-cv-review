@@ -1,8 +1,19 @@
-import { JobSearchParams, RapidApiJobDetailsResponse, RapidApiSearchResponse } from '../model/job.types';
+import {
+  JobSearchParams,
+  RapidApiJobDetailsResponse,
+  RapidApiSearchResponse,
+} from '../model/job.types';
 import appConfig from '../../../config/config';
 
-interface HttpResponse { ok: boolean; status: number; json(): Promise<unknown>; }
-type Fetcher = (url: string, init: { method: string; headers: Record<string, string> }) => Promise<HttpResponse>;
+interface HttpResponse {
+  ok: boolean;
+  status: number;
+  json(): Promise<unknown>;
+}
+type Fetcher = (
+  url: string,
+  init: { method: string; headers: Record<string, string> },
+) => Promise<HttpResponse>;
 type Delay = (milliseconds: number) => Promise<void>;
 
 export interface RapidApiConfig {
@@ -21,7 +32,8 @@ export class RapidApiJobProvider {
   constructor(
     config: RapidApiConfig = {},
     private readonly fetcher: Fetcher = fetch as unknown as Fetcher,
-    private readonly delay: Delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds)),
+    private readonly delay: Delay = (milliseconds) =>
+      new Promise((resolve) => setTimeout(resolve, milliseconds)),
   ) {
     const platform = config.platform ?? appConfig.jobs.rapidApiPlatform;
     if (!['linkedin', 'indeed', 'bing', 'xing'].includes(platform)) {
@@ -33,7 +45,9 @@ export class RapidApiJobProvider {
       baseUrl: config.baseUrl ?? appConfig.jobs.rapidApiBaseUrl,
       platform,
       countryCode: config.countryCode ?? appConfig.jobs.rapidApiCountryCode,
-      maxPages: Math.floor(Math.max(1, Math.min(5, config.maxPages ?? appConfig.jobs.rapidApiMaxPages))),
+      maxPages: Math.floor(
+        Math.max(1, Math.min(5, config.maxPages ?? appConfig.jobs.rapidApiMaxPages)),
+      ),
     };
   }
 
@@ -54,7 +68,7 @@ export class RapidApiJobProvider {
           try {
             const response = await this.fetcher(url, { method: 'GET', headers: this.headers() });
             if (response.ok) {
-              pageResult = await response.json() as RapidApiSearchResponse;
+              pageResult = (await response.json()) as RapidApiSearchResponse;
               break;
             }
             if (response.status === 429 && attempt < retries) {
@@ -78,15 +92,21 @@ export class RapidApiJobProvider {
       if (!nextPageToken) break;
       nextToken = nextPageToken;
     }
-    return { data: [...new Map(data.map(job => [job.id, job])).values()], meta: { nextToken: nextPageToken } };
+    return {
+      data: [...new Map(data.map((job) => [job.id, job])).values()],
+      meta: { nextToken: nextPageToken },
+    };
   }
 
   async getDetails(jobId: string): Promise<RapidApiJobDetailsResponse | null> {
     if (!this.config.apiKey) return null;
     try {
-      const response = await this.fetcher(`${this.platformBaseUrl()}/get?id=${encodeURIComponent(jobId)}`, { method: 'GET', headers: this.headers() });
+      const response = await this.fetcher(
+        `${this.platformBaseUrl()}/get?id=${encodeURIComponent(jobId)}`,
+        { method: 'GET', headers: this.headers() },
+      );
       if (!response.ok) return null;
-      return await response.json() as RapidApiJobDetailsResponse;
+      return (await response.json()) as RapidApiJobDetailsResponse;
     } catch {
       return null;
     }

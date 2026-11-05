@@ -25,15 +25,17 @@ async function main(): Promise<void> {
         ]),
       ]);
       const alreadyGranted = grantedLots[0]?.alreadyGranted || 0;
-      console.log(JSON.stringify({
-        mode: 'dry-run',
-        databaseName,
-        eligibleAccounts,
-        alreadyGranted,
-        pending: Math.max(0, eligibleAccounts - alreadyGranted),
-        inactiveOrUnverified: Math.max(0, totalAccounts - eligibleAccounts),
-        checkpointKey,
-      }));
+      console.log(
+        JSON.stringify({
+          mode: 'dry-run',
+          databaseName,
+          eligibleAccounts,
+          alreadyGranted,
+          pending: Math.max(0, eligibleAccounts - alreadyGranted),
+          inactiveOrUnverified: Math.max(0, totalAccounts - eligibleAccounts),
+          checkpointKey,
+        }),
+      );
       return;
     }
     if (
@@ -41,7 +43,9 @@ async function main(): Promise<void> {
       process.env.BILLING_MIGRATION_TARGET !== 'staging' ||
       !/(?:^|[-_])staging(?:$|[-_])/i.test(databaseName)
     ) {
-      throw new Error('Trial backfill apply is restricted to an explicitly selected staging MongoDB database.');
+      throw new Error(
+        'Trial backfill apply is restricted to an explicitly selected staging MongoDB database.',
+      );
     }
     if (!config.billing.trialEnabled) {
       throw new Error('CREDIT_TRIAL_ENABLED must be true before applying the trial backfill.');
@@ -56,7 +60,11 @@ async function main(): Promise<void> {
     let users = await User.find({
       ...filter,
       ...(lastUserId ? { _id: { $gt: lastUserId } } : {}),
-    }).select('_id').sort({ _id: 1 }).limit(pageSize).lean();
+    })
+      .select('_id')
+      .sort({ _id: 1 })
+      .limit(pageSize)
+      .lean();
     while (users.length) {
       for (const user of users) {
         const result = await billingService.grantWelcomeTrial(user._id.toString());
@@ -75,15 +83,31 @@ async function main(): Promise<void> {
       users = await User.find({
         ...filter,
         _id: { $gt: lastUserId },
-      }).select('_id').sort({ _id: 1 }).limit(pageSize).lean();
+      })
+        .select('_id')
+        .sort({ _id: 1 })
+        .limit(pageSize)
+        .lean();
     }
-    console.log(JSON.stringify({ mode: 'applied', databaseName, processed, granted, alreadyGranted, checkpointKey }));
+    console.log(
+      JSON.stringify({
+        mode: 'applied',
+        databaseName,
+        processed,
+        granted,
+        alreadyGranted,
+        checkpointKey,
+      }),
+    );
   } finally {
     await mongoose.disconnect();
   }
 }
 
-void main().catch(error => {
-  console.error('Welcome trial backfill failed:', error instanceof Error ? error.message : 'unknown error');
+void main().catch((error) => {
+  console.error(
+    'Welcome trial backfill failed:',
+    error instanceof Error ? error.message : 'unknown error',
+  );
   process.exitCode = 1;
 });

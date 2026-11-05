@@ -11,18 +11,42 @@ import Template from '../src/models/Template.model';
 dotenv.config();
 
 const candidateNames = [
-  'John Smith', 'Sarah Johnson', 'Michael Brown', 'Emily Davis', 'David Wilson',
-  'Jessica Miller', 'Christopher Moore', 'Ashley Taylor', 'Matthew Anderson', 'Amanda Thomas',
-  'Daniel Jackson', 'Jennifer White', 'James Harris', 'Lisa Martin', 'Robert Thompson',
-  'Mary Garcia', 'William Martinez', 'Elizabeth Robinson', 'Joseph Clark', 'Susan Rodriguez',
-  'Thomas Lewis', 'Karen Lee', 'Charles Walker', 'Nancy Hall', 'Steven Allen',
-  'Betty Young', 'Kenneth Hernandez', 'Helen King', 'Paul Wright', 'Sandra Lopez',
+  'John Smith',
+  'Sarah Johnson',
+  'Michael Brown',
+  'Emily Davis',
+  'David Wilson',
+  'Jessica Miller',
+  'Christopher Moore',
+  'Ashley Taylor',
+  'Matthew Anderson',
+  'Amanda Thomas',
+  'Daniel Jackson',
+  'Jennifer White',
+  'James Harris',
+  'Lisa Martin',
+  'Robert Thompson',
+  'Mary Garcia',
+  'William Martinez',
+  'Elizabeth Robinson',
+  'Joseph Clark',
+  'Susan Rodriguez',
+  'Thomas Lewis',
+  'Karen Lee',
+  'Charles Walker',
+  'Nancy Hall',
+  'Steven Allen',
+  'Betty Young',
+  'Kenneth Hernandez',
+  'Helen King',
+  'Paul Wright',
+  'Sandra Lopez',
 ];
 
 const seedFinal = async () => {
   try {
     console.log('🚀 Starting final comprehensive seed...');
-    
+
     await mongoose.connect(process.env.MONGODB_URI!, {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
@@ -47,7 +71,7 @@ const seedFinal = async () => {
     const codes = [];
     for (let i = 1; i <= 1223; i++) {
       codes.push({
-        code: `AFORSY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`
+        code: `AFORSY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
       });
     }
     const insertedCodes = await Code.insertMany(codes);
@@ -60,7 +84,8 @@ const seedFinal = async () => {
         slug: 'default',
         title: 'Senior Backend Engineer',
         company: 'Tech Company',
-        description: 'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
+        description:
+          'We are looking for a Senior Backend Engineer with strong experience in Node.js and cloud technologies.',
         requirements: {
           technical: ['5+ years backend development', 'Node.js', 'TypeScript', 'MongoDB', 'AWS'],
           soft_skills: ['Communication', 'Leadership', 'Problem-solving', 'Team collaboration'],
@@ -78,7 +103,8 @@ const seedFinal = async () => {
         slug: 'fullstack-engineer',
         title: 'Full Stack Engineer',
         company: 'Tech Startup',
-        description: 'Looking for a Full Stack Engineer with experience in modern web technologies.',
+        description:
+          'Looking for a Full Stack Engineer with experience in modern web technologies.',
         requirements: {
           technical: ['3+ years full stack', 'React', 'Node.js', 'MongoDB', 'REST APIs'],
           soft_skills: ['Self-motivated', 'Team player', 'Fast learner', 'Adaptable'],
@@ -96,10 +122,16 @@ const seedFinal = async () => {
         slug: 'frontend-developer',
         title: 'Frontend Developer',
         company: 'Digital Agency',
-        description: 'Seeking a creative Frontend Developer with expertise in modern JavaScript frameworks.',
+        description:
+          'Seeking a creative Frontend Developer with expertise in modern JavaScript frameworks.',
         requirements: {
           technical: ['2+ years frontend', 'React/Vue.js', 'HTML5/CSS3', 'JavaScript ES6+', 'Git'],
-          soft_skills: ['Creative thinking', 'Attention to detail', 'User-focused', 'Collaborative'],
+          soft_skills: [
+            'Creative thinking',
+            'Attention to detail',
+            'User-focused',
+            'Collaborative',
+          ],
         },
         scoringWeights: {
           technicalSkillsMatch: 0.35,
@@ -109,7 +141,7 @@ const seedFinal = async () => {
           aiExperience: 0.0,
         },
         isDefault: false,
-      }
+      },
     ];
     const insertedJobs = await JobDescription.insertMany(jobDescriptions);
     console.log(`✅ Inserted ${insertedJobs.length} job descriptions`);
@@ -168,7 +200,7 @@ const seedFinal = async () => {
     </div>
 </body>
 </html>`,
-      }
+      },
     ];
     const insertedTemplates = await Template.insertMany(templates);
     console.log(`✅ Inserted ${insertedTemplates.length} templates`);
@@ -177,15 +209,16 @@ const seedFinal = async () => {
     console.log('\n📁 Step 4: Generating 800 documents in batches...');
     let totalDocuments = 0;
     const batchSize = 50; // Smaller batches to avoid timeouts
-    
-    for (let batch = 0; batch < 23; batch++) { // 16 batches of 50 = 800
+
+    for (let batch = 0; batch < 23; batch++) {
+      // 16 batches of 50 = 800
       const documents = [];
       const startIndex = batch * batchSize;
-      
+
       for (let i = 0; i < batchSize; i++) {
         const docIndex = startIndex + i;
         const candidateName = candidateNames[docIndex % candidateNames.length];
-        
+
         documents.push({
           filename: `document_${docIndex + 1}.pdf`,
           originalName: `${candidateName.replace(' ', '_')}_cv.pdf`,
@@ -198,10 +231,12 @@ const seedFinal = async () => {
           uploadedAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000),
         });
       }
-      
+
       const inserted = await Document.insertMany(documents);
       totalDocuments += inserted.length;
-      console.log(`   Batch ${batch + 1}/16: Inserted ${inserted.length} documents (Total: ${totalDocuments})`);
+      console.log(
+        `   Batch ${batch + 1}/16: Inserted ${inserted.length} documents (Total: ${totalDocuments})`,
+      );
     }
 
     // Get all documents for referencing
@@ -214,32 +249,35 @@ const seedFinal = async () => {
     for (let i = 0; i < 300; i++) {
       const candidateName = candidateNames[i % candidateNames.length];
       const status = ['queued', 'processing', 'completed', 'failed'][Math.floor(Math.random() * 4)];
-      
+
       evaluations.push({
         candidateName,
         cvDocumentId: allDocuments[i]._id,
         code_id: insertedCodes[i + 800]._id,
         jobDescriptionId: insertedJobs[i % insertedJobs.length]._id,
         status,
-        result: status === 'completed' ? {
-          cvMatchRate: Math.floor(Math.random() * 40) + 60,
-          cvFeedback: `Strong candidate with relevant experience.`,
-          projectScore: Math.floor(Math.random() * 30) + 70,
-          projectFeedback: 'Well-structured projects.',
-          overallSummary: `${candidateName} is a recommended candidate.`,
-          recommendation: 'Proceed to technical interview',
-          detailedScores: {
-            technicalSkillsMatch: Math.floor(Math.random() * 30) + 70,
-            experienceLevel: Math.floor(Math.random() * 25) + 75,
-            relevantAchievements: Math.floor(Math.random() * 35) + 65,
-            culturalFit: Math.floor(Math.random() * 20) + 80,
-            correctness: Math.floor(Math.random() * 25) + 75,
-            codeQuality: Math.floor(Math.random() * 30) + 70,
-            resilience: Math.floor(Math.random() * 20) + 80,
-            documentation: Math.floor(Math.random() * 40) + 60,
-            creativity: Math.floor(Math.random() * 35) + 65,
-          },
-        } : undefined,
+        result:
+          status === 'completed'
+            ? {
+                cvMatchRate: Math.floor(Math.random() * 40) + 60,
+                cvFeedback: `Strong candidate with relevant experience.`,
+                projectScore: Math.floor(Math.random() * 30) + 70,
+                projectFeedback: 'Well-structured projects.',
+                overallSummary: `${candidateName} is a recommended candidate.`,
+                recommendation: 'Proceed to technical interview',
+                detailedScores: {
+                  technicalSkillsMatch: Math.floor(Math.random() * 30) + 70,
+                  experienceLevel: Math.floor(Math.random() * 25) + 75,
+                  relevantAchievements: Math.floor(Math.random() * 35) + 65,
+                  culturalFit: Math.floor(Math.random() * 20) + 80,
+                  correctness: Math.floor(Math.random() * 25) + 75,
+                  codeQuality: Math.floor(Math.random() * 30) + 70,
+                  resilience: Math.floor(Math.random() * 20) + 80,
+                  documentation: Math.floor(Math.random() * 40) + 60,
+                  creativity: Math.floor(Math.random() * 35) + 65,
+                },
+              }
+            : undefined,
         error: status === 'failed' ? 'Processing error' : undefined,
       });
     }
@@ -251,41 +289,46 @@ const seedFinal = async () => {
     const cvMatchers = [];
     const skills = ['JavaScript', 'Python', 'React', 'Node.js', 'MongoDB', 'AWS'];
     const companies = ['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple', 'Netflix'];
-    
+
     for (let i = 0; i < 100; i++) {
       const candidateName = candidateNames[i % candidateNames.length];
       const status = ['queued', 'processing', 'completed', 'failed'][Math.floor(Math.random() * 4)];
       const primarySkills = skills.slice(0, Math.floor(Math.random() * 3) + 2);
-      
+
       cvMatchers.push({
         cvDocumentId: allDocuments[i + 300]._id,
         code_id: insertedCodes[i + 1100]._id,
         status,
-        result: status === 'completed' ? {
-          user_profile: {
-            name: candidateName,
-            seniority: ['Junior', 'Mid-level', 'Senior'][Math.floor(Math.random() * 3)],
-            primary_skills: primarySkills,
-          },
-          suggested_roles: ['Software Engineer', 'Full Stack Developer'],
-          jobs: [{
-            title: 'Senior Developer',
-            company: companies[i % companies.length],
-            link: `https://jobs.${companies[i % companies.length].toLowerCase()}.com/job-1`,
-            skill_match: Math.floor(Math.random() * 30) + 70,
-            experience_match: Math.floor(Math.random() * 25) + 75,
-            responsibility_match: Math.floor(Math.random() * 35) + 65,
-            job_description: `Great opportunity for ${primarySkills.join(', ')} developer.`,
-            score: Math.floor(Math.random() * 30) + 70,
-            grade: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
-            explanation: `Strong match based on ${primarySkills[0]} skills.`,
-          }],
-          summary: {
-            strengths: [`Strong ${primarySkills[0]} skills`, 'Good experience'],
-            improvements: ['Learn more frameworks', 'Improve documentation'],
-            next_steps: ['Apply to positions', 'Prepare for interviews'],
-          },
-        } : undefined,
+        result:
+          status === 'completed'
+            ? {
+                user_profile: {
+                  name: candidateName,
+                  seniority: ['Junior', 'Mid-level', 'Senior'][Math.floor(Math.random() * 3)],
+                  primary_skills: primarySkills,
+                },
+                suggested_roles: ['Software Engineer', 'Full Stack Developer'],
+                jobs: [
+                  {
+                    title: 'Senior Developer',
+                    company: companies[i % companies.length],
+                    link: `https://jobs.${companies[i % companies.length].toLowerCase()}.com/job-1`,
+                    skill_match: Math.floor(Math.random() * 30) + 70,
+                    experience_match: Math.floor(Math.random() * 25) + 75,
+                    responsibility_match: Math.floor(Math.random() * 35) + 65,
+                    job_description: `Great opportunity for ${primarySkills.join(', ')} developer.`,
+                    score: Math.floor(Math.random() * 30) + 70,
+                    grade: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
+                    explanation: `Strong match based on ${primarySkills[0]} skills.`,
+                  },
+                ],
+                summary: {
+                  strengths: [`Strong ${primarySkills[0]} skills`, 'Good experience'],
+                  improvements: ['Learn more frameworks', 'Improve documentation'],
+                  next_steps: ['Apply to positions', 'Prepare for interviews'],
+                },
+              }
+            : undefined,
         error: status === 'failed' ? 'AI processing error' : undefined,
       });
     }
@@ -297,7 +340,7 @@ const seedFinal = async () => {
     const atsPDFs = [];
     for (let i = 0; i < 23; i++) {
       const candidateName = candidateNames[i % candidateNames.length];
-      
+
       atsPDFs.push({
         code_id: insertedCodes[i + 1200]._id,
         html_file: `ATS_${candidateName.replace(' ', '_')}_report.html`,
@@ -310,10 +353,15 @@ const seedFinal = async () => {
     console.log(`✅ Inserted ${insertedAtsPDFs.length} ATS PDF records`);
 
     // Final Summary
-    const totalRecords = insertedCodes.length + insertedJobs.length + insertedTemplates.length + 
-                        totalDocuments + insertedEvaluations.length + 
-                        insertedCvMatchers.length + insertedAtsPDFs.length;
-    
+    const totalRecords =
+      insertedCodes.length +
+      insertedJobs.length +
+      insertedTemplates.length +
+      totalDocuments +
+      insertedEvaluations.length +
+      insertedCvMatchers.length +
+      insertedAtsPDFs.length;
+
     console.log('\n🎉 === SEEDING COMPLETED SUCCESSFULLY ===');
     console.log(`📊 Total records created: ${totalRecords}`);
     console.log('\n📋 Final Breakdown:');
@@ -327,8 +375,9 @@ const seedFinal = async () => {
 
     await mongoose.disconnect();
     console.log('\n✅ Database connection closed');
-    console.log('🚀 All models seeded successfully with 1223 unique codes distributed across all models!');
-
+    console.log(
+      '🚀 All models seeded successfully with 1223 unique codes distributed across all models!',
+    );
   } catch (error) {
     console.error('❌ Seeding failed:', error);
     if (error instanceof Error) {

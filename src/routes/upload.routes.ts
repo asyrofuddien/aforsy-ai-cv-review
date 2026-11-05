@@ -5,11 +5,6 @@ import { validateUpload } from '../middlewares/validation.middleware';
 
 const router = Router();
 
-router.post(
-  '/',
-  uploadMultiple,
-  validateUpload,
-  uploadController.uploadDocuments
-);
+router.post('/', uploadMultiple, validateUpload, uploadController.uploadDocuments);
 
 export default router;

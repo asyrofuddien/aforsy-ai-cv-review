@@ -98,7 +98,11 @@ class QueueService {
       const job = await enqueueWithCompensation({
         record: evaluation,
         enqueue: () => this.evaluationQueue!.add('evaluate', payload, { jobId: evaluation!.id }),
-        compensate: (record, error) => queueRepository.markReviewEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue review job'),
+        compensate: (record, error) =>
+          queueRepository.markReviewEnqueueFailed(
+            record.id,
+            error instanceof Error ? error.message : 'Unable to enqueue review job',
+          ),
       });
 
       if (!job.id) {
@@ -123,7 +127,11 @@ class QueueService {
       if (['waiting', 'active', 'delayed', 'waiting-children'].includes(state)) return;
       await existing.remove();
     }
-    const job = await this.aiOperationQueue!.add('run-operation', { operationId }, { jobId: operationId, attempts, backoff: { type: 'exponential', delay: 5000 } });
+    const job = await this.aiOperationQueue!.add(
+      'run-operation',
+      { operationId },
+      { jobId: operationId, attempts, backoff: { type: 'exponential', delay: 5000 } },
+    );
     if (!job.id) throw new Error('Failed to enqueue durable AI operation');
   }
 
@@ -132,11 +140,17 @@ class QueueService {
     if (this.aiOperationWorker) throw new Error('AI operation worker is already initialized');
     const connection = this.parseRedisUrl(config.database.redisUrl);
     this.aiOperationWorker = new Worker('ai-operation-queue', processor, {
-      connection, concurrency: config.queue.concurrency, lockDuration: 120_000,
+      connection,
+      concurrency: config.queue.concurrency,
+      lockDuration: 120_000,
     });
-    this.aiOperationWorker.on('failed', (job, error) => logger.error('Durable operation job failed', {
-      operationId: job?.data.operationId, attempt: job?.attemptsMade, error,
-    }));
+    this.aiOperationWorker.on('failed', (job, error) =>
+      logger.error('Durable operation job failed', {
+        operationId: job?.data.operationId,
+        attempt: job?.attemptsMade,
+        error,
+      }),
+    );
   }
 
   initializeEvaluationWorker(processor: (_job: Job<ReviewQueuePayload>) => Promise<unknown>) {
@@ -182,7 +196,12 @@ class QueueService {
     });
 
     this.cvMatcherWorker.on('failed', (job, error) => {
-      logger.error('CV matcher job failed', { jobId: job?.id, matcherId: job?.data.cvMatcherId, attempt: job?.attemptsMade, error });
+      logger.error('CV matcher job failed', {
+        jobId: job?.id,
+        matcherId: job?.data.cvMatcherId,
+        attempt: job?.attemptsMade,
+        error,
+      });
     });
   }
 
@@ -225,14 +244,26 @@ class QueueService {
   }
 
   async close(force = false) {
-    const workers = [this.worker, this.cvMatcherWorker, this.aiOperationWorker].filter((worker): worker is Worker => worker !== null);
-    const workerResults = await Promise.allSettled(workers.map(worker => worker.close(force)));
-    const resources = [this.queueEvents, this.cvMatcherQueueEvents, this.evaluationQueue, this.cvMatcherQueue, this.aiOperationQueue].filter((resource): resource is Queue | QueueEvents => resource !== null);
-    const resourceResults = await Promise.allSettled(resources.map(resource => resource.close()));
-    const failures = [...workerResults, ...resourceResults].filter(result => result.status === 'rejected');
+    const workers = [this.worker, this.cvMatcherWorker, this.aiOperationWorker].filter(
+      (worker): worker is Worker => worker !== null,
+    );
+    const workerResults = await Promise.allSettled(workers.map((worker) => worker.close(force)));
+    const resources = [
+      this.queueEvents,
+      this.cvMatcherQueueEvents,
+      this.evaluationQueue,
+      this.cvMatcherQueue,
+      this.aiOperationQueue,
+    ].filter((resource): resource is Queue | QueueEvents => resource !== null);
+    const resourceResults = await Promise.allSettled(resources.map((resource) => resource.close()));
+    const failures = [...workerResults, ...resourceResults].filter(
+      (result) => result.status === 'rejected',
+    );
     if (failures.length) {
       const error = new Error('Failed to close queue resources') as Error & { causes?: unknown[] };
-      error.causes = failures.map(result => result.status === 'rejected' ? result.reason : undefined);
+      error.causes = failures.map((result) =>
+        result.status === 'rejected' ? result.reason : undefined,
+      );
       throw error;
     }
     this.closed = true;
@@ -275,7 +306,11 @@ class QueueService {
       const job = await enqueueWithCompensation({
         record: cvMatcher,
         enqueue: () => this.cvMatcherQueue!.add('cv-matcher', payload, { jobId: cvMatcher!.id }),
-        compensate: (record, error) => queueRepository.markMatcherEnqueueFailed(record.id, error instanceof Error ? error.message : 'Unable to enqueue CV matcher job'),
+        compensate: (record, error) =>
+          queueRepository.markMatcherEnqueueFailed(
+            record.id,
+            error instanceof Error ? error.message : 'Unable to enqueue CV matcher job',
+          ),
       });
 
       if (!job.id) {

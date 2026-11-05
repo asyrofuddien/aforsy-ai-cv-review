@@ -13,7 +13,7 @@ dotenv.config();
 const testStats = async () => {
   try {
     console.log('🧪 Testing stats calculations...');
-    
+
     await mongoose.connect(process.env.MONGODB_URI!);
     console.log('✅ Connected to MongoDB');
 
@@ -42,13 +42,13 @@ const testStats = async () => {
       {
         $group: {
           _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     console.log('\n📈 Evaluation Status Breakdown:');
-    evalByStatus.forEach(stat => {
+    evalByStatus.forEach((stat) => {
       console.log(`   - ${stat._id}: ${stat.count}`);
     });
 
@@ -57,20 +57,19 @@ const testStats = async () => {
       {
         $group: {
           _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     console.log('\n🤖 CV Matcher Status Breakdown:');
-    cvMatcherByStatus.forEach(stat => {
+    cvMatcherByStatus.forEach((stat) => {
       console.log(`   - ${stat._id}: ${stat.count}`);
     });
 
     await mongoose.disconnect();
     console.log('\n✅ Stats test completed successfully!');
     console.log('🚀 The enhanced /test/stats endpoint should work with this data.');
-
   } catch (error) {
     console.error('❌ Stats test failed:', error);
     await mongoose.disconnect();

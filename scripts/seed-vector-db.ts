@@ -36,9 +36,7 @@ const seedVectorDB = async () => {
       // Add technical requirements separately
       documents.push({
         id: `job-tech-${job._id}`,
-        text: `Technical requirements for ${
-          job.title
-        }: ${job.requirements.technical.join('. ')}`,
+        text: `Technical requirements for ${job.title}: ${job.requirements.technical.join('. ')}`,
         metadata: {
           type: 'job_description' as const,
           section: 'technical_requirements',
@@ -49,9 +47,7 @@ const seedVectorDB = async () => {
       // Add soft skills requirements
       documents.push({
         id: `job-soft-${job._id}`,
-        text: `Soft skills for ${
-          job.title
-        }: ${job.requirements.soft_skills.join('. ')}`,
+        text: `Soft skills for ${job.title}: ${job.requirements.soft_skills.join('. ')}`,
         metadata: {
           type: 'job_description' as const,
           section: 'soft_skills',

@@ -107,8 +107,7 @@ class OpenAIService {
         inputTokens: usage?.prompt_tokens ?? null,
         outputTokens: usage?.completion_tokens ?? null,
         usageAvailability:
-          usage?.prompt_tokens !== undefined &&
-          usage?.completion_tokens !== undefined
+          usage?.prompt_tokens !== undefined && usage?.completion_tokens !== undefined
             ? 'reported'
             : 'unknown',
         latencyMs: Math.round(performance.now() - startedAt),
@@ -158,16 +157,16 @@ class OpenAIService {
       ...reference,
       stage: data.stage || 'unspecified',
       attempt: data.attempt,
-      provider: config.ai.baseUrl.includes('sumopod.com')
-        ? 'sumopod'
-        : 'openai-compatible',
+      provider: config.ai.baseUrl.includes('sumopod.com') ? 'sumopod' : 'openai-compatible',
       model: data.model.slice(0, 128),
       inputTokens: data.inputTokens,
       outputTokens: data.outputTokens,
       usageAvailability:
         data.usageAvailability ||
-        (data.inputTokens !== undefined && data.inputTokens !== null &&
-        data.outputTokens !== undefined && data.outputTokens !== null
+        (data.inputTokens !== undefined &&
+        data.inputTokens !== null &&
+        data.outputTokens !== undefined &&
+        data.outputTokens !== null
           ? 'reported'
           : 'unknown'),
       latencyMs: data.latencyMs,

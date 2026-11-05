@@ -34,9 +34,7 @@ function buildDocs(): void {
       return;
     }
 
-    const postmanCollection: PostmanCollection = JSON.parse(
-      fs.readFileSync(postmanPath, 'utf8')
-    );
+    const postmanCollection: PostmanCollection = JSON.parse(fs.readFileSync(postmanPath, 'utf8'));
 
     // Create OpenAPI spec from postman
     const openApiSpec = {
@@ -132,9 +130,7 @@ function buildDocs(): void {
   }
 }
 
-function convertPostmanToPaths(
-  collection: PostmanCollection
-): Record<string, OpenAPIPath> {
+function convertPostmanToPaths(collection: PostmanCollection): Record<string, OpenAPIPath> {
   const paths: Record<string, OpenAPIPath> = {};
 
   if (collection.item) {
@@ -175,15 +171,13 @@ function convertPostmanToPaths(
 
             // Add query parameters
             if (request.request.url?.query) {
-              const queryParams = request.request.url.query.map(
-                (param: any) => ({
-                  name: param.key,
-                  in: 'query',
-                  schema: { type: 'string' },
-                  description: param.description || param.key,
-                  required: false,
-                })
-              );
+              const queryParams = request.request.url.query.map((param: any) => ({
+                name: param.key,
+                in: 'query',
+                schema: { type: 'string' },
+                description: param.description || param.key,
+                required: false,
+              }));
               paths[url][method].parameters = [
                 ...(paths[url][method].parameters || []),
                 ...queryParams,
@@ -336,11 +330,7 @@ function setupAssets(): void {
     fs.mkdirSync(assetsDir, { recursive: true });
   }
 
-  const assetsToCopy = [
-    'swagger-ui-bundle.js',
-    'swagger-ui.css',
-    'favicon-32x32.png',
-  ];
+  const assetsToCopy = ['swagger-ui-bundle.js', 'swagger-ui.css', 'favicon-32x32.png'];
 
   assetsToCopy.forEach((asset) => {
     const srcPath = path.join(swaggerUiPath, asset);

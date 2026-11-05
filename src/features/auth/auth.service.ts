@@ -1,7 +1,13 @@
 import { randomBytes, timingSafeEqual } from 'crypto';
 import { hashOpaqueToken } from './credentials.crypto';
 import { clearSessionCookie, setSessionCookie } from './session-cookie.adapter';
-export { clearSessionCookie, csrfHeaderName, getCookie, sessionCookieName, syncSessionCookieForAppRoutes } from './session-cookie.adapter';
+export {
+  clearSessionCookie,
+  csrfHeaderName,
+  getCookie,
+  sessionCookieName,
+  syncSessionCookieForAppRoutes,
+} from './session-cookie.adapter';
 export { hashOpaqueToken, hashPassword, verifyPassword } from './credentials.crypto';
 export { createEmailAction, consumeEmailAction } from './email-actions.service';
 import { Request, Response } from 'express';
@@ -13,7 +19,12 @@ const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const SESSION_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
 const adminEmailSet = (): Set<string> =>
-  new Set(config.auth.adminEmails.split(',').map((email) => email.trim().toLowerCase()).filter(Boolean));
+  new Set(
+    config.auth.adminEmails
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  );
 
 export const promoteConfiguredAdmin = async (user: IUser): Promise<IUser> => {
   if (adminEmailSet().has(user.email) && user.isEmailVerified && user.role !== 'admin') {
@@ -79,4 +90,3 @@ export const asPublicUser = (user: IUser) => ({
   role: user.role,
   isEmailVerified: user.isEmailVerified,
 });
-

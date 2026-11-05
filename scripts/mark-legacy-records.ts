@@ -17,7 +17,9 @@ const markUnclaimed = async () => {
     ),
   );
   models.forEach((model, index) => {
-    console.info(`${model.modelName}: marked ${results[index].modifiedCount} legacy records as unclaimed`);
+    console.info(
+      `${model.modelName}: marked ${results[index].modifiedCount} legacy records as unclaimed`,
+    );
   });
   await mongoose.disconnect();
 };

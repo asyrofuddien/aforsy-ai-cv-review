@@ -9,9 +9,18 @@ import CvMatcher from '../models/cvMatcher.model';
 import AtsPdf from '../models/atsPDF.model';
 import queueService from '../services/queue.service';
 import appLogger from '../utils/logger';
-import { archiveAdminTemplate, createAdminTemplate, updateAdminTemplate } from '../features/admin/templates/admin-template.service';
+import {
+  archiveAdminTemplate,
+  createAdminTemplate,
+  updateAdminTemplate,
+} from '../features/admin/templates/admin-template.service';
 import { setUserActiveStatus, setUserRole } from '../features/admin/users/admin-user.service';
-import { createAdminAuditEvent, updateAdminAuditEvent, listAdminAuditEvents, countAdminAuditEvents } from '../features/admin/audit/admin-audit.repository';
+import {
+  createAdminAuditEvent,
+  updateAdminAuditEvent,
+  listAdminAuditEvents,
+  countAdminAuditEvents,
+} from '../features/admin/audit/admin-audit.repository';
 
 const logger = appLogger.child({ scope: 'admin' });
 
@@ -31,28 +40,50 @@ type AdminActivityEvent = {
 
 export class AdminController {
   summary = asyncHandler(async (_req: Request, res: Response) => {
-    const [users, activeUsers, admins, templates, activeTemplates, auditEvents] = await Promise.all([
-      User.countDocuments(), User.countDocuments({ isActive: true }), User.countDocuments({ role: 'admin', isActive: true }),
-      AtsTemplate.countDocuments({ status: { $ne: 'archived' } }), AtsTemplate.countDocuments({ status: 'active' }),
-      countAdminAuditEvents(),
-    ]);
-    res.json({ success: true, data: { users, activeUsers, admins, templates, activeTemplates, auditEvents } });
+    const [users, activeUsers, admins, templates, activeTemplates, auditEvents] = await Promise.all(
+      [
+        User.countDocuments(),
+        User.countDocuments({ isActive: true }),
+        User.countDocuments({ role: 'admin', isActive: true }),
+        AtsTemplate.countDocuments({ status: { $ne: 'archived' } }),
+        AtsTemplate.countDocuments({ status: 'active' }),
+        countAdminAuditEvents(),
+      ],
+    );
+    res.json({
+      success: true,
+      data: { users, activeUsers, admins, templates, activeTemplates, auditEvents },
+    });
   });
 
   listUsers = asyncHandler(async (req: Request, res: Response) => {
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
-    const search = String(req.query.search || '').trim().slice(0, 100);
+    const search = String(req.query.search || '')
+      .trim()
+      .slice(0, 100);
     const filter: Record<string, unknown> = {};
     if (search) {
       const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.$or = [{ email: { $regex: escaped, $options: 'i' } }, { displayName: { $regex: escaped, $options: 'i' } }];
+      filter.$or = [
+        { email: { $regex: escaped, $options: 'i' } },
+        { displayName: { $regex: escaped, $options: 'i' } },
+      ];
     }
     const [users, total] = await Promise.all([
-      User.find(filter).select('email displayName role isActive isEmailVerified createdAt updatedAt').sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
+      User.find(filter)
+        .select('email displayName role isActive isEmailVerified createdAt updatedAt')
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
       User.countDocuments(filter),
     ]);
-    res.json({ success: true, data: users, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    res.json({
+      success: true,
+      data: users,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   });
 
   getUserDetails = asyncHandler(async (req: Request, res: Response) => {
@@ -117,10 +148,26 @@ export class AdminController {
     const candidateLimit = (page - 1) * limit + limit;
 
     const [documents, evaluations, cvMatches, atsCvs] = await Promise.all([
-      Document.find({ userId }).select('originalName mimeType size type uploadedAt').sort({ uploadedAt: -1, _id: -1 }).limit(candidateLimit).lean(),
-      Evaluation.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
-      CvMatcher.find({ userId }).select('status error queueJobId createdAt updatedAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
-      AtsPdf.find({ userId }).select('file_name createdAt').sort({ createdAt: -1, _id: -1 }).limit(candidateLimit).lean(),
+      Document.find({ userId })
+        .select('originalName mimeType size type uploadedAt')
+        .sort({ uploadedAt: -1, _id: -1 })
+        .limit(candidateLimit)
+        .lean(),
+      Evaluation.find({ userId })
+        .select('status error queueJobId createdAt updatedAt')
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(candidateLimit)
+        .lean(),
+      CvMatcher.find({ userId })
+        .select('status error queueJobId createdAt updatedAt')
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(candidateLimit)
+        .lean(),
+      AtsPdf.find({ userId })
+        .select('file_name createdAt')
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(candidateLimit)
+        .lean(),
     ]);
 
     const events: AdminActivityEvent[] = [
@@ -161,27 +208,40 @@ export class AdminController {
         fileName: atsCv.file_name || 'Generated CV',
       })),
     ]
-      .sort((left, right) => right.at.getTime() - left.at.getTime() || right.id.localeCompare(left.id))
+      .sort(
+        (left, right) => right.at.getTime() - left.at.getTime() || right.id.localeCompare(left.id),
+      )
       .slice((page - 1) * limit, page * limit);
 
-    const pageEvents = await Promise.all(events.map(async ({ queueJobId, ...event }) => {
-      if (event.type !== 'evaluation' && event.type !== 'cv_matcher') return event;
-      const queueType = event.type === 'evaluation' ? 'evaluation' : 'cv-matcher';
-      const queueState = event.status === 'failed' && queueJobId
-        ? await queueService.getJobState(queueType, queueJobId)
-        : null;
-      return {
-        ...event,
-        status: queueState === 'active' ? 'processing' : ['waiting', 'delayed', 'waiting-children'].includes(queueState || '') ? 'queued' : event.status,
-        retryable: event.status === 'failed' && queueState === 'failed',
-      };
-    }));
+    const pageEvents = await Promise.all(
+      events.map(async ({ queueJobId, ...event }) => {
+        if (event.type !== 'evaluation' && event.type !== 'cv_matcher') return event;
+        const queueType = event.type === 'evaluation' ? 'evaluation' : 'cv-matcher';
+        const queueState =
+          event.status === 'failed' && queueJobId
+            ? await queueService.getJobState(queueType, queueJobId)
+            : null;
+        return {
+          ...event,
+          status:
+            queueState === 'active'
+              ? 'processing'
+              : ['waiting', 'delayed', 'waiting-children'].includes(queueState || '')
+                ? 'queued'
+                : event.status,
+          retryable: event.status === 'failed' && queueState === 'failed',
+        };
+      }),
+    );
 
     res.json({ success: true, data: pageEvents, pagination: { page, limit, total, pages } });
   });
 
   retryUserProcess = asyncHandler(async (req: Request, res: Response) => {
-    if (!Types.ObjectId.isValid(req.params.userId) || !Types.ObjectId.isValid(req.params.processId)) {
+    if (
+      !Types.ObjectId.isValid(req.params.userId) ||
+      !Types.ObjectId.isValid(req.params.processId)
+    ) {
       throw new AppError('Invalid user or process ID', 400);
     }
     if (req.params.type !== 'evaluation' && req.params.type !== 'cv-matcher') {
@@ -190,25 +250,29 @@ export class AdminController {
 
     const userId = new Types.ObjectId(req.params.userId);
     const filter = { _id: req.params.processId, userId };
-    const process = req.params.type === 'evaluation'
-      ? await Evaluation.findOne(filter).lean()
-      : await CvMatcher.findOne(filter).lean();
+    const process =
+      req.params.type === 'evaluation'
+        ? await Evaluation.findOne(filter).lean()
+        : await CvMatcher.findOne(filter).lean();
     if (!process) throw new AppError('Process not found', 404);
-    if (process.status !== 'failed') throw new AppError('Only failed processes can be retried', 409);
-    if (!process.queueJobId) throw new AppError('This older process has no retryable queue record', 409);
+    if (process.status !== 'failed')
+      throw new AppError('Only failed processes can be retried', 409);
+    if (!process.queueJobId)
+      throw new AppError('This older process has no retryable queue record', 409);
 
     const stateFilter = { ...filter, status: 'failed' };
-    const queued = req.params.type === 'evaluation'
-      ? await Evaluation.findOneAndUpdate(
-        stateFilter,
-        { $set: { status: 'queued' }, $unset: { error: 1 } },
-        { new: true },
-      )
-      : await CvMatcher.findOneAndUpdate(
-        stateFilter,
-        { $set: { status: 'queued' }, $unset: { error: 1 } },
-        { new: true },
-      );
+    const queued =
+      req.params.type === 'evaluation'
+        ? await Evaluation.findOneAndUpdate(
+            stateFilter,
+            { $set: { status: 'queued' }, $unset: { error: 1 } },
+            { new: true },
+          )
+        : await CvMatcher.findOneAndUpdate(
+            stateFilter,
+            { $set: { status: 'queued' }, $unset: { error: 1 } },
+            { new: true },
+          );
     if (!queued) throw new AppError('This process has already changed state', 409);
 
     let auditEvent;
@@ -227,18 +291,23 @@ export class AdminController {
         process.queueJobId,
       );
       if (!retried) {
-        const revertFailed = req.params.type === 'evaluation' ? Evaluation.updateOne : CvMatcher.updateOne;
+        const revertFailed =
+          req.params.type === 'evaluation' ? Evaluation.updateOne : CvMatcher.updateOne;
         await revertFailed(
           { _id: process._id, userId, status: 'queued' },
           { $set: { status: 'failed', ...(process.error ? { error: process.error } : {}) } },
         );
-        await updateAdminAuditEvent(String(auditEvent._id), { $set: { 'details.outcome': 'unavailable' } });
+        await updateAdminAuditEvent(String(auditEvent._id), {
+          $set: { 'details.outcome': 'unavailable' },
+        });
         throw new AppError('The failed queue record is no longer available for retry', 409);
       }
 
       retryAccepted = true;
       try {
-        await updateAdminAuditEvent(String(auditEvent._id), { $set: { 'details.outcome': 'queued' } });
+        await updateAdminAuditEvent(String(auditEvent._id), {
+          $set: { 'details.outcome': 'queued' },
+        });
       } catch (error) {
         logger.error('Process was requeued but its audit outcome could not be updated', {
           processId: String(process._id),
@@ -249,13 +318,16 @@ export class AdminController {
       res.status(202).json({ success: true, data: { id: String(process._id), status: 'queued' } });
     } catch (error) {
       if (!retryAccepted && !(error instanceof AppError && error.statusCode === 409)) {
-        const revertFailed = req.params.type === 'evaluation' ? Evaluation.updateOne : CvMatcher.updateOne;
+        const revertFailed =
+          req.params.type === 'evaluation' ? Evaluation.updateOne : CvMatcher.updateOne;
         await revertFailed(
           { _id: process._id, userId, status: 'queued' },
           { $set: { status: 'failed', ...(process.error ? { error: process.error } : {}) } },
         );
         if (auditEvent) {
-          await updateAdminAuditEvent(String(auditEvent._id), { $set: { 'details.outcome': 'failed' } });
+          await updateAdminAuditEvent(String(auditEvent._id), {
+            $set: { 'details.outcome': 'failed' },
+          });
         }
       }
       if (error instanceof AppError) throw error;
@@ -273,11 +345,17 @@ export class AdminController {
   }
 
   setUserStatus = asyncHandler(async (req: Request, res: Response) => {
-    res.json({ success: true, data: await setUserActiveStatus(req.authUser!.userId, req.params.id, req.body.isActive) });
+    res.json({
+      success: true,
+      data: await setUserActiveStatus(req.authUser!.userId, req.params.id, req.body.isActive),
+    });
   });
 
   setUserRole = asyncHandler(async (req: Request, res: Response) => {
-    res.json({ success: true, data: await setUserRole(req.authUser!.userId, req.params.id, req.body.role) });
+    res.json({
+      success: true,
+      data: await setUserRole(req.authUser!.userId, req.params.id, req.body.role),
+    });
   });
 
   listTemplates = asyncHandler(async (_req: Request, res: Response) => {
@@ -304,7 +382,11 @@ export class AdminController {
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, Number(req.query.limit) || 20));
     const { events, total } = await listAdminAuditEvents(page, limit);
-    res.json({ success: true, data: events, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    res.json({
+      success: true,
+      data: events,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
   });
 }
 

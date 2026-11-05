@@ -1,7 +1,10 @@
 export const JOBS_PROMPTS = {
   BEAUTIFY_DESCRIPTION: {
-    system: 'You are an expert at summarizing job descriptions concisely while preserving key information.',
-    user: (description: string) => `Rewrite this job description into 1-3 clear, concise sentences that capture the main responsibilities and requirements:
+    system:
+      'You are an expert at summarizing job descriptions concisely while preserving key information.',
+    user: (
+      description: string,
+    ) => `Rewrite this job description into 1-3 clear, concise sentences that capture the main responsibilities and requirements:
 
 ${description}
 
@@ -16,8 +19,12 @@ Return ONLY this JSON (no markdown, no explanation):
 }`,
   },
   CALCULATE_SKILL: {
-    system: 'You are an expert recruiter evaluating skill alignment between candidates and job requirements across ALL industries.',
-    user: (cvSkills: any, jobRequirements: any) => `Calculate the skill match percentage between the candidate's skills and job requirements.
+    system:
+      'You are an expert recruiter evaluating skill alignment between candidates and job requirements across ALL industries.',
+    user: (
+      cvSkills: any,
+      jobRequirements: any,
+    ) => `Calculate the skill match percentage between the candidate's skills and job requirements.
 
 Candidate Skills:
 ${JSON.stringify(cvSkills, null, 2)}

@@ -49,24 +49,23 @@ async function extractDocxHeaderFooterText(buffer: Buffer): Promise<string> {
   return sections.join('\n');
 }
 
-
 export async function parseDocx(filePath: string): Promise<string> {
-    try {
-      const [buffer, result] = await Promise.all([
-        fs.readFile(filePath),
-        mammoth.extractRawText({ path: filePath }),
-      ]);
-      const headerFooterText = await extractDocxHeaderFooterText(buffer);
-      const fullText = [result.value.trim(), headerFooterText].filter(Boolean).join('\n\n');
-      
-      if (!fullText) {
-        logger.warn(`DOCX parsed but no text extracted from: ${filePath}`);
-        throw new AppError('DOCX contains no readable text', 400);
-      }
-      
-      return fullText;
-    } catch (error) {
-      logger.error(`Error parsing DOCX at ${filePath}:`, error);
-      throw error;
+  try {
+    const [buffer, result] = await Promise.all([
+      fs.readFile(filePath),
+      mammoth.extractRawText({ path: filePath }),
+    ]);
+    const headerFooterText = await extractDocxHeaderFooterText(buffer);
+    const fullText = [result.value.trim(), headerFooterText].filter(Boolean).join('\n\n');
+
+    if (!fullText) {
+      logger.warn(`DOCX parsed but no text extracted from: ${filePath}`);
+      throw new AppError('DOCX contains no readable text', 400);
     }
+
+    return fullText;
+  } catch (error) {
+    logger.error(`Error parsing DOCX at ${filePath}:`, error);
+    throw error;
+  }
 }

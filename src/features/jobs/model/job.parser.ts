@@ -4,7 +4,9 @@ export class JobParser {
   parseProviderDetails(response: RapidApiJobDetailsResponse): JobListing {
     const detail = response.data;
     if (!detail) throw new Error('Job provider details are missing');
-    const { requirements, responsibilities } = this.extractSkillsAndResponsibilities(detail.description || '');
+    const { requirements, responsibilities } = this.extractSkillsAndResponsibilities(
+      detail.description || '',
+    );
     return {
       title: detail.title || 'Untitled role',
       company: detail.companyName || detail.company || detail.employer || 'Unknown company',
@@ -15,7 +17,10 @@ export class JobParser {
       requirements,
       responsibilities,
       job_description: detail.description || '',
-      posted_at: detail.datePosted || detail.postedAt || this.convertPostedTimeAgo(detail.postedTimeAgo || ''),
+      posted_at:
+        detail.datePosted ||
+        detail.postedAt ||
+        this.convertPostedTimeAgo(detail.postedTimeAgo || ''),
       link: detail.linkedinUrl || detail.applyUrl || detail.url || '',
     };
   }

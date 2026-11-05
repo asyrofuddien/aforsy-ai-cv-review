@@ -20,7 +20,7 @@ export const errorMiddleware = (
   err: Error | AppError,
   req: Request,
   res: Response,
-  _next: NextFunction
+  _next: NextFunction,
 ) => {
   let error = { ...err };
   error.message = err.message;
@@ -48,7 +48,10 @@ export const errorMiddleware = (
   const status = (error as AppError).statusCode || 500;
   res.locals.failureLogged = true;
   logger.log(status >= 500 ? 'error' : 'warn', 'Request failed', {
-    status, method: req.method, route: req.baseUrl + (req.route?.path || req.path), error: err,
+    status,
+    method: req.method,
+    route: req.baseUrl + (req.route?.path || req.path),
+    error: err,
   });
 
   res.status(status).json({
@@ -60,7 +63,6 @@ export const errorMiddleware = (
 };
 
 // Async error handler wrapper
-export const asyncHandler =
-  (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
+export const asyncHandler = (fn: Function) => (req: Request, res: Response, next: NextFunction) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
+};

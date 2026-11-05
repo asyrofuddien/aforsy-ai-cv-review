@@ -14,18 +14,8 @@ router.get('/', jobDescriptionController.getAll);
 router.get('/:id', jobDescriptionController.getOne);
 router.get('/slug/:slug', jobDescriptionController.getBySlug);
 router.post('/', requireAdmin, validateJobDescription, jobDescriptionController.create);
-router.post(
-  '/upload',
-  requireAdmin,
-  uploadSingle,
-  jobDescriptionController.uploadJobDescription
-);
-router.put(
-  '/:id',
-  requireAdmin,
-  validateJobDescriptionUpdate,
-  jobDescriptionController.update
-);
+router.post('/upload', requireAdmin, uploadSingle, jobDescriptionController.uploadJobDescription);
+router.put('/:id', requireAdmin, validateJobDescriptionUpdate, jobDescriptionController.update);
 router.delete('/:id', requireAdmin, jobDescriptionController.delete);
 router.patch('/:id/set-default', requireAdmin, jobDescriptionController.setDefault);
 

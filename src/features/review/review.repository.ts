@@ -14,14 +14,29 @@ export const reviewRepository = {
   },
   findJobDescription: async (id: string): Promise<ReviewDescription | null> => {
     const job = await JobDescription.findById(id);
-    return job ? job.toObject() as ReviewDescription : null;
+    return job ? (job.toObject() as ReviewDescription) : null;
   },
-  markProcessing: (id: string, retrying: boolean) => Evaluation.findOneAndUpdate(
-    { _id: id, status: { $in: retrying ? ['queued', 'failed', 'processing'] : ['queued', 'failed'] } },
-    { status: 'processing' },
-  ),
-  complete: (id: string, candidateName: string | undefined, result: ReviewResult, matchingProfile?: unknown) =>
-    Evaluation.findOneAndUpdate({ _id: id, status: 'processing' }, { status: 'completed', candidateName, result, matchingProfile }, { omitUndefined: true }),
-  fail: (id: string, message: string) => Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),
-  retry: (id: string) => Evaluation.findByIdAndUpdate(id, { status: 'queued', $unset: { error: 1 } }),
+  markProcessing: (id: string, retrying: boolean) =>
+    Evaluation.findOneAndUpdate(
+      {
+        _id: id,
+        status: { $in: retrying ? ['queued', 'failed', 'processing'] : ['queued', 'failed'] },
+      },
+      { status: 'processing' },
+    ),
+  complete: (
+    id: string,
+    candidateName: string | undefined,
+    result: ReviewResult,
+    matchingProfile?: unknown,
+  ) =>
+    Evaluation.findOneAndUpdate(
+      { _id: id, status: 'processing' },
+      { status: 'completed', candidateName, result, matchingProfile },
+      { omitUndefined: true },
+    ),
+  fail: (id: string, message: string) =>
+    Evaluation.findByIdAndUpdate(id, { status: 'failed', error: message }),
+  retry: (id: string) =>
+    Evaluation.findByIdAndUpdate(id, { status: 'queued', $unset: { error: 1 } }),
 };

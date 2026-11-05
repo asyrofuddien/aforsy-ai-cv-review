@@ -1,12 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export type JobOperationStage = 'search' | 'scoring';
-export type JobOperationStatus =
-  | 'completed'
-  | 'partial'
-  | 'failed'
-  | 'no_matches'
-  | 'no_query';
+export type JobOperationStatus = 'completed' | 'partial' | 'failed' | 'no_matches' | 'no_query';
 
 export interface IJobOperationMetric extends Document {
   referenceType: 'evaluation' | 'cv_matcher';
@@ -71,7 +66,4 @@ JobOperationMetricSchema.index(
 );
 JobOperationMetricSchema.index({ createdAt: -1, status: 1 });
 
-export default mongoose.model<IJobOperationMetric>(
-  'JobOperationMetric',
-  JobOperationMetricSchema,
-);
+export default mongoose.model<IJobOperationMetric>('JobOperationMetric', JobOperationMetricSchema);

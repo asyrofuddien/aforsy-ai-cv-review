@@ -11,16 +11,30 @@ export async function indexJobDescription(job: IJobDescription): Promise<void> {
       {
         id: `job-${job._id}`,
         text: `${job.title} at ${job.company}. ${job.description}`,
-        metadata: { type: 'job_description', jobId: String(job._id), title: job.title, company: job.company, slug: job.slug },
+        metadata: {
+          type: 'job_description',
+          jobId: String(job._id),
+          title: job.title,
+          company: job.company,
+          slug: job.slug,
+        },
       },
       {
         id: `job-tech-${job._id}`,
         text: `Technical requirements for ${job.title}: ${job.requirements.technical.join('. ')}`,
-        metadata: { type: 'job_description', section: 'technical_requirements', jobId: String(job._id), slug: job.slug },
+        metadata: {
+          type: 'job_description',
+          section: 'technical_requirements',
+          jobId: String(job._id),
+          slug: job.slug,
+        },
       },
     ]);
   } catch (error) {
-    logger.error('Job description indexing failed; Mongo remains authoritative', { jobId: String(job._id), error });
+    logger.error('Job description indexing failed; Mongo remains authoritative', {
+      jobId: String(job._id),
+      error,
+    });
   }
 }
 

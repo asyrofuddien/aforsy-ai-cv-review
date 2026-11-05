@@ -14,13 +14,16 @@ router.get('/health', (_req, res) => {
   });
 });
 
-router.get('/health/transactions', asyncHandler(async (_req: Request, res: Response) => {
-  const available = await probeMongoTransactions();
-  res.status(available ? 200 : 503).json({
-    status: available ? 'available' : 'unavailable',
-    capability: 'mongodb-transactions',
-  });
-}));
+router.get(
+  '/health/transactions',
+  asyncHandler(async (_req: Request, res: Response) => {
+    const available = await probeMongoTransactions();
+    res.status(available ? 200 : 503).json({
+      status: available ? 'available' : 'unavailable',
+      capability: 'mongodb-transactions',
+    });
+  }),
+);
 
 // Test route
 router.get('/test', (req, res) => {
@@ -45,7 +48,11 @@ router.get('/test', (req, res) => {
   ];
 
   if (isDev) {
-    endpoints.push('', '===== DEVELOPMENT ONLY =====', 'DELETE /api/test/clear-test-data       - Clear all test data [DEV ONLY]');
+    endpoints.push(
+      '',
+      '===== DEVELOPMENT ONLY =====',
+      'DELETE /api/test/clear-test-data       - Clear all test data [DEV ONLY]',
+    );
   }
 
   res.json({

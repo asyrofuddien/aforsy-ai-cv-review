@@ -46,10 +46,7 @@ const JobDescriptionSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export default mongoose.model<IJobDescription>(
-  'JobDescription',
-  JobDescriptionSchema
-);
+export default mongoose.model<IJobDescription>('JobDescription', JobDescriptionSchema);

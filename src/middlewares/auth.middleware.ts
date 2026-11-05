@@ -2,7 +2,13 @@ import { Request, Response, NextFunction } from 'express';
 import AuthSession from '../models/authSession.model';
 import User from '../models/user.model';
 import { AppError } from './error.middleware';
-import { csrfHeaderName, getCookie, hashOpaqueToken, sessionCookieName, verifyCsrf } from '../services/auth.service';
+import {
+  csrfHeaderName,
+  getCookie,
+  hashOpaqueToken,
+  sessionCookieName,
+  verifyCsrf,
+} from '../services/auth.service';
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -36,7 +42,10 @@ export const authenticate = async (req: Request, _res: Response, next: NextFunct
       createdAt: session.createdAt,
     };
 
-    if (MUTATING_METHODS.has(req.method) && !verifyCsrf(req.header(csrfHeaderName), session.csrfHash)) {
+    if (
+      MUTATING_METHODS.has(req.method) &&
+      !verifyCsrf(req.header(csrfHeaderName), session.csrfHash)
+    ) {
       throw new AppError('Security token missing or expired. Refresh the page and try again.', 403);
     }
 
@@ -47,6 +56,7 @@ export const authenticate = async (req: Request, _res: Response, next: NextFunct
 };
 
 export const requireAdmin = (req: Request, _res: Response, next: NextFunction) => {
-  if (req.authUser?.role !== 'admin') return next(new AppError('Administrator access required', 403));
+  if (req.authUser?.role !== 'admin')
+    return next(new AppError('Administrator access required', 403));
   next();
 };

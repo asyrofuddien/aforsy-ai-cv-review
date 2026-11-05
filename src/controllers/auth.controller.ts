@@ -1,4 +1,4 @@
-import {requestLocale} from '../utils/locale';
+import { requestLocale } from '../utils/locale';
 import { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../middlewares/error.middleware';
 import User, { IUser } from '../models/user.model';
@@ -16,7 +16,10 @@ import {
   syncSessionCookieForAppRoutes,
   verifyPassword,
 } from '../services/auth.service';
-import { googleStart as startGoogleOAuth, googleCallback as finishGoogleOAuth } from '../features/auth/google-oauth.controller';
+import {
+  googleStart as startGoogleOAuth,
+  googleCallback as finishGoogleOAuth,
+} from '../features/auth/google-oauth.controller';
 import { billingService } from '../features/billing/billing.service';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -42,10 +45,12 @@ export class AuthController {
     const displayName = requireString(req.body.displayName, 'Name', 120);
     const password = req.body.password;
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
-    if (!validatePassword(password)) throw new AppError('Password must be 12 to 128 characters', 400);
+    if (!validatePassword(password))
+      throw new AppError('Password must be 12 to 128 characters', 400);
 
     const existing = await User.findOne({ email }).select('+passwordHash');
-    if (existing?.isEmailVerified) throw new AppError('An account already exists for this email', 409);
+    if (existing?.isEmailVerified)
+      throw new AppError('An account already exists for this email', 409);
 
     const passwordHash = await hashPassword(password);
     const user = existing || new User({ email, displayName, passwordHash, isEmailVerified: false });
@@ -75,7 +80,14 @@ export class AuthController {
     const user = await User.findById(req.authUser!.userId);
     if (!user) throw new AppError('Account not found', 404);
     syncSessionCookieForAppRoutes(req, res, req.authSession!.expiresAt);
-    res.json({ success: true, data: { user: asPublicUser(user), csrfToken: await rotateCsrfToken(req.authSession!.id), expiresAt: req.authSession?.expiresAt } });
+    res.json({
+      success: true,
+      data: {
+        user: asPublicUser(user),
+        csrfToken: await rotateCsrfToken(req.authSession!.id),
+        expiresAt: req.authSession?.expiresAt,
+      },
+    });
   });
 
   logout = asyncHandler(async (req: Request, res: Response) => {
@@ -87,7 +99,10 @@ export class AuthController {
   refresh = asyncHandler(async (req: Request, res: Response) => {
     const refreshed = await refreshSession(req, res);
     if (!refreshed) throw new AppError('Session expired. Please sign in again.', 401);
-    res.json({ success: true, data: { csrfToken: refreshed.csrfToken, expiresAt: refreshed.expiresAt } });
+    res.json({
+      success: true,
+      data: { csrfToken: refreshed.csrfToken, expiresAt: refreshed.expiresAt },
+    });
   });
 
   verifyEmail = asyncHandler(async (req: Request, res: Response) => {
@@ -105,22 +120,32 @@ export class AuthController {
     const email = requireString(req.body.email, 'Email', 254).toLowerCase();
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
     const user = await User.findOne({ email });
-    if (user && !user.isEmailVerified && user.isActive) await createEmailAction(user, 'verify-email', requestLocale(req));
-    res.json({ success: true, message: 'If the account needs verification, a new link has been sent.' });
+    if (user && !user.isEmailVerified && user.isActive)
+      await createEmailAction(user, 'verify-email', requestLocale(req));
+    res.json({
+      success: true,
+      message: 'If the account needs verification, a new link has been sent.',
+    });
   });
 
   forgotPassword = asyncHandler(async (req: Request, res: Response) => {
     const email = requireString(req.body.email, 'Email', 254).toLowerCase();
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
-    const user = await User.findOne({ email, isEmailVerified: true, isActive: true }).select('+passwordHash');
+    const user = await User.findOne({ email, isEmailVerified: true, isActive: true }).select(
+      '+passwordHash',
+    );
     if (user?.passwordHash) await createEmailAction(user, 'reset-password', requestLocale(req));
-    res.json({ success: true, message: 'If the account exists, a password reset link has been sent.' });
+    res.json({
+      success: true,
+      message: 'If the account exists, a password reset link has been sent.',
+    });
   });
 
   resetPassword = asyncHandler(async (req: Request, res: Response) => {
     const token = requireString(req.body.token, 'Reset token', 200);
     const password = req.body.password;
-    if (!validatePassword(password)) throw new AppError('Password must be 12 to 128 characters', 400);
+    if (!validatePassword(password))
+      throw new AppError('Password must be 12 to 128 characters', 400);
     const user = await consumeEmailAction(token, 'reset-password');
     if (!user) throw new AppError('Password reset link is invalid or expired', 400);
     user.passwordHash = await hashPassword(password);
@@ -132,7 +157,8 @@ export class AuthController {
   changePassword = asyncHandler(async (req: Request, res: Response) => {
     const currentPassword = requireString(req.body.currentPassword, 'Current password', 128);
     const newPassword = req.body.newPassword;
-    if (!validatePassword(newPassword)) throw new AppError('New password must be 12 to 128 characters', 400);
+    if (!validatePassword(newPassword))
+      throw new AppError('New password must be 12 to 128 characters', 400);
     const user = await User.findById(req.authUser!.userId).select('+passwordHash');
     if (!user?.passwordHash || !(await verifyPassword(currentPassword, user.passwordHash))) {
       throw new AppError('Current password is incorrect', 401);

@@ -59,10 +59,7 @@ async function fixDocumentPaths() {
       const absolutePath = path.resolve(process.cwd(), currentPath);
 
       if (fs.existsSync(absolutePath)) {
-        await Document.updateOne(
-          { _id: doc._id },
-          { $set: { path: absolutePath } }
-        );
+        await Document.updateOne({ _id: doc._id }, { $set: { path: absolutePath } });
         console.log(`✅ Fixed: ${currentPath} -> ${absolutePath}`);
         fixed++;
       } else {

@@ -3,19 +3,21 @@ import { PROJECT_PROMPTS } from './project.prompts';
 import { AIJsonService } from '../../services/llm/json-response';
 import openaiService from '../../services/llm/openai.service';
 
-
 const logger = appLogger.child({ scope: 'ai-chain' });
 
 export class ProjectAIService extends AIJsonService {
-async evaluateProject(projectContent: string, rubric: any): Promise<any> {
+  async evaluateProject(projectContent: string, rubric: any): Promise<any> {
     try {
       logger.debug('🔗 Chain: Evaluating project');
 
-      const response = await openaiService.completion(PROJECT_PROMPTS.PROJECT_EVALUATION.user(projectContent, rubric), {
-        systemPrompt: PROJECT_PROMPTS.PROJECT_EVALUATION.system,
-        temperature: 0.3,
-        stage: 'project_evaluation',
-      });
+      const response = await openaiService.completion(
+        PROJECT_PROMPTS.PROJECT_EVALUATION.user(projectContent, rubric),
+        {
+          systemPrompt: PROJECT_PROMPTS.PROJECT_EVALUATION.system,
+          temperature: 0.3,
+          stage: 'project_evaluation',
+        },
+      );
 
       const parsed = this.parseJSON(response, {
         score: 3.0,

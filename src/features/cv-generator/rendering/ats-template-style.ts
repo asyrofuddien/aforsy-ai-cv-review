@@ -27,9 +27,9 @@ export function applyAtsTemplateStyle(
     throw new Error('Unsupported ATS template layout');
   }
   if (
-    !['0.3in', '0.4in', '0.5in'].includes(layout.pageMargin)
-    || !/^#[0-9a-f]{6}$/i.test(layout.headingColor)
-    || !/^#[0-9a-f]{6}$/i.test(layout.accentColor)
+    !['0.3in', '0.4in', '0.5in'].includes(layout.pageMargin) ||
+    !/^#[0-9a-f]{6}$/i.test(layout.headingColor) ||
+    !/^#[0-9a-f]{6}$/i.test(layout.accentColor)
   ) {
     throw new Error('Invalid ATS template layout configuration');
   }
@@ -38,10 +38,12 @@ export function applyAtsTemplateStyle(
   const configuredStyles = `${atsTemplateStyles}\nbody.ats-template--${variant} h2.section-title { color: ${layout.headingColor}; border-bottom-color: ${layout.accentColor}; }`;
   const result = styledHtml.replace(/<\/head>/i, `<style>${configuredStyles}</style></head>`);
   const hasSemanticHeadings = /<h1\b/i.test(result) && /<h2\b/i.test(result);
-  const hasFontAndMargins = /font-family\s*:/i.test(result) && /(?:padding|margin)\s*:/i.test(result);
+  const hasFontAndMargins =
+    /font-family\s*:/i.test(result) && /(?:padding|margin)\s*:/i.test(result);
   const hasUnsupportedLayout = /<(?:table|img)\b/i.test(result);
-  const hasUnsafeLinks = [...result.matchAll(/\bhref\s*=\s*["']([^"']*)["']/gi)]
-    .some(([, href]) => /^\s*(?:javascript|data):/i.test(href));
+  const hasUnsafeLinks = [...result.matchAll(/\bhref\s*=\s*["']([^"']*)["']/gi)].some(([, href]) =>
+    /^\s*(?:javascript|data):/i.test(href),
+  );
 
   if (!hasSemanticHeadings || !hasFontAndMargins || hasUnsupportedLayout || hasUnsafeLinks) {
     throw new Error('ATS template validation failed');

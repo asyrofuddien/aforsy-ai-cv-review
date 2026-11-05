@@ -4,6 +4,8 @@
   "scripts": {
     "dev": "nodemon",
     "build": "node scripts/clean-dist.cjs && tsc --incremental false",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\" \"scripts/**/*.{ts,tsx,js,jsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\" \"scripts/**/*.{ts,tsx,js,jsx}\"",
     "postbuild": "mkdir -p dist && cp -r results dist/results",
     "start": "node dist/server.js",
     "seed": "ts-node scripts/seed-job-descriptions.ts",
@@ -62,6 +64,7 @@
     "@typescript-eslint/parser": "8.46.2",
     "eslint": "8.57.1",
     "nodemon": "^2.0.22",
+    "prettier": "^3.9.10",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   }

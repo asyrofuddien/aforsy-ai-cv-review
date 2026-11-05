@@ -24,7 +24,7 @@ const UserProfileSchema = new Schema(
     seniority: { type: String, required: true },
     primary_skills: [{ type: String }],
   },
-  { _id: false }
+  { _id: false },
 );
 
 const JobSuggestionSchema = new Schema(
@@ -40,38 +40,38 @@ const JobSuggestionSchema = new Schema(
     job_description: { type: String },
     posted_at: { type: String },
     link: { type: String, required: true },
-    skill_match: { 
-      type: Number, 
+    skill_match: {
+      type: Number,
       required: true,
       min: 0,
       max: 100,
-      default: 0
+      default: 0,
     },
-    experience_match: { 
-      type: Number, 
+    experience_match: {
+      type: Number,
       required: true,
       min: 0,
       max: 100,
-      default: 0
+      default: 0,
     },
-    responsibility_match: { 
-      type: Number, 
+    responsibility_match: {
+      type: Number,
       required: true,
       min: 0,
       max: 100,
-      default: 0
+      default: 0,
     },
-    score: { 
-      type: Number, 
+    score: {
+      type: Number,
       required: true,
       min: 0,
       max: 100,
-      default: 0
+      default: 0,
     },
     grade: { type: String, required: true, default: 'F' },
     explanation: { type: String, required: true, default: 'No explanation available' },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const EvaluationSummarySchema = new Schema(
@@ -80,7 +80,7 @@ const EvaluationSummarySchema = new Schema(
     improvements: [{ type: String }],
     next_steps: [{ type: String }],
   },
-  { _id: false }
+  { _id: false },
 );
 
 const EvaluationResultSchema = new Schema(
@@ -90,7 +90,7 @@ const EvaluationResultSchema = new Schema(
     jobs: [JobSuggestionSchema],
     summary: { type: EvaluationSummarySchema, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const CvMatcherSchema = new Schema(
@@ -120,7 +120,7 @@ const CvMatcherSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model<IEvaluation>('CvMatcher', CvMatcherSchema);

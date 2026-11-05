@@ -15,5 +15,5 @@ export const isStrongPassword = (password: string): boolean => {
 };
 
 export const sanitizeInput = (input: string): string => {
-  return input.trim().replace(/[<>]/g, "");
+  return input.trim().replace(/[<>]/g, '');
 };

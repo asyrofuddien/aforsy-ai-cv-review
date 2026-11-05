@@ -20,7 +20,11 @@ import { getAffiliateConfig } from '../controllers/affiliate.controller';
 const router = Router();
 
 router.use('/auth', authRoutes);
-router.post('/webhooks/lynk/receive', rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false }), receiveLynkWebhook);
+router.post(
+  '/webhooks/lynk/receive',
+  rateLimit({ windowMs: 60_000, max: 120, standardHeaders: true, legacyHeaders: false }),
+  receiveLynkWebhook,
+);
 router.get('/affiliate/config', getAffiliateConfig);
 router.use('/', systemRoutes);
 router.use('/', documentRoutes);

@@ -46,7 +46,10 @@ export default {
   },
   upload: {
     maxFileSize: env.MAX_FILE_SIZE as number,
-    allowedTypes: (env.ALLOWED_FILE_TYPES as string).split(',').map((type) => type.trim()).filter(Boolean),
+    allowedTypes: (env.ALLOWED_FILE_TYPES as string)
+      .split(',')
+      .map((type) => type.trim())
+      .filter(Boolean),
     uploadDir: env.UPLOAD_DIR as string,
   },
   queue: {
@@ -58,7 +61,10 @@ export default {
     maxRequests: env.RATE_LIMIT_MAX_REQUESTS as number,
   },
   cors: {
-    allowedOrigins: (env.CORS_ORIGINS as string).split(',').map((origin) => origin.trim()).filter(Boolean),
+    allowedOrigins: (env.CORS_ORIGINS as string)
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean),
   },
   auth: {
     frontendUrl: env.FRONTEND_URL as string,
@@ -85,8 +91,14 @@ export default {
     rapidApiPlatform: env.RAPIDAPI_PLATFORM as 'linkedin' | 'indeed' | 'bing' | 'xing',
     rapidApiCountryCode: env.RAPIDAPI_COUNTRY_CODE as string,
     rapidApiMaxPages: env.RAPIDAPI_MAX_PAGES as number,
-    greenhouseBoards: (env.GREENHOUSE_BOARDS as string).split(',').map((item) => item.trim()).filter(Boolean),
-    leverSites: (env.LEVER_SITES as string).split(',').map((item) => item.trim()).filter(Boolean),
+    greenhouseBoards: (env.GREENHOUSE_BOARDS as string)
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+    leverSites: (env.LEVER_SITES as string)
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
   },
   shutdown: {
     gracePeriodMs: env.SHUTDOWN_GRACE_PERIOD_MS as number,

@@ -7,20 +7,30 @@ const apply = process.argv.includes('--apply');
 const databaseName = new URL(config.database.mongoUri).pathname.slice(1);
 type MongoIndexDirection = 1 | -1 | '2d' | '2dsphere' | 'geoHaystack' | 'hashed' | 'text';
 
-function normalizeIndexKeys(keys: Record<string, string | number>): Record<string, MongoIndexDirection> {
+function normalizeIndexKeys(
+  keys: Record<string, string | number>,
+): Record<string, MongoIndexDirection> {
   const normalized: Record<string, MongoIndexDirection> = {};
   for (const [field, direction] of Object.entries(keys)) {
     if (direction === 'asc' || direction === 'ascending') normalized[field] = 1;
     else if (direction === 'desc' || direction === 'descending') normalized[field] = -1;
-    else if (direction === 1 || direction === -1 || direction === '2d' || direction === '2dsphere' ||
-      direction === 'geoHaystack' || direction === 'hashed' || direction === 'text') normalized[field] = direction;
+    else if (
+      direction === 1 ||
+      direction === -1 ||
+      direction === '2d' ||
+      direction === '2dsphere' ||
+      direction === 'geoHaystack' ||
+      direction === 'hashed' ||
+      direction === 'text'
+    )
+      normalized[field] = direction;
     else throw new Error(`Unsupported MongoDB index direction for ${field}.`);
   }
   return normalized;
 }
 
 async function main(): Promise<void> {
-  const plan = billingModelIndexPlan.flatMap(model =>
+  const plan = billingModelIndexPlan.flatMap((model) =>
     model.indexes.map(([keys, options]) => ({
       collection: model.collection,
       keys: normalizeIndexKeys(keys),
@@ -29,19 +39,25 @@ async function main(): Promise<void> {
   );
 
   if (!apply) {
-    console.log(JSON.stringify({ mode: 'dry-run', migrationKey, databaseName, indexes: plan }, null, 2));
+    console.log(
+      JSON.stringify({ mode: 'dry-run', migrationKey, databaseName, indexes: plan }, null, 2),
+    );
     return;
   }
 
-  const stagingTarget = config.nodeEnv !== 'production' &&
+  const stagingTarget =
+    config.nodeEnv !== 'production' &&
     process.env.BILLING_MIGRATION_TARGET === 'staging' &&
     /(?:^|[-_])staging(?:$|[-_])/i.test(databaseName);
-  const productionTarget = config.nodeEnv === 'production' &&
+  const productionTarget =
+    config.nodeEnv === 'production' &&
     databaseName === 'cv-evaluation' &&
     process.env.BILLING_MIGRATION_TARGET === 'production' &&
     process.env.BILLING_PRODUCTION_CONFIRM === databaseName;
   if (!stagingTarget && !productionTarget) {
-    throw new Error('Apply requires the staging guard or explicit production target and database-name confirmation.');
+    throw new Error(
+      'Apply requires the staging guard or explicit production target and database-name confirmation.',
+    );
   }
 
   await mongoose.connect(config.database.mongoUri);
@@ -50,7 +66,10 @@ async function main(): Promise<void> {
     if (!db) throw new Error('MongoDB connection has no selected database.');
 
     const checkpoints = db.collection('billing_schema_migrations');
-    await checkpoints.createIndex({ migrationKey: 1 }, { unique: true, name: 'migration_key_unique' });
+    await checkpoints.createIndex(
+      { migrationKey: 1 },
+      { unique: true, name: 'migration_key_unique' },
+    );
     if (await checkpoints.findOne({ migrationKey })) {
       console.log(JSON.stringify({ mode: 'already-applied', migrationKey, databaseName }));
       return;
@@ -60,13 +79,18 @@ async function main(): Promise<void> {
       await db.collection(index.collection).createIndex(index.keys, index.options);
     }
     await checkpoints.insertOne({ migrationKey, appliedAt: new Date(), indexCount: plan.length });
-    console.log(JSON.stringify({ mode: 'applied', migrationKey, databaseName, indexCount: plan.length }));
+    console.log(
+      JSON.stringify({ mode: 'applied', migrationKey, databaseName, indexCount: plan.length }),
+    );
   } finally {
     await mongoose.disconnect();
   }
 }
 
-void main().catch(error => {
-  console.error('Billing index migration failed:', error instanceof Error ? error.message : 'unknown error');
+void main().catch((error) => {
+  console.error(
+    'Billing index migration failed:',
+    error instanceof Error ? error.message : 'unknown error',
+  );
   process.exitCode = 1;
 });

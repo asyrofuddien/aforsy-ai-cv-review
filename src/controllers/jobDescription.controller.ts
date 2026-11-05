@@ -19,16 +19,24 @@ export class JobDescriptionController {
   });
 
   getAll = asyncHandler(async (req: Request, res: Response) => {
-    const result = await jobDescriptionService.list(req.query.page, req.query.limit, req.query.search);
+    const result = await jobDescriptionService.list(
+      req.query.page,
+      req.query.limit,
+      req.query.search,
+    );
     res.status(200).json({ success: true, ...result });
   });
 
   getOne = asyncHandler(async (req: Request, res: Response) => {
-    res.status(200).json({ success: true, data: await jobDescriptionService.getById(req.params.id) });
+    res
+      .status(200)
+      .json({ success: true, data: await jobDescriptionService.getById(req.params.id) });
   });
 
   getBySlug = asyncHandler(async (req: Request, res: Response) => {
-    res.status(200).json({ success: true, data: await jobDescriptionService.getBySlug(req.params.slug) });
+    res
+      .status(200)
+      .json({ success: true, data: await jobDescriptionService.getBySlug(req.params.slug) });
   });
 
   update = asyncHandler(async (req: Request, res: Response) => {

@@ -14,7 +14,11 @@ export interface PdfRenderOptions {
   protocolTimeoutMs: number;
 }
 
-export async function renderCvPdf(html: string, fileName: string, options: PdfRenderOptions): Promise<Buffer> {
+export async function renderCvPdf(
+  html: string,
+  fileName: string,
+  options: PdfRenderOptions,
+): Promise<Buffer> {
   const resultsDir = path.join(process.cwd(), 'results');
   const temporaryId = randomUUID();
   const htmlPath = path.join(resultsDir, `${fileName}-${temporaryId}.html`);

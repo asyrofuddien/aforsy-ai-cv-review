@@ -14,7 +14,8 @@ const createAuthLimiter = (
     windowMs,
     max,
     message,
-    handler: (_req, res, _next, options) => res.status(options.statusCode).json({success:false,message}),
+    handler: (_req, res, _next, options) =>
+      res.status(options.statusCode).json({ success: false, message }),
     skipSuccessfulRequests,
     standardHeaders: true,
     legacyHeaders: false,
@@ -44,7 +45,11 @@ router.post(
 );
 router.post(
   '/resend-verification',
-  createAuthLimiter(60 * 60 * 1000, 5, 'Too many verification emails requested. Please try again later.'),
+  createAuthLimiter(
+    60 * 60 * 1000,
+    5,
+    'Too many verification emails requested. Please try again later.',
+  ),
   authController.resendVerification,
 );
 router.post(
@@ -54,7 +59,11 @@ router.post(
 );
 router.post(
   '/reset-password',
-  createAuthLimiter(15 * 60 * 1000, 10, 'Too many password reset attempts. Please try again later.'),
+  createAuthLimiter(
+    15 * 60 * 1000,
+    10,
+    'Too many password reset attempts. Please try again later.',
+  ),
   authController.resetPassword,
 );
 router.get('/google', authController.googleStart);

@@ -5,8 +5,12 @@ import { ReviewJobPayload } from '../../features/review/review.types';
 
 /** @deprecated The worker now calls feature workflows directly. */
 class EvaluationService {
-  processEvaluation(payload: ReviewJobPayload) { return reviewWorkflow.process(payload); }
-  processCvMatcher(payload: MatcherJobPayload) { return matcherWorkflow.process(payload); }
+  processEvaluation(payload: ReviewJobPayload) {
+    return reviewWorkflow.process(payload);
+  }
+  processCvMatcher(payload: MatcherJobPayload) {
+    return matcherWorkflow.process(payload);
+  }
 }
 
 export default new EvaluationService();

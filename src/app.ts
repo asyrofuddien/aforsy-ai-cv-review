@@ -1,5 +1,5 @@
 /// <reference path="./types/auth.d.ts" />
-import {localeMiddleware} from './middlewares/locale.middleware';
+import { localeMiddleware } from './middlewares/locale.middleware';
 import express from 'express';
 import { requestLogging } from './middlewares/request-logging.middleware';
 import cors from 'cors';

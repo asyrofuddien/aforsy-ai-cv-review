@@ -18,7 +18,7 @@ const TemplateSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model<ITemplate>('template', TemplateSchema);

@@ -18,10 +18,14 @@ export class ParserService {
       }
 
       switch (mimeType) {
-        case 'application/pdf': return await parsePdf(filePath);
-        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': return await parseDocx(filePath);
-        case 'text/plain': return await parseTxt(filePath);
-        default: throw new AppError('Unsupported file type', 400);
+        case 'application/pdf':
+          return await parsePdf(filePath);
+        case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+          return await parseDocx(filePath);
+        case 'text/plain':
+          return await parseTxt(filePath);
+        default:
+          throw new AppError('Unsupported file type', 400);
       }
     } catch (error) {
       if (error instanceof AppError) throw error;

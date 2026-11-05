@@ -1,4 +1,8 @@
-import type { ReviewCriterion, ReviewStrength, RequirementMatch } from '../features/review/review.scoring';
+import type {
+  ReviewCriterion,
+  ReviewStrength,
+  RequirementMatch,
+} from '../features/review/review.scoring';
 // ==========================================
 // PERSONAL INFORMATION
 // ==========================================

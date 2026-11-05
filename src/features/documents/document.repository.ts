@@ -6,11 +6,16 @@ import path from 'path';
 const logger = appLogger.child({ scope: 'documents' });
 
 export class DocumentService {
-  async saveDocument(fileData: Express.Multer.File, type: 'cv' | 'project', userId: string, content?: string): Promise<IDocument> {
+  async saveDocument(
+    fileData: Express.Multer.File,
+    type: 'cv' | 'project',
+    userId: string,
+    content?: string,
+  ): Promise<IDocument> {
     try {
       // Ensure we save absolute path for reliable access later
-      const absolutePath = path.isAbsolute(fileData.path) 
-        ? fileData.path 
+      const absolutePath = path.isAbsolute(fileData.path)
+        ? fileData.path
         : path.resolve(process.cwd(), fileData.path);
 
       const document = new Document({
@@ -36,8 +41,6 @@ export class DocumentService {
   async getOwnedByFilename(filename: string, ownerId: string): Promise<IDocument | null> {
     return Document.findOne({ filename, userId: ownerId });
   }
-
-
 }
 
 export default new DocumentService();

@@ -2,16 +2,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as Handlebars from 'handlebars';
 
-Handlebars.registerHelper('lookup', (value: Record<string, unknown>, field: string) => value[field]);
+Handlebars.registerHelper(
+  'lookup',
+  (value: Record<string, unknown>, field: string) => value[field],
+);
 Handlebars.registerHelper('eq', (left: unknown, right: unknown) => left === right);
-Handlebars.registerHelper('ifEquals', function (
-  this: unknown,
-  left: unknown,
-  right: unknown,
-  options: Handlebars.HelperOptions,
-) {
-  return left === right ? options.fn(this) : options.inverse(this);
-});
+Handlebars.registerHelper(
+  'ifEquals',
+  function (this: unknown, left: unknown, right: unknown, options: Handlebars.HelperOptions) {
+    return left === right ? options.fn(this) : options.inverse(this);
+  },
+);
 
 export function loadCvTemplate(storedContent: string | undefined, relativePath: string): string {
   if (storedContent?.trim()) return storedContent;

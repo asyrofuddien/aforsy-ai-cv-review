@@ -11,7 +11,11 @@ export interface ReviewCriterion {
   exampleRevision?: string;
 }
 
-export interface ReviewStrength { title: string; evidence: string; section: string; }
+export interface ReviewStrength {
+  title: string;
+  evidence: string;
+  section: string;
+}
 export interface RequirementMatch {
   requirement: string;
   status: 'supported' | 'partial' | 'not_visible';
@@ -21,13 +25,30 @@ export interface RequirementMatch {
 
 export function validateAndAggregateReview(input: unknown): number {
   const criteria = input as ReviewCriterion[];
-  if (!Array.isArray(criteria) || criteria.length !== 6 || criteria.some(item =>
-    !item || typeof item.name !== 'string' ||
-    !(item.score === null && item.evidenceStatus === 'not_assessable' || typeof item.score === 'number' && Number.isFinite(item.score) && item.score >= 0 && item.score <= 5) ||
-    typeof item.evidence !== 'string' || typeof item.suggestion !== 'string')) {
+  if (
+    !Array.isArray(criteria) ||
+    criteria.length !== 6 ||
+    criteria.some(
+      (item) =>
+        !item ||
+        typeof item.name !== 'string' ||
+        !(
+          (item.score === null && item.evidenceStatus === 'not_assessable') ||
+          (typeof item.score === 'number' &&
+            Number.isFinite(item.score) &&
+            item.score >= 0 &&
+            item.score <= 5)
+        ) ||
+        typeof item.evidence !== 'string' ||
+        typeof item.suggestion !== 'string',
+    )
+  ) {
     throw new Error('AI returned an incomplete review. Please retry.');
   }
-  const assessed = criteria.filter((item): item is ReviewCriterion & { score: number } => item.score !== null);
-  if (!assessed.length) throw new Error('AI returned an incomplete review. No criteria could be assessed.');
-  return Math.round(assessed.reduce((sum, item) => sum + item.score, 0) / assessed.length * 20);
+  const assessed = criteria.filter(
+    (item): item is ReviewCriterion & { score: number } => item.score !== null,
+  );
+  if (!assessed.length)
+    throw new Error('AI returned an incomplete review. No criteria could be assessed.');
+  return Math.round((assessed.reduce((sum, item) => sum + item.score, 0) / assessed.length) * 20);
 }

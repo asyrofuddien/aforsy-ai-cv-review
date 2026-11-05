@@ -40,7 +40,7 @@ const CvAtsSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export default mongoose.model<ICvAts>('ats_pdf', CvAtsSchema);

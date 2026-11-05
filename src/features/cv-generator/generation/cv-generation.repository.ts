@@ -7,7 +7,9 @@ export const cvGenerationRepository = {
   findLegacyTemplate: () => TemplateModel.findOne().lean(),
   findNewTemplate: () => TemplateModel.findOne({ name: 'new_template' }).lean(),
   findNewTemplateContent: async () => {
-    const stored = await TemplateModel.findOne({ name: 'new_template' }).lean() as { content?: string } | null;
+    const stored = (await TemplateModel.findOne({ name: 'new_template' }).lean()) as {
+      content?: string;
+    } | null;
     return stored?.content;
   },
   findActiveTemplate: (templateId: string) => getActiveAtsTemplate(templateId),
@@ -25,9 +27,15 @@ export const cvGenerationRepository = {
     ]);
     return { records, total };
   },
-  findPdfForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('pdf_file'),
-  findHtmlForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('html_text'),
-  findSourceForOwner: (id: string, ownerId: string) => AtsPdf.findOne({ _id: id, userId: ownerId }).select('source_data'),
-  findActiveTemplates: () => AtsTemplate.find({ status: 'active' })
-    .select('id name description version status layout preview').sort({ name: 1 }).lean(),
+  findPdfForOwner: (id: string, ownerId: string) =>
+    AtsPdf.findOne({ _id: id, userId: ownerId }).select('pdf_file'),
+  findHtmlForOwner: (id: string, ownerId: string) =>
+    AtsPdf.findOne({ _id: id, userId: ownerId }).select('html_text'),
+  findSourceForOwner: (id: string, ownerId: string) =>
+    AtsPdf.findOne({ _id: id, userId: ownerId }).select('source_data'),
+  findActiveTemplates: () =>
+    AtsTemplate.find({ status: 'active' })
+      .select('id name description version status layout preview')
+      .sort({ name: 1 })
+      .lean(),
 };

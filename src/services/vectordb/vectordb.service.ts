@@ -27,10 +27,7 @@ class VectorDBService {
   > = new Map();
 
   // Simple dimension reduction using averaging
-  private reduceDimensions(
-    embedding: number[],
-    targetDim: number = 384
-  ): number[] {
+  private reduceDimensions(embedding: number[], targetDim: number = 384): number[] {
     const sourceLength = embedding.length;
     const ratio = sourceLength / targetDim;
     const reduced: number[] = [];
@@ -48,9 +45,7 @@ class VectorDBService {
     }
 
     // Normalize the reduced vector
-    const magnitude = Math.sqrt(
-      reduced.reduce((sum, val) => sum + val * val, 0)
-    );
+    const magnitude = Math.sqrt(reduced.reduce((sum, val) => sum + val * val, 0));
     return reduced.map((val) => val / magnitude);
   }
 
@@ -72,7 +67,7 @@ class VectorDBService {
               text: doc.text,
             },
           };
-        })
+        }),
       );
 
       const pinecone = getPineconeClient();
@@ -127,9 +122,7 @@ class VectorDBService {
             metadata: data.metadata,
             text: data.text,
           }))
-          .filter(
-            (result) => !filter || this.matchesFilter(result.metadata, filter)
-          )
+          .filter((result) => !filter || this.matchesFilter(result.metadata, filter))
           .sort((a, b) => b.score - a.score)
           .slice(0, topK);
 
