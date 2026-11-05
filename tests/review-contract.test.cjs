@@ -164,3 +164,25 @@ test('job matching failure leaves a successful CV review completed and reports t
   assert.equal(calls[0][0], 'complete');
   assert.equal(calls.some(([type]) => type === 'fail'), false);
 });
+
+test('deferred matching saves the review and sends its email before searching jobs', async () => {
+  const { createReviewWorkflow } = loadTs('src/features/review/review.workflow.ts', {
+    './review.response': loadTs('src/features/review/review.response.ts'),
+  });
+  const calls = [];
+  const workflow = createReviewWorkflow({
+    repository: {
+      markProcessing: async () => ({}), findJobDescription: async () => null,
+      complete: async (_id, _name, result, profile) => { calls.push('saved'); assert.equal(result.jobMatchingStatus, 'processing'); assert.equal(profile.name, 'Synthetic Person'); return {}; },
+      fail: async () => { throw new Error('Review should remain ready'); },
+    },
+    evaluator: { evaluate: async () => ({ extractedInfo: { name: 'Synthetic Person' }, matchRate: 80, evaluation: { criteria: criteria(), feedback: 'Ready' } }) },
+    summary: { generateFinalSummary: async () => ({}) },
+    jobMatcher: { findMatches: async () => { calls.push('matching'); return { suggestedRoles: [], jobs: [] }; } },
+    notifyCompleted: async () => calls.push('email'),
+    logger,
+  });
+  const result = await workflow.process({ evaluationId: 'evaluation-deferred', cvDocumentId: 'cv-1', deferMatching: true });
+  assert.equal(result.jobMatchingStatus, 'processing');
+  assert.deepEqual(calls, ['saved', 'email']);
+});

@@ -244,7 +244,7 @@ export interface EvaluationResult {
   requirementMatches?: RequirementMatch[];
   suggestedRoles?: string[];
   jobMatches?: JobListing[];
-  jobMatchingStatus?: 'completed' | 'failed' | 'not_run';
+  jobMatchingStatus?: 'completed' | 'failed' | 'not_run' | 'processing';
   jobMatchingError?: string;
   mode?: 'general' | 'job_specific';
   jobDescription?: { id: string; title: string; company: string; text?: string };

@@ -9,6 +9,7 @@ export interface ReviewJobPayload {
   locale?: 'id' | 'en';
   attempt?: number;
   maxAttempts?: number;
+  deferMatching?: boolean;
 }
 
 export interface ReviewDescription {
@@ -41,7 +42,7 @@ export interface ReviewResult {
   criteria: ReviewCriterion[];
   jobMatches: unknown[];
   suggestedRoles: string[];
-  jobMatchingStatus: 'completed' | 'failed' | 'not_run';
+  jobMatchingStatus: 'completed' | 'failed' | 'not_run' | 'processing';
   jobMatchingError?: string;
   schemaVersion?: number;
   strengths?: ReviewStrength[];

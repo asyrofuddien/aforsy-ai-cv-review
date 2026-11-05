@@ -119,7 +119,8 @@ export function createReviewWorkflow(dependencies: ReviewWorkflowDependencies) {
           locale,
           summaryResult,
         );
-        if (jobMatcher) {
+        if (payload.deferMatching && jobMatcher) response.jobMatchingStatus = 'processing';
+        if (jobMatcher && !payload.deferMatching) {
           try {
             const matches = await runStage(
               logger,

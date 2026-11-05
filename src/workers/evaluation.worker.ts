@@ -18,6 +18,35 @@ import { randomUUID } from 'crypto';
 import { localBillingReconciler } from './reconciler.worker';
 
 const logger = appLogger.child({ scope: 'worker' });
+async function finishReviewMatching(evaluationId: string): Promise<void> {
+  const review = await Evaluation.findById(evaluationId)
+    .select('+matchingProfile status result.jobMatchingStatus')
+    .lean();
+  if (review?.status !== 'completed' || review.result?.jobMatchingStatus !== 'processing') return;
+  if (!review.matchingProfile) throw new Error('Review matching profile is unavailable');
+  const matching = await jobMatcher.findMatches(review.matchingProfile);
+  await Evaluation.updateOne(
+    { _id: evaluationId, 'result.jobMatchingStatus': 'processing' },
+    {
+      $set: {
+        'result.jobMatches': matching.jobs,
+        'result.suggestedRoles': matching.suggestedRoles,
+        'result.jobMatchingStatus': 'completed',
+      },
+    },
+  );
+}
+async function failReviewMatching(evaluationId: string): Promise<void> {
+  await Evaluation.updateOne(
+    { _id: evaluationId, status: 'completed', 'result.jobMatchingStatus': 'processing' },
+    {
+      $set: {
+        'result.jobMatchingStatus': 'failed',
+        'result.jobMatchingError': 'Job matching could not run. Your CV review is ready.',
+      },
+    },
+  );
+}
 function processJob(
   job: Job<ReviewQueuePayload | MatcherQueuePayload>,
   type: 'review' | 'cv-matcher',
@@ -33,18 +62,29 @@ function processJob(
       const started = performance.now();
       logger.info('Job started', { type, attempt: job.attemptsMade + 1 });
       // Queue's failed event owns failure logging; lower layers rethrow for retry.
-      const result =
-        type === 'review'
-          ? await reviewWorkflow.process({
-              ...(job.data as ReviewQueuePayload),
-              attempt: job.attemptsMade + 1,
-              maxAttempts: Number(job.opts.attempts) || 1,
-            })
-          : await matcherWorkflow.process({
-              ...(job.data as MatcherQueuePayload),
-              attempt: job.attemptsMade + 1,
-              maxAttempts: Number(job.opts.attempts) || 1,
-            });
+      let result;
+      if (type === 'review') {
+        const payload = job.data as ReviewQueuePayload;
+        result = await reviewWorkflow.process({
+          ...payload,
+          attempt: job.attemptsMade + 1,
+          maxAttempts: Number(job.opts.attempts) || 1,
+          deferMatching: true,
+        });
+        try {
+          await finishReviewMatching(String(payload.evaluationId));
+        } catch (error) {
+          if (job.attemptsMade + 1 >= Number(job.opts.attempts || 1))
+            await failReviewMatching(String(payload.evaluationId));
+          else throw error;
+        }
+      } else {
+        result = await matcherWorkflow.process({
+          ...(job.data as MatcherQueuePayload),
+          attempt: job.attemptsMade + 1,
+          maxAttempts: Number(job.opts.attempts) || 1,
+        });
+      }
       logger.info('Job completed', {
         type,
         durationMs: Math.round(performance.now() - started),
@@ -131,7 +171,9 @@ async function processDurableOperation(job: Job<{ operationId: string }>) {
       locale: op.locale === 'id' ? 'id' : 'en',
       attempt: op.attemptCount,
       maxAttempts: op.maxAttempts,
+      deferMatching: true,
     });
+    await finishReviewMatching(evaluationId);
     const evaluation = await Evaluation.findById(evaluationId).select('status result').lean();
     if (!evaluation || evaluation.status !== 'completed' || !evaluation.result)
       throw new Error('Review did not produce a completed result');
@@ -148,6 +190,12 @@ async function processDurableOperation(job: Job<{ operationId: string }>) {
     return { status: 'completed', hadReviewResult: Boolean(reviewResult) };
   } catch (error) {
     if (job.attemptsMade + 1 >= Number(job.opts.attempts || 1)) {
+      const failedReview = await AiOperation.findById(operationId)
+        .select('resourceId action')
+        .lean();
+      if (failedReview?.action === 'cv_review_bundle' && failedReview.resourceId) {
+        await failReviewMatching(String(failedReview.resourceId));
+      }
       await operationService.releaseTerminal(operationId, 'operation_failed_final', workerToken);
     } else {
       await operationService.retryLease(operationId, workerToken);

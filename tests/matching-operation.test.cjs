@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const { loadTs, invoke } = require('./helpers/load-ts.cjs');
 class AppError extends Error { constructor(message, statusCode) { super(message); this.statusCode = statusCode; } }
 
-function fixture(action = 'cv_review_bundle', status = 'running') {
+function fixture(action = 'cv_review_bundle', status = 'running', matchingStatus = 'failed') {
   const op = { _id: new mongoose.Types.ObjectId(), userId: new mongoose.Types.ObjectId(), resourceId: new mongoose.Types.ObjectId(), status, action, workerToken: 'owner', stateVersion: 0, locale: 'id', set(key, value) { this[key] = value; }, async save() {} };
   op.id = String(op._id);
   const session = { async withTransaction(work) { return work(); }, async endSession() {} };
@@ -20,8 +20,8 @@ function fixture(action = 'cv_review_bundle', status = 'running') {
     },
     '../billing/billing.service': { billingService: { settleCreditOperation: async (...args) => { assert.equal(args[3], session); calls.billing.push(args); } } },
     '../../models/evaluation.model': {
-      findOne: filter => ({ session: async actual => { assert.equal(actual, session); assert.equal(filter.userId, op.userId); return { status: 'completed' }; } }),
-      updateOne: async (filter, update, options) => { assert.equal(options.session, session); assert.equal(String(filter.matchingRetryOperationId), op.id); assert.equal(filter.userId, op.userId); calls.updates.push(update); return { modifiedCount }; },
+      findOne: filter => ({ session: async actual => { assert.equal(actual, session); assert.equal(filter.userId, op.userId); return { status: 'completed', result: { jobMatchingStatus: matchingStatus } }; } }),
+      updateOne: async (filter, update, options) => { assert.equal(options.session, session); if (action === 'job_match_retry') assert.equal(String(filter.matchingRetryOperationId), op.id); assert.equal(filter.userId, op.userId); calls.updates.push(update); return { modifiedCount }; },
     },
   });
   return { op, calls, operationService, loseClaim: () => { modifiedCount = 0; } };
@@ -37,7 +37,7 @@ test('partial review settlement is fenced and durable; duplicate finalization ca
   assert.equal(f.calls.results[0].$setOnInsert.resultData.evaluationId, String(f.op.resourceId));
   await f.operationService.savePartialAndSettle(f.op.id, 'matching_failed_final', {}, 'owner');
   assert.equal(f.calls.billing.length, 1);
-  assert.equal(f.calls.outbox.length, 1);
+  assert.equal(f.calls.outbox.length, 0);
 });
 
 test('a last-attempt crash after saving a partial review still returns only one matching credit', async () => {
@@ -46,6 +46,21 @@ test('a last-attempt crash after saving a partial review still returns only one 
   assert.equal(f.op.status, 'completed_partial');
   assert.equal(f.calls.billing.length, 1);
   assert.equal(f.calls.billing[0][1], 'partial');
+});
+
+test('terminal recovery charges review only when matching is still processing', async () => {
+  const f = fixture('cv_review_bundle', 'queued', 'processing');
+  await f.operationService.releaseTerminal(f.op.id, 'lease_expired_final');
+  assert.equal(f.op.status, 'completed_partial');
+  assert.equal(f.calls.billing[0][1], 'partial');
+  assert.equal(f.calls.updates[0].$set['result.jobMatchingStatus'], 'failed');
+});
+
+test('terminal recovery captures the full bundle after matching was saved', async () => {
+  const f = fixture('cv_review_bundle', 'queued', 'completed');
+  await f.operationService.releaseTerminal(f.op.id, 'lease_expired_final');
+  assert.equal(f.op.status, 'completed');
+  assert.equal(f.calls.billing[0][1], 'capture');
 });
 
 test('a successful matching-only retry saves matching and captures in the same transaction, including valid zero matches', async () => {

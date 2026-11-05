@@ -15,6 +15,13 @@ function payload() {
   } } };
 }
 
+test('Lynk checkout allowlist accepts the checkout path and rejects another host', () => {
+  const adapter = new LynkAdapter();
+  const input = { productId: 'synthetic-product', orderReference: 'local-order', checkoutUrl: 'https://lynk.id/aforsy/item/checkout' };
+  assert.equal(adapter.createOrderUrl(input), input.checkoutUrl);
+  assert.throws(() => adapter.createOrderUrl({ ...input, checkoutUrl: 'https://lynk.id.evil.test/aforsy/item/checkout' }), /not allowlisted/);
+});
+
 test('Lynk adapter verifies signature with configured key and rejects tampering', () => {
   const adapter = new LynkAdapter();
   const event = payload();

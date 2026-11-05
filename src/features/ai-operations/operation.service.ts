@@ -547,21 +547,22 @@ class OperationServiceImpl implements OperationService {
       op.leaseUntil = undefined;
       op.stateVersion += 1;
       await op.save({ session });
-      await OutboxEvent.updateOne(
-        { eventKey: `ai-operation.result-ready:${op.id}` },
-        {
-          $setOnInsert: {
-            eventKey: `ai-operation.result-ready:${op.id}`,
-            type: 'email.result_ready',
-            entityId: op._id,
-            payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale },
-            state: 'pending',
-            attempts: 0,
-            nextAttemptAt: now,
+      if (op.action === 'ai_draft')
+        await OutboxEvent.updateOne(
+          { eventKey: `ai-operation.result-ready:${op.id}` },
+          {
+            $setOnInsert: {
+              eventKey: `ai-operation.result-ready:${op.id}`,
+              type: 'email.result_ready',
+              entityId: op._id,
+              payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale },
+              state: 'pending',
+              attempts: 0,
+              nextAttemptAt: now,
+            },
           },
-        },
-        { upsert: true, session },
-      );
+          { upsert: true, session },
+        );
     });
   }
 
@@ -618,21 +619,22 @@ class OperationServiceImpl implements OperationService {
     op.leaseUntil = undefined;
     op.stateVersion += 1;
     await op.save({ session });
-    await OutboxEvent.updateOne(
-      { eventKey: `ai-operation.partial:${op.id}` },
-      {
-        $setOnInsert: {
-          eventKey: `ai-operation.partial:${op.id}`,
-          type: 'email.partial_result',
-          entityId: op._id,
-          payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale },
-          state: 'pending',
-          attempts: 0,
-          nextAttemptAt: now,
+    if (op.action !== 'cv_review_bundle')
+      await OutboxEvent.updateOne(
+        { eventKey: `ai-operation.partial:${op.id}` },
+        {
+          $setOnInsert: {
+            eventKey: `ai-operation.partial:${op.id}`,
+            type: 'email.partial_result',
+            entityId: op._id,
+            payload: { operationId: op.id, userId: op.userId.toString(), locale: op.locale },
+            state: 'pending',
+            attempts: 0,
+            nextAttemptAt: now,
+          },
         },
-      },
-      { upsert: true, session },
-    );
+        { upsert: true, session },
+      );
   }
 
   async releaseTerminal(
@@ -654,9 +656,53 @@ class OperationServiceImpl implements OperationService {
           _id: op.resourceId,
           userId: op.userId,
           status: 'completed',
-          'result.jobMatchingStatus': 'failed',
+          'result.jobMatchingStatus': { $in: ['completed', 'failed', 'processing'] },
         }).session(session);
         if (review) {
+          if (review.result?.jobMatchingStatus === 'completed') {
+            const now = new Date();
+            const result = await AiOperationResult.findOneAndUpdate(
+              { operationId: op._id },
+              {
+                $setOnInsert: {
+                  operationId: op._id,
+                  userId: op.userId,
+                  resultData: { evaluationId: String(op.resourceId) },
+                  schemaVersion: 1,
+                  source: 'review',
+                  state: 'available',
+                  expiresAt: new Date(now.getTime() + 30 * 86400_000),
+                },
+              },
+              { upsert: true, new: true, session },
+            );
+            await billingService.settleCreditOperation(
+              operationId,
+              'capture',
+              'operation_completed',
+              session,
+            );
+            op.status = 'completed';
+            op.resultId = result._id;
+            op.completedAt = now;
+            op.set('inputSnapshot', undefined);
+            op.workerToken = undefined;
+            op.leaseUntil = undefined;
+            op.stateVersion += 1;
+            await op.save({ session });
+            return;
+          }
+          if (review.result?.jobMatchingStatus === 'processing')
+            await Evaluation.updateOne(
+              { _id: op.resourceId, userId: op.userId, 'result.jobMatchingStatus': 'processing' },
+              {
+                $set: {
+                  'result.jobMatchingStatus': 'failed',
+                  'result.jobMatchingError': 'Job matching could not run. Your CV review is ready.',
+                },
+              },
+              { session },
+            );
           await this.persistPartialAndSettle(
             op,
             'matching_failed_final',
@@ -685,7 +731,7 @@ class OperationServiceImpl implements OperationService {
       op.leaseUntil = undefined;
       op.stateVersion += 1;
       await op.save({ session });
-      await OutboxEvent.updateOne(
+      if (op.action !== 'job_match_retry') await OutboxEvent.updateOne(
         { eventKey: `ai-operation.failed:${op.id}` },
         {
           $setOnInsert: {
