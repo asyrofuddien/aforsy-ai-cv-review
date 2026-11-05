@@ -1,6 +1,11 @@
 import { randomBytes, timingSafeEqual } from 'crypto';
 import { hashOpaqueToken } from './credentials.crypto';
-import { clearSessionCookie, setSessionCookie } from './session-cookie.adapter';
+import {
+  getCookie,
+  sessionCookieName,
+  clearSessionCookie,
+  setSessionCookie,
+} from './session-cookie.adapter';
 export {
   clearSessionCookie,
   csrfHeaderName,
@@ -36,7 +41,7 @@ export const promoteConfiguredAdmin = async (user: IUser): Promise<IUser> => {
 
 export const issueSession = async (user: IUser, req: Request, res: Response) => {
   const rawToken = randomBytes(32).toString('base64url');
-  const csrfToken = randomBytes(32).toString('base64url');
+  const csrfToken = hashOpaqueToken(`csrf:${rawToken}`);
   const expiresAt = new Date(Date.now() + SESSION_TTL_MS);
   await AuthSession.create({
     userId: user._id,
@@ -58,20 +63,19 @@ export const refreshSession = async (req: Request, res: Response) => {
     return null;
   }
 
-  const rawToken = randomBytes(32).toString('base64url');
-  const csrfToken = randomBytes(32).toString('base64url');
+  // Keep the shared browser session and CSRF token stable across tabs.
+  const rawToken = getCookie(req.headers.cookie, sessionCookieName);
+  if (!rawToken) throw new Error('Session cookie is required');
+  const csrfToken = await getSessionCsrfToken(session.id, rawToken);
   const expiresAt = new Date(Math.min(Date.now() + SESSION_TTL_MS, absoluteExpiry));
-  await AuthSession.findByIdAndUpdate(session.id, {
-    tokenHash: hashOpaqueToken(rawToken),
-    csrfHash: hashOpaqueToken(csrfToken),
-    expiresAt,
-  });
+  await AuthSession.findByIdAndUpdate(session.id, { expiresAt });
   setSessionCookie(req, res, rawToken, expiresAt);
   return { csrfToken, expiresAt };
 };
 
-export const rotateCsrfToken = async (sessionId: string): Promise<string> => {
-  const csrfToken = randomBytes(32).toString('base64url');
+export const getSessionCsrfToken = async (sessionId: string, rawToken: string): Promise<string> => {
+  const csrfToken = hashOpaqueToken(`csrf:${rawToken}`);
+  // Also upgrades sessions issued before deterministic CSRF tokens were introduced.
   await AuthSession.findByIdAndUpdate(sessionId, { csrfHash: hashOpaqueToken(csrfToken) });
   return csrfToken;
 };

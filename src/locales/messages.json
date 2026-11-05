@@ -4522,5 +4522,17 @@
   "Please check your input and try again.": {
     "id": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
     "en": "Please check your input and try again."
+  },
+  "Use 12–128 characters with a lowercase letter, an uppercase letter, a number, and a special character.": {
+    "id": "Gunakan 12–128 karakter dengan huruf kecil, huruf kapital, angka, dan karakter spesial.",
+    "en": "Use 12–128 characters with a lowercase letter, an uppercase letter, a number, and a special character."
+  },
+  "Password is required and must not exceed 128 characters.": {
+    "id": "Password wajib diisi dan maksimal 128 karakter.",
+    "en": "Password is required and must not exceed 128 characters."
+  },
+  "You already have a pending purchase for this package. Open it from your billing history.": {
+    "id": "Kamu sudah punya pembelian tertunda untuk paket ini. Buka dari riwayat tagihan.",
+    "en": "You already have a pending purchase for this package. Open it from your billing history."
   }
 }

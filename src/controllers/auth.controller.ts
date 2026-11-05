@@ -1,3 +1,4 @@
+import { isStrongPassword } from '../features/auth/password-policy';
 import { requestLocale } from '../utils/locale';
 import { Request, Response } from 'express';
 import { asyncHandler, AppError } from '../middlewares/error.middleware';
@@ -12,7 +13,9 @@ import {
   issueSession,
   promoteConfiguredAdmin,
   refreshSession,
-  rotateCsrfToken,
+  getSessionCsrfToken,
+  getCookie,
+  sessionCookieName,
   syncSessionCookieForAppRoutes,
   verifyPassword,
 } from '../services/auth.service';
@@ -24,8 +27,14 @@ import { billingService } from '../features/billing/billing.service';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const validatePassword = (password: unknown): password is string =>
-  typeof password === 'string' && password.length >= 12 && password.length <= 128;
+const validatePassword = isStrongPassword;
+const passwordMessage =
+  'Use 12–128 characters with a lowercase letter, an uppercase letter, a number, and a special character.';
+const readPassword = (value: unknown): string => {
+  if (typeof value !== 'string' || !value.length || value.length > 128)
+    throw new AppError('Password is required and must not exceed 128 characters.', 400);
+  return value;
+};
 
 const requireString = (value: unknown, field: string, maxLength = 200): string => {
   if (typeof value !== 'string' || !value.trim() || value.trim().length > maxLength) {
@@ -45,8 +54,7 @@ export class AuthController {
     const displayName = requireString(req.body.displayName, 'Name', 120);
     const password = req.body.password;
     if (!emailPattern.test(email)) throw new AppError('Enter a valid email address', 400);
-    if (!validatePassword(password))
-      throw new AppError('Password must be 12 to 128 characters', 400);
+    if (!validatePassword(password)) throw new AppError(passwordMessage, 400);
 
     const existing = await User.findOne({ email }).select('+passwordHash');
     if (existing?.isEmailVerified)
@@ -64,7 +72,7 @@ export class AuthController {
 
   login = asyncHandler(async (req: Request, res: Response) => {
     const email = requireString(req.body.email, 'Email', 254).toLowerCase();
-    const password = requireString(req.body.password, 'Password', 128);
+    const password = readPassword(req.body.password);
     const user = await User.findOne({ email }).select('+passwordHash');
     if (!user || !user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
       throw new AppError('Email or password is incorrect', 401);
@@ -84,7 +92,10 @@ export class AuthController {
       success: true,
       data: {
         user: asPublicUser(user),
-        csrfToken: await rotateCsrfToken(req.authSession!.id),
+        csrfToken: await getSessionCsrfToken(
+          req.authSession!.id,
+          getCookie(req.headers.cookie, sessionCookieName)!,
+        ),
         expiresAt: req.authSession?.expiresAt,
       },
     });
@@ -144,8 +155,7 @@ export class AuthController {
   resetPassword = asyncHandler(async (req: Request, res: Response) => {
     const token = requireString(req.body.token, 'Reset token', 200);
     const password = req.body.password;
-    if (!validatePassword(password))
-      throw new AppError('Password must be 12 to 128 characters', 400);
+    if (!validatePassword(password)) throw new AppError(passwordMessage, 400);
     const user = await consumeEmailAction(token, 'reset-password');
     if (!user) throw new AppError('Password reset link is invalid or expired', 400);
     user.passwordHash = await hashPassword(password);
@@ -155,10 +165,9 @@ export class AuthController {
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response) => {
-    const currentPassword = requireString(req.body.currentPassword, 'Current password', 128);
+    const currentPassword = readPassword(req.body.currentPassword);
     const newPassword = req.body.newPassword;
-    if (!validatePassword(newPassword))
-      throw new AppError('New password must be 12 to 128 characters', 400);
+    if (!validatePassword(newPassword)) throw new AppError(passwordMessage, 400);
     const user = await User.findById(req.authUser!.userId).select('+passwordHash');
     if (!user?.passwordHash || !(await verifyPassword(currentPassword, user.passwordHash))) {
       throw new AppError('Current password is incorrect', 401);

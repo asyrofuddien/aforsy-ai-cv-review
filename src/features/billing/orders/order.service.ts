@@ -105,13 +105,29 @@ export const orderService = {
           order = repeated;
           return;
         }
+        // Fixed Lynk checkout URLs cannot distinguish two orders for the same package.
+        const pendingPackageOrder = await PaymentOrder.exists({
+          userId: user._id,
+          'packageSnapshot.sku': pkg.sku,
+          paymentStatus: 'pending',
+        }).session(session);
+        if (pendingPackageOrder)
+          throw new AppError(
+            'You already have a pending purchase for this package. Open it from your billing history.',
+            409,
+            'PURCHASE_PENDING',
+          );
         if (
           (await PaymentOrder.countDocuments({
             userId: user._id,
             paymentStatus: 'pending',
           }).session(session)) >= 2
         )
-          throw new AppError('You already have two pending purchases.', 409);
+          throw new AppError(
+            'You already have two pending purchases.',
+            409,
+            'PURCHASE_PENDING_LIMIT',
+          );
         order = await PaymentOrder.create(
           [
             {
@@ -159,7 +175,7 @@ export const orderService = {
     return {
       orderId: String(order._id),
       orderNumber: order.publicOrderNumber,
-      checkoutUrl,
+      checkoutUrl: order.checkoutUrl,
       paymentStatus: order.paymentStatus,
       packageSnapshot: order.packageSnapshot,
     };

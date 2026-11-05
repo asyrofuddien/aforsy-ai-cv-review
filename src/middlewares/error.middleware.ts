@@ -6,11 +6,13 @@ const logger = appLogger.child({ scope: 'http-error' });
 export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
+  code?: string;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, statusCode: number, code?: string) {
     super(message);
     this.statusCode = statusCode;
     this.isOperational = true;
+    this.code = code;
 
     Error.captureStackTrace(this, this.constructor);
   }
@@ -59,6 +61,7 @@ export const errorMiddleware = (
     success: false,
     error: {
       message: publicMessage,
+      ...(status < 500 && (error as AppError).code ? { code: (error as AppError).code } : {}),
     },
   });
 };

@@ -37,14 +37,16 @@ export async function createEmailAction(
 }
 
 export async function consumeEmailAction(rawToken: string, purpose: EmailTokenPurpose) {
-  const token = await EmailToken.findOne({
-    tokenHash: hashOpaqueToken(rawToken),
-    purpose,
-    usedAt: { $exists: false },
-    expiresAt: { $gt: new Date() },
-  }).select('+tokenHash');
+  const token = await EmailToken.findOneAndUpdate(
+    {
+      tokenHash: hashOpaqueToken(rawToken),
+      purpose,
+      usedAt: { $exists: false },
+      expiresAt: { $gt: new Date() },
+    },
+    { $set: { usedAt: new Date() } },
+    { new: true },
+  ).select('+tokenHash');
   if (!token) return null;
-  token.usedAt = new Date();
-  await token.save();
   return User.findById(token.userId).select('+passwordHash +googleSub');
 }
