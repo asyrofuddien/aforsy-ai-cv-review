@@ -43,7 +43,7 @@ function packageInput(body: any): PackageInput {
     result.credits <= 0 ||
     !/^[A-Za-z0-9._-]{1,80}$/.test(result.termsVersion) ||
     !/^[A-Za-z0-9_-]{1,180}$/.test(result.lynkProductId) ||
-    !/^https:\/\/lynk\.id\/[A-Za-z0-9_-]+\/[A-Za-z0-9_-]+$/.test(result.lynkCheckoutUrl)
+    !validLynkCheckoutUrl(result.lynkCheckoutUrl)
   ) {
     throw new AppError(
       'Catalog details are invalid. Check names, whole-number price and credits, terms, and Lynk product mapping.',
@@ -51,6 +51,24 @@ function packageInput(body: any): PackageInput {
     );
   }
   return result;
+}
+
+function validLynkCheckoutUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const parts = url.pathname.split('/').filter(Boolean);
+    return (
+      url.protocol === 'https:' &&
+      url.hostname === 'lynk.id' &&
+      !url.username &&
+      !url.password &&
+      !url.port &&
+      (parts.length === 2 || (parts.length === 3 && parts[2] === 'checkout')) &&
+      !url.hash
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function audit(actorId: string, action: string, pkg: any): Promise<void> {
