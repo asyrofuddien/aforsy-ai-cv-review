@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import { randomBytes } from 'node:crypto';
 import { asyncHandler, AppError } from '../../middlewares/error.middleware';
 import { requireAdmin } from '../../middlewares/auth.middleware';
 import Evaluation from '../../models/evaluation.model';
@@ -25,6 +26,24 @@ const string = (value: unknown, max: number, required = false) => {
   return value.trim();
 };
 const owner = (req: any) => req.authUser.userId;
+const validAttachment = (item: any) => {
+  if (
+    typeof item?.name !== 'string' ||
+    !item.name.trim() ||
+    item.name.length > 120 ||
+    typeof item?.dataUrl !== 'string' ||
+    item.dataUrl.length > 1400000
+  )
+    return false;
+  const match = item.dataUrl.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+=*)$/);
+  if (!match) return false;
+  const bytes = Buffer.from(match[2], 'base64');
+  if (!bytes.length || bytes.length > 1000000) return false;
+  if (match[1] === 'png')
+    return bytes.subarray(0, 8).equals(Buffer.from('89504e470d0a1a0a', 'hex'));
+  if (match[1] === 'jpeg') return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  return bytes.toString('ascii', 0, 4) === 'RIFF' && bytes.toString('ascii', 8, 12) === 'WEBP';
+};
 
 router.get(
   '/feedback/:evaluationId',
@@ -90,6 +109,13 @@ router.post(
       throw new AppError('Please wait for your existing support cases to be resolved.', 409);
     const subject = string(req.body?.subject, 120, true);
     const message = string(req.body?.message, 2000, true);
+    const attachments = req.body?.attachments ?? [];
+    if (
+      !Array.isArray(attachments) ||
+      attachments.length > 3 ||
+      attachments.some((item: any) => !validAttachment(item))
+    )
+      throw new AppError('Attach up to three PNG, JPEG, or WebP images (1 MB each).', 400);
     const evaluationId = req.body?.evaluationId;
     const paymentOrderId = req.body?.paymentOrderId;
     if (
@@ -107,6 +133,8 @@ router.post(
       userId: owner(req),
       subject,
       message,
+      attachments,
+      ticketNumber: `SUP-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${randomBytes(6).toString('hex').toUpperCase()}`,
       evaluationId,
       paymentOrderId,
     });

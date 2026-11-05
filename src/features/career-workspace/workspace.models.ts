@@ -13,11 +13,15 @@ const feedbackSchema = new Schema(
 
 const caseSchema = new Schema(
   {
+    ticketNumber: { type: String, unique: true, index: true },
     userId: { type: Schema.Types.ObjectId, required: true, index: true },
     evaluationId: { type: Schema.Types.ObjectId, index: true },
     paymentOrderId: { type: Schema.Types.ObjectId, index: true },
     subject: { type: String, required: true, maxlength: 120 },
     message: { type: String, required: true, maxlength: 2000 },
+    attachments: [
+      { name: { type: String, maxlength: 120 }, dataUrl: { type: String, maxlength: 1400000 } },
+    ],
     status: {
       type: String,
       enum: ['open', 'in_progress', 'resolved'],
