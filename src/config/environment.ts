@@ -79,6 +79,7 @@ const schema = Joi.object({
     .optional(),
   LOG_DIR: Joi.string().trim().min(1).default('logs'),
   PUPPETEER_EXECUTABLE_PATH: Joi.string().allow('').optional(),
+  PUPPETEER_DISABLE_SANDBOX: Joi.boolean().default(false),
 }).unknown(true);
 
 export function parseEnvironment(input: NodeJS.ProcessEnv): Record<string, unknown> {

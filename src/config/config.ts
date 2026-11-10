@@ -108,6 +108,9 @@ export default {
     level: env.LOG_LEVEL as string | undefined,
     directory: env.LOG_DIR as string,
   },
-  puppeteer: { executablePath: env.PUPPETEER_EXECUTABLE_PATH as string | undefined },
+  puppeteer: {
+    executablePath: env.PUPPETEER_EXECUTABLE_PATH as string | undefined,
+    disableSandbox: env.PUPPETEER_DISABLE_SANDBOX as boolean,
+  },
   backendApi: env.BACKEND_API as string | undefined,
 };

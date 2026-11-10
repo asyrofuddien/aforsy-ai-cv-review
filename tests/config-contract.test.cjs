@@ -11,10 +11,22 @@ test('environment schema applies development defaults and normalizes numeric val
   assert.equal(config.EMAIL_PROVIDER, 'smtp');
   assert.equal(config.CREDIT_TRIAL_ENABLED, false);
   assert.equal(config.CREDIT_ADMIN_GRANTS_ENABLED, false);
+  assert.equal(config.PUPPETEER_DISABLE_SANDBOX, false);
   assert.equal(config.BILLING_ADMIN_TEST_PAYMENTS_ENABLED, false);
   assert.equal(config.SMTP_HOST, 'localhost');
   assert.equal(config.SMTP_PORT, 1025);
   assert.deepEqual(config.CORS_ORIGINS, ' https://app.example,https://admin.example ');
+});
+
+test('Chromium sandbox opt-out requires an explicit environment setting', () => {
+  assert.equal(
+    parseEnvironment({ PUPPETEER_DISABLE_SANDBOX: 'true' }).PUPPETEER_DISABLE_SANDBOX,
+    true,
+  );
+  assert.throws(
+    () => parseEnvironment({ PUPPETEER_DISABLE_SANDBOX: 'maybe' }),
+    /PUPPETEER_DISABLE_SANDBOX/,
+  );
 });
 
 test('environment schema uses safe production defaults and accepts existing provider settings', () => {

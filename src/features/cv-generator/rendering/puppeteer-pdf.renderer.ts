@@ -38,8 +38,7 @@ export async function renderCvPdf(
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--disable-software-rasterizer',
-        '--no-zygote',
-        '--single-process',
+        ...(config.puppeteer.disableSandbox ? ['--no-sandbox'] : []),
       ],
       timeout: options.timeoutMs,
     });
